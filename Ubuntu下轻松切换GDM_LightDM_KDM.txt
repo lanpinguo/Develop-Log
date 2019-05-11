@@ -1,0 +1,15 @@
+Ubuntu下轻松切换GDM, LightDM , KDM
+
+
+各位同学，如果已经安装LightDM和GDM登录显示器。那么在Ubuntu下怎么在各种DM间任意切换呢？
+举例：
+
+以切换到GDM为例，打开终端，使用命令：
+
+sudo dpkg-reconfigure gdm3
+
+接下来，会出现下面对话框：
+
+
+
+然后选择GDM，按住Enter选择即可。然后重启计算机生效。同样，可以用其他DM如KDM，SLim，LightDM来替换上述命令中的gdm来进行DM间切换。

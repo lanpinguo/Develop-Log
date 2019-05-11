@@ -1,0 +1,111 @@
+
+
+tig查看git 的 log
+常用指令：
+上下箭头选择log的版本
+enter进入具体版本查看详细
+k和j是上下滚动查看详细信息的内容
+m是关闭详细信息，返回到log的版本
+pageup/pagedown是同k和j，只不过是一屏一屏的滚动
+
+[-] generic bindings
+View switching
+                              m view-main         Show main view
+                              d view-diff         Show diff view
+                              l view-log          Show log view
+                              t view-tree         Show tree view
+                              f view-blob         Show blob view
+                              b view-blame        Show blame view
+                              r view-refs         Show refs view
+                           s, S view-status       Show status view
+                              c view-stage        Show stage view
+                              y view-stash        Show stash view
+                              g view-grep         Show grep view
+                              p view-pager        Show pager view
+                              h view-help         Show help view
+View manipulation
+                        <Enter> enter             Enter and open selected line
+                              < back              Go back to the previous view state
+               <Down>, <Ctrl-N> next              Move to next
+                 <Up>, <Ctrl-P> previous          Move to previous
+                            ',' parent            Move to parent
+                          <Tab> view-next         Move focus to the next view
+                        R, <F5> refresh           Reload and refresh view
+                              O maximize          Maximize the current view
+                              q view-close        Close the current view
+                              Q quit              Close all views and quit
+Cursor navigation
+                              k move-up           Move cursor one line up
+                              j move-down         Move cursor one line down
+  <PageDown>, <Ctrl-D>, <Space> move-page-down    Move cursor one page down
+          <PageUp>, <Ctrl-U>, - move-page-up      Move cursor one page up
+                         <Home> move-first-line   Move cursor to first line
+                          <End> move-last-line    Move cursor to last line
+Scrolling
+             <Insert>, <Ctrl-Y> scroll-line-up    Scroll one line up
+             <Delete>, <Ctrl-E> scroll-line-down  Scroll one line down
+                   <ScrollBack> scroll-page-up    Scroll one page up
+                    <ScrollFwd> scroll-page-down  Scroll one page down
+                              | scroll-first-col  Scroll to the first line columns
+                         <Left> scroll-left       Scroll two columns left
+                        <Right> scroll-right      Scroll two columns right
+Searching
+                              / search            Search the view
+                              ? search-back       Search backwards in the view
+                              n find-next         Find next search match
+                              N find-prev         Find previous search match
+Option manipulation
+                              o options           Open the options menu
+Misc
+                              e edit              Open in editor
+                              : prompt            Open the prompt
+                       <Ctrl-L> screen-redraw     Redraw the screen
+                              z stop-loading      Stop all loading views
+                              v show-version      Show version information
+Option toggling:
+                              I :toggle sort-order
+                              i :toggle sort-field
+                              # :toggle line-number
+                              D :toggle date
+                              A :toggle author
+                              ~ :toggle line-graphics
+                              F :toggle file-name
+                              W :toggle ignore-space
+                              X :toggle id
+                              $ :toggle commit-title-overflow
+                              % :toggle file-filter
+[-] main bindings
+
+
+tig
+tig是什么?
+现在任意一个程序员对于git应该都不陌生吧 
+那么请把git字母顺序颠倒过来 git - tig. 看来两者肯定是有渊源的。哈哈哈哈~ 进入正题 
+tig 可以用一句话描述：text-mode interface for git
+安装
+mac : brew install tig 
+ubuntu: sudo apt-get install tig
+命令
+man tig (ubuntu好使，mac上 man ls )
+tig -v
+tig vim命令移动 
+默认tig命令 是全局历史修改
+tig fileName 某文件的历史修改
+d （git diff）
+q 退出 
+提交注释搜索 由于版本历史较多 vim / 搜索模式 （键入’n’下一匹配项目 ‘N’ 上一匹配项)
+为啥使用tig
+由于tig是git工具的文本模式界面，所以tig能够实现的其实git中都能够实现。 
+那为什么还要推荐使用tig呢？ 
+* 方便 
+* 美观 
++ tig blame fileName ==>git blame fileName 
+* 全键盘操作 
+* 字符模式 ssh远程登录 一样可以使用tig
+图形界面
+gitk 
+  图形界面的当然使用鼠标更舒服了，但是占资源，运行效率跟不上的话，工作效率势必会被影响。
+说明
+git内置功能强大，tig只是封装了其中很少一部分，不是因为tig强大而使用它，而是它更加方便美观。最好的方式git+tig混合使用。 
+* git diff 
+* tig diff(tig: No revisions match the given arguments.)

@@ -1,0 +1,22 @@
+win7 nfs环境配置：
+C:\Windows\System32>showmount -e 192.168.1.101
+导出列表在 192.168.1.101:
+/c/tools                           -readonly, 192.168.1.4
+/sdn                               -public
+/boot                              -public
+/c/ftp                             -range, 192.168.1.10, 192.168.1.1
+
+C:\Windows\System32>mount \\192.168.1.101\boot w:
+w: 现已成功连接到 \\192.168.1.101\boot
+
+命令已成功完成。
+
+C:\Windows\System32>
+
+ubuntu nfs配置：
+ sudo apt-get install nfs-common
+
+ mount -t nfs 192.168.1.101:/boot /mnt/host/
+ 
+ 
+ 

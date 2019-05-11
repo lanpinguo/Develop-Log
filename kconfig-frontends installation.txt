@@ -1,0 +1,28 @@
+
+kconfig-frontends的下载地址
+
+http://ymorin.is-a-geek.org/download/kconfig-frontends/kconfig-frontends-4.11.0.1.tar.bz2
+下载源码后解压缩，执行Linux软件安装三步曲, configure/make/make install
+$ cd /home/user/ kconfig-frontends-4.11.0.1/
+$ ./configure --prefix=/usr
+$ make 
+
+$ sudo make install
+
+ubuntu 18.04 （make 版本 GNU Make 4.1, gcc 版本 gcc (Ubuntu 7.3.0-16ubuntu3) 7.3.0）
+编译时出现如下错误：
+lanpinguo@ubuntu:/work/tools/kconfig-frontends-4.11.0.1$ make
+  CC       libs/parser/libs_parser_libkconfig_parser_la-yconf.lo
+In file included from libs/parser/yconf.c:252:0:
+libs/parser/hconf.gperf:153:1: error: conflicting types for ‘kconf_id_lookup’
+libs/parser/hconf.gperf:12:31: note: previous declaration of ‘kconf_id_lookup’ was here
+ static const struct kconf_id *kconf_id_lookup(register const char *str, register GPERF_LEN_TYPE len);
+                               ^~~~~~~~~~~~~~~
+Makefile:1404: recipe for target 'libs/parser/libs_parser_libkconfig_parser_la-yconf.lo' failed
+make[1]: *** [libs/parser/libs_parser_libkconfig_parser_la-yconf.lo] Error 1
+Makefile:889: recipe for target 'all' failed
+make: *** [all] Error 2
+
+解决方法：
+将 hconf.gperf文件的12行中改成如下内容：
+const struct kconf_id *kconf_id_lookup(register const char *str, register GPERF_LEN_TYPE len);

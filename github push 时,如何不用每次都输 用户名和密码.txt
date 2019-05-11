@@ -1,0 +1,16 @@
+github push 时, 如何不用每次都输 用户名和密码?
+
+修改代码根目录的隐藏配置文件 " .git/config "文件
+
+[remote "origin"]
+url = https://username:passwd@github.com/dotheright/mylovelycodes.git
+fetch = +refs/heads/*:refs/remotes/origin/*
+
+
+username 改为你的用户名
+
+passwd 改为你的密码
+
+中间的冒号不能省略
+
+原理上讲其实就是URL的格式,里面可以带用户名密码.

@@ -1,0 +1,41 @@
+#coding=utf-8
+'''
+Created on 2012-5-14
+ 
+@author: 大孟
+'''
+from numpy import sin,pi,arange,linspace,abs
+from numpy.fft import fft
+from pylab import figure,plot,subplot,show
+#注释掉这些可以启用latex,前提是你配置好了
+#from matplotlib import rc
+##rc('text', usetex=True)
+#rc('text.latex', unicode=True) 
+  
+#真实频率 
+f=190.5
+#估计频率,因为fft与截窗大小有关
+freq_est=100.0
+#scale用来对估计周期再度分割
+scale=100.0
+freq_max=freq_est*scale
+#sampling_rate是模拟到数字的采样率,fft_size指做fft变换时只用前
+sampling_rate,fft_size = 1000.0,200.0
+#截窗的长度取采样点数(归一化的长度)除以估计的频率乘以一个比例
+#波长/采样点=周期/分割系数
+wave_len=sampling_rate*(1/freq_max)
+step=wave_len/sampling_rate
+t=arange(0,wave_len,step)
+y=sin(2*pi*f*t)
+y_fft=y[:fft_size]
+xf=linspace(0,freq_max,fft_size)
+yf =abs(fft(y_fft))*2 /fft_size
+ 
+figure(figsize=(10,15))
+ 
+subplot(211)
+plot(t,y)
+subplot(212) 
+plot(xf,yf)
+   
+show()

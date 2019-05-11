@@ -1,0 +1,12 @@
+
+My system had a similar problem: I was able to choose "Chinese", but it didn't really input any Chinese. The key step missing was to install a specific Chinese input method/package. E.g.:
+
+sudo apt-get install ibus-pinyin 
+After installing Pinyin in this example, go to System Settings 鈫?Language Support 鈫?Chinese (Pinyin).
+
+Now it works as expected.
+
+This thread helped me to figure out this solution. It also suggests another input method:
+
+sudo apt-get install ibus-sunpinyin
+

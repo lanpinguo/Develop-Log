@@ -1,0 +1,36 @@
+sdn@sdn-develop:/home$ sudo smbpasswd -a sdn
+[sudo] password for sdn: 
+New SMB password:
+Retype new SMB password:
+Added user sdn.
+sdn@sdn-develop:/home$ 
+
+添加的Samba用户首先必须是Linux用户
+
+linux-06bq:/etc/samba # useradd sunjing
+linux-06bq:/usr/local/services/samba/bin # ./smbpasswd -a sunjing
+New SMB password:
+Retype new SMB password:
+Added user sunjing.
+
+接下来在Windows机器上【控制面板】→【凭证管理器】中添加Windows凭证：
+
+网络地址：xxx.xxx.xxx.xxx(即需要连接的Linux开发机的IP)
+用户名：sunjing
+密码：给Samba添加sunjing用户时设置的密码
+
+最后，在【资源管理器】里直接【映射网络驱动器】，连上开发机即可。
+
+smbpasswd命令的常用方法
+
+smbpasswd -a 增加用户（要增加的用户必须以是系统用户）
+smbpasswd -d 冻结用户，就是这个用户不能在登录了
+smbpasswd -e 恢复用户，解冻用户，让冻结的用户可以在使用
+smbpasswd -n 把用户的密码设置成空.
+             要在global中写入 null passwords -true
+smbpasswd -x  删除用户
+
+查看samba用户 pdbedit -L
+root@Orangepi:~# pdbedit -L
+smbuser:1001:
+orangepi:1000:orangepi

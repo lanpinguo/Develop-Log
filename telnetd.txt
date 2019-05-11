@@ -1,0 +1,8 @@
+/rsp # telnetd -p 1000
+/rsp # chown root:root -R /bin
+/rsp # chown root:root -R /usr/bin
+/rsp # adduser -g root -G root test -D
+/rsp # passwd test -d
+Password for test changed by root
+/rsp # chmod 4755 /bin/busybox 
+/rsp # telnetd -p 1000

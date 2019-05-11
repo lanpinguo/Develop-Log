@@ -1,0 +1,55 @@
+SecureCRT是一个很不错的东西，今天试着去安装配置了一下。安装软件的过程就不用去讲了。
+首先确保自己的虚拟机已经装了ssh，如果没装就以下方式装上：
+1.安装
+Ubuntu缺省安装了openssh-client,所以在这里就不安装了，如果你的系统没有安装的话，再用apt-get安装上即可。
+安装ssh-server
+sudo apt-get install openssh-server
+安装ssh-client
+sudo apt-get install openssh-client
+2.确认sshserver是否安装好
+ps -e | grep sshd
+  450 ?        00:00:00 sshd
+如果看到sshd那说明ssh-server已经启动了
+
+下面是我的配置过程：
+准备工作：我的虚拟机时Ubuntu Linux，采用的是桥接上网的模式。我给linux分配了一个ip（192.168.1.104），而我主机的ip是192.168.1.103（从主机ping虚拟机能够ping通，哈哈这个是废话啦！）。
+
+在打开SecureCRT的时候会出现快速连接界面，根据提示，要填入主机名，顾名思义就是你虚拟机的ip啦。而端口是22，这个先不用去管它。用户名就是登录到你虚拟机上的要你enter的用户名了。照理说现在应该就可以连接到我的虚拟机上了，但是当你点击连接的时候，它会出现这样的错误提示：到会话192.168.1.104（1）的连接失败，远程系统拒绝了连接。这很可能意味着远程系统不提供您正在尝试访问的服务，或者在一个不同的端口上提供服务。
+
+根据提示错误，我们可以做到可能是我们的端口号设置问题了。那我们的端口号应该在哪里设置呢？
+其实在/etc/ssh下有一个sshd_config 文件。对这个文件进行修改vi sshd_config。
+
+往文件中添加如下内容：
+Port 22
+Protocol 2
+PermitRootLogin yes
+PasswordAuthentication yes
+
+然后在/etc/init.d/下，通过service sshd restart命令重启这个服务。你再去试试看连接就可以上了。
+
+如果接着出现错误： 提示
+密钥交换失败。
+
+没有兼容的加密程序。服务器支持这些加密程序：
+
+aes128-ctr,aes192-ctr,aes256-ctr,aes128-gcm@openssh.com,aes256- 
+
+gcm@openssh.com,chacha20-poly1305@openssh.com
+
+ssh client 提示：Server responded"Algorithm negotiation failed"
+
+Key exchange with the remote host failed. This can happen for
+
+example computer does not support the selected algorthms. 
+
+问题已经解决了，修改ssh的配置文件 /etc/ssh/sshd_config
+
+在配置文件中添加：
+
+Ciphers aes128-cbc,aes192-cbc,aes256-cbc,aes128-ctr,aes192-ctr,aes256-ctr,3des-cbc,arcfour128,arcfour256,arcfour,blowfish-cbc,cast128-cbc
+
+MACs hmac-md5,hmac-sha1,umac-64@openssh.com,hmac-ripemd160,hmac-sha1-96,hmac-md5-96
+
+KexAlgorithms diffie-hellman-group1-sha1,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1,diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group1-sha1,curve25519-sha256@libssh.org
+
+重启sshd服务后，即可正常连接

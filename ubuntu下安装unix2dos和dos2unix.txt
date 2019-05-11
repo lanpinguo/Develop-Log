@@ -1,0 +1,21 @@
+ubuntu下安装unix2dos和dos2unix  
+开始不知道安装啥包，后来发现在tofrodos这个包里：
+sudo apt-get install tofrodos
+
+使用方法不是unix2dos和dos2unix了，而是todos 和fromdos了。
+
+Converts DOS <-> Unix text files, alias tofromdos
+
+DOS text files traditionally have CR/LF (carriage return/line feed) pairs
+as their new line delimiters while Unix text files traditionally have
+LFs (line feeds) to terminate each line.
+
+Tofrodos comprises one program, "fromdos" alias "todos", which converts
+text files to and from these formats. Use "fromdos" to convert DOS
+text files to the Unix format, and "todos" to convert Unix text files
+to the DOS format.
+	
+On ubuntu 18.04 uses down cmd:	
+apt install dos2unix
+
+	

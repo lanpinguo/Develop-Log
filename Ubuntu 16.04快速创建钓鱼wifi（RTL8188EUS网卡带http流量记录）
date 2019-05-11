@@ -1,0 +1,201 @@
+原文地址：http://www.tuicool.com/articles/6vUBFv6
+
+首先还是更新下系统
+sudo apt-get update && sudo apt-get dist-upgrade -y
+
+然后安装一些必要的软件
+
+sudo apt-get install -y git hostapd haveged dnsmasq
+
+这里使用create_ap来快速创建，所以先要安装下create_ap
+
+新建一个目录Github
+mkdir Github && cd Github
+
+把create_ap源码克隆回来，查看README.md可以发现关于依赖的一些东西
+## Dependencies
+### General
+* bash (to run this script)
+* util-linux (for getopt)
+* procps or procps-ng
+* hostapd
+* iproute2
+* iw
+* iwconfig (you only need this if 'iw' can not recognize your adapter)
+* haveged (optional)
+
+### For 'NATed' or 'None' Internet sharing method
+* dnsmasq
+* iptables
+
+执行以下命令克隆
+git clone https://github.com/oblique/create_ap.git
+
+切换到相应目录进行编译安装
+cd create_ap
+make install
+
+然后尝试创建wifi，这里给出了很多种创建的方案
+## Installation
+### Generic
+    git clone https://github.com/oblique/create_ap
+    cd create_ap
+    make install
+
+### ArchLinux (AUR)
+    yaourt -S create_ap
+
+### Gentoo
+    emerge layman
+    layman -f -a jorgicio
+    emerge net-wireless/create_ap
+
+## Examples
+### No passphrase (open network):
+    create_ap wlan0 eth0 MyAccessPoint
+
+### WPA + WPA2 passphrase:
+    create_ap wlan0 eth0 MyAccessPoint MyPassPhrase
+
+### AP without Internet sharing:
+    create_ap -n wlan0 MyAccessPoint MyPassPhrase
+
+### Bridged Internet sharing:
+    create_ap -m bridge wlan0 eth0 MyAccessPoint MyPassPhrase
+
+### Bridged Internet sharing (pre-configured bridge interface):
+    create_ap -m bridge wlan0 br0 MyAccessPoint MyPassPhrase
+
+### Internet sharing from the same WiFi interface:
+    create_ap wlan0 wlan0 MyAccessPoint MyPassPhrase
+
+### Choose a different WiFi adapter driver
+    create_ap --driver rtl871xdrv wlan0 eth0 MyAccessPoint MyPassPhrase
+
+### No passphrase (open network) using pipe:
+    echo -e "MyAccessPoint" | create_ap wlan0 eth0
+
+### WPA + WPA2 passphrase using pipe:
+    echo -e "MyAccessPoint\nMyPassPhrase" | create_ap wlan0 eth0
+
+### Enable IEEE 802.11n
+    create_ap --ieee80211n --ht_capab '[HT40+]' wlan0 eth0 MyAccessPoint MyPassPhrase
+
+### Client Isolation:
+    create_ap --isolate-clients wlan0 eth0 MyAccessPoint MyPassPhrase
+
+## Systemd service
+Using the persistent [systemd](https://wiki.archlinux.org/index.php/systemd#Basic_systemctl_usage) service
+### Start service immediately:
+    systemctl start create_ap
+
+### Start on boot:
+    systemctl enable create_ap
+
+先执行iw命令看下自己的网卡名称，我这里无线网卡显示的是wlx085700bd345b，有线网卡是enp0s3
+sudo create_ap wlx085700bd345b enp0s3 @Freewifi --no-virt
+
+这个模式是比较常用的模式，在无线网卡上创建一个热点，使用另外一个网卡共享网络给无线网卡达到联网的目的。--no-virt 参数表示不创建虚拟接口
+
+如果执行之后显示 ERROR: Your adapter does not support AP (master) mode 基本上没戏，因为网卡不支持AP模式
+
+执行之后发现报错
+Config dir: /tmp/create_ap.wlx085700bd345b.conf.uajeRd30
+PID: 7937
+Network Manager found, set wlx085700bd345b as unmanaged device... DONE
+Sharing Internet using method: nat
+hostapd command-line interface: hostapd_cli -p /tmp/create_ap.wlx085700bd345b.conf.uajeRd30/hostapd_ctrl
+Configuration file: /tmp/create_ap.wlx085700bd345b.conf.uajeRd30/hostapd.conf
+nl80211: Driver does not support authentication/association or connect commands
+nl80211: deinit ifname=wlx085700bd345b disabled_11b_rates=0
+nl80211 driver initialization failed.
+wlx085700bd345b: interface state UNINITIALIZED->DISABLED
+wlx085700bd345b: AP-DISABLED 
+hostapd_free_hapd_data: Interface wlx085700bd345b wasn't started
+
+Error: Failed to run hostapd, maybe a program is interfering.
+If an error like 'n80211: Could not configure driver mode' was thrown
+try running the following before starting create_ap:
+    nmcli r wifi off
+    rfkill unblock wlan
+
+Doing cleanup.. done
+
+根据错误信息发现wlx085700bd345b: AP-DISABLED，这句的意思是网卡的AP模式不可用，这个时候可以使用官方提供的另外一种方案
+sudo create_ap --driver rtl871xdrv wlx085700bd345b enp0s3 @Freewifi --no-virt
+
+这种方式是加载一个不同的驱动，继续执行发现依然报错
+Config dir: /tmp/create_ap.wlx085700bd345b.conf.xLE76fDe
+PID: 9662
+Network Manager found, set wlx085700bd345b as unmanaged device... DONE
+Sharing Internet using method: nat
+hostapd command-line interface: hostapd_cli -p /tmp/create_ap.wlx085700bd345b.conf.xLE76fDe/hostapd_ctrl
+Configuration file: /tmp/create_ap.wlx085700bd345b.conf.xLE76fDe/hostapd.conf
+Line 4: invalid/unknown driver 'rtl871xdrv'
+1 errors found in configuration file '/tmp/create_ap.wlx085700bd345b.conf.xLE76fDe/hostapd.conf'
+Failed to set up interface with /tmp/create_ap.wlx085700bd345b.conf.xLE76fDe/hostapd.conf
+Failed to initialize interface
+
+Error: Failed to run hostapd, maybe a program is interfering.
+If an error like 'n80211: Could not configure driver mode' was thrown
+try running the following before starting create_ap:
+    nmcli r wifi off
+    rfkill unblock wlan
+
+Doing cleanup.. done
+
+提示不知道rtl871xdrv这个驱动，谷歌一下发现hostapd原版本并不支持RTL8188EUS的驱动，所以需要使用修改版的hostapd，这里先把原来的hostapd卸载
+sudo apt-get remove hostapd -y
+
+然后git回来修改好的hostapd源码
+git clone https://github.com/christianeisendle/hostapd_rtl871xdrv
+
+然后切换到对应目录编译安装
+cd hostapd_rtl871xdrv/hostapd
+make
+sudo make install
+
+然后继续执行
+sudo create_ap --driver rtl871xdrv wlx085700bd345b enp0s3 @Freewifi --no-virt
+
+执行成功显示这样的
+Config dir: /tmp/create_ap.wlx085700bd345b.conf.G8midueO
+PID: 14071
+Network Manager found, set wlx085700bd345b as unmanaged device... DONE
+Sharing Internet using method: nat
+hostapd command-line interface: hostapd_cli -p /tmp/create_ap.wlx085700bd345b.conf.G8midueO/hostapd_ctrl
+Configuration file: /tmp/create_ap.wlx085700bd345b.conf.G8midueO/hostapd.conf
+drv->ifindex=5
+l2_sock_recv==l2_sock_xmit=0x0x15ab010
++rtl871x_sta_deauth_ops, ff:ff:ff:ff:ff:ff is deauth, reason=2
+rtl871x_set_key_ops
+rtl871x_set_key_ops
+rtl871x_set_key_ops
+rtl871x_set_key_ops
+Using interface wlx085700bd345b with hwaddr 08:57:00:bd:34:5b and ssid '@Freewifi'
+rtl871x_set_wps_assoc_resp_ie
+rtl871x_set_wps_beacon_ie
+rtl871x_set_wps_probe_resp_ie
+rtl871x_set_beacon_ops
+rtl871x_set_hidden_ssid ignore_broadcast_ssid:0, @Freewifi,9
+rtl871x_set_acl
+
+手机打开wifi测试，尝试连接后终端会显示
++rtl871x_get_sta_wpaie, 84:8e:0c:21:6a:ed is sta's address
+wlx085700bd345b: STA 84:8e:0c:21:6a:ed IEEE 802.11: associated
+wlx085700bd345b: STA 84:8e:0c:21:6a:ed RADIUS: starting accounting session 5799A18A-00000000
+
+手机获取到的IP地址是192.168.12.×网段的，这个可以根据自己的需要修改，接下来测试记录http请求，我写了个脚本在这 https://github.com/kbdancer/snifferPanel
+
+git回来之后执行
+python sniff.py wlx085700bd345b
+
+就可以把http请求记录到数据库了，当然前提是你已经安装了脚本所需要的一些模块 最后放个图吧
+
+终端显示http请求
+
+
+
+sqlite3记录http请求
+
+

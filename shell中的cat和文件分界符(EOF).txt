@@ -1,0 +1,81 @@
+在shell中，文件分界符（通常写成EOF，你也可以写成FOE或者其他任何字符串）紧跟在<<符号后，意思是分界符后的内容将被当做标准输入传给<<前面的命令，直到再次在独立的一行遇到这个文件分界符(EOF或者其他任何字符，注意是独立一行，EOF前面不能有空格)。通常这个命令是cat，用来实现一些多行的屏幕输入或者创建一些临时文件。
+1、最简单的用法
+root@ribbonchen-laptop:~#cat<<EOF
+> ha
+> haha
+> hahaha
+> EOF
+输出：
+ha
+haha
+hahaha
+2、把输出追加到文件
+root@ribbonchen-laptop:~#cat<<EOF>out.txt
+> ha
+> haha
+> hahaha
+> EOF
+root@ribbonchen-laptop:~#cat out.txt
+ha
+haha
+hahaha
+3、换一种写法
+root@ribbonchen-laptop:~#cat>out.txt<<EOF
+> ha
+> haha
+> hahaha
+> EOF
+root@ribbonchen-laptop:~#cat out.txt
+ha
+haha
+hahaha
+4、cat>filename，创建文件，并把标准输入输出到filename文件中，以ctrl+d作为输入结束
+root@ribbonchen-laptop:~#cat>filename
+ha  
+haha 
+hahaha
+root@ribbonchen-laptop:~#cat filename
+ha
+haha
+hahaha
+下面的脚本实现了一个简单的菜单功能：
+#!/bin/bash
+MYDATE=`date+%d/%m/%Y`
+THIS_HOST=`hostname`
+USER=`whoami`
+while :
+do
+ clear
+ cat<<EOF
+ _______________________________________________________________
+ User:$USER        Host:$THIS_HOST         DATE:$MYDATE
+ _______________________________________________________________
+                1:List files in currentdir
+                2:Use the vi editor
+                3:See who is on thesystem
+                H:Help sreen
+                Q:Exit Menu
+ _______________________________________________________________
+EOF
+ echo -e -n "\tYour Choice [1,2,3,H,Q]>"
+ read CHOICE
+   case $CHOICE in
+   1) ls
+     ;;
+   2) vi
+     ;;
+   3) who
+     ;;
+   H|h)
+     cat<<EOF
+     This is the help screen,nothing here yet to help you!
+EOF
+     ;;
+   Q|q) exit 0
+     ;;
+   *) echo -e "\t\007unknown user response"
+     ;;
+   esac
+ echo -e -n "\tHit the return key to continue"
+ read DUMMY
+done

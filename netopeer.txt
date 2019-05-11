@@ -1,0 +1,37 @@
+连接设备
+connect --login raisecom 192.168.113.65
+
+如果节点是container类型的：
+netconf> edit-config --config=/home/share/cmcc_support/netopeer/cli/tests/anyxml/man1.xml candidate
+netconf> commit
+
+
+
+如果节点类型是RPC类型的，则用user-rpc命令，无需commit
+netconf> user-rpc --file=/home/share/cmcc_support/netopeer/cli/tests/anyxml/clock.xml 
+
+获取配置信息：
+netconf> get-config running --out a.txt
+
+全部信息获取：
+netconf> get --out a.txt
+
+
+连接异常处理：
+如果设备上重复执行了generate ssh-key，netopeer再连接的时候就会报错：
+netconf> connect --login raisecom 192.168.200.11 
+libnetconf ERROR: Remote host key changed, the connection will be terminated!
+libnetconf ERROR: Checking the host key failed.
+解决办法：把linux电脑上的known_hosts文件重新ssh-keygen生成一下，再连接就好了。
+root@linux:~# ssh-keygen -f "/root/.ssh/known_hosts" -R 192.168.200.11
+# Host 192.168.200.11 found: line 4 type RSA
+/root/.ssh/known_hosts updated.
+Original contents retained as /root/.ssh/known_hosts.old
+root@linux:~# netopeer-cli 
+netconf> connect --login raisecom 192.168.200.11 
+The authenticity of the host '192.168.200.11' cannot be established.
+ssh-rsa key fingerprint is cc:00:71:ca:7c:ac:3e:e8:6a:6a:53:3d:35:9e:8e:85:4f:12:d5:14.
+Are you sure you want to continue connecting (yes/no)? yes
+raisecom@192.168.200.11 password: 
+netconf> 
+

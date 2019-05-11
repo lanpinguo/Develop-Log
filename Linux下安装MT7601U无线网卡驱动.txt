@@ -1,0 +1,54 @@
+目前已知的小米随身Wifi、腾讯全民Wifi、360Wifi、百度小度Wifi等都是基于MT7601U无线网卡制作的。因此，下面方法也同样可以驱动它们。
+
+一、下载驱动
+
+     由于MTK原厂驱动有问题，因此使用开源驱动比较好。地址：https://github.com/porjo/mt7601 
+
+二、修改驱动源码
+
+     打开./mt7601-master/src/common/rtusb_dev_id.c文件。如果你用的是小米Wifi、360wifi、小度wifi或者全民wifi，请添加以下PID（PID来自网络）。
+
+{USB_DEVICE(0x2717,0x4106)},/* XiaoMi wifi */
+{USB_DEVICE(0x148f,0x760b)},/* 360 Wifi 2 Gen */
+{USB_DEVICE(0x2955,0x1001)},/* Xiao Du Wifi */
+{USB_DEVICE(0x2a5f,0x1000)},/* Quan Min Wifi */
+
+注：使用lsusb可以查看PID。
+
+username@linux :~/mt7601-master/src$ lsusb
+Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 001 Device 003: ID 05e3:0608 Genesys Logic, Inc. USB-2.0 4-Port HUB
+Bus 001 Device 002: ID 2717:4106  
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+
+第三行什么都没写的“Bus 001 Device 002: ID 2717:4106”就是小米的PID。可能是厂家要保护自家的软件吧，把PID修改了造成原来的驱动不能识别这个硬件。现在加上就可以识别了。
+
+三、编译安装
+
+     把当前路径切换到./mt7601-master/src后，运行
+
+make
+
+sudo make install
+
+sudo modprobe mt7601Usta
+
+
+     好了安装成功没有？去看看你的机器吧。不过我在使用中仍然发现有些时候在windows下可以连接的Wifi在Linux下却连接不上，甚至有的时候还会提示密码错误。祝你好运吧！
+
+
+文献：
+
+[1] https://github.com/porjo/mt7601 
+
+[2] http://blog.sina.com.cn/s/blog_4d31f1650101ejlt.html 
+
+[3] http://ctyfrank.blog.163.com/blog/static/3754367920144288355825/ 
+
+[4] http://v.tieba.baidu.com/p/3010940964 
+
+[5] https://code.launchpad.net/~thopiekar/+archive/ubuntu/mt7601 
+
+[6] http://bbs.chinaunix.net/forum.php?mod=viewthread&tid=4164172 
+
+[7] http://blog.sina.com.cn/s/blog_6ad624380102v7k0.html 

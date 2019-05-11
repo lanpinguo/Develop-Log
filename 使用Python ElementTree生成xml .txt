@@ -1,0 +1,47 @@
+Python 处理 xml 文档的方法有很多，除了经典的 sax 和 dom 之外，还有一个 ElementTree。
+首先 import 之：
+1
+from xml.etree import ElementTree as etree
+然后开始构建 xml 树：
+
+from xml.etree.ElementTree import Element, SubElement, ElementTree
+ 
+# 生成根节点
+root = Element('root')
+# 生成第一个子节点 head
+head = SubElement(root, 'head')
+# head 节点的子节点
+title = SubElement(head, 'title')
+title.text = 'Well Dola!'
+# 生成 root 的第二个子节点 body
+body = SubElement(root, 'body')
+# body 的内容
+body.text = 'I love Dola!'
+tree = ElementTree(root)
+这样就得到了一个 xml 树的对象 tree 以及它的根节点的对象 root
+接着我们把它们变成 xml 串，有两个办法，一个是用 tree 对象的 write 方法将 xml 内容写成一个文件，还有一个是用 etree 的 tostring 方法转成 xml 字符串：
+
+# 第一种
+tree.write('result.xml', encoding='utf-8')
+# 第二种
+xml_string = etree.tostring(root)
+# xml_string 就是 xml 字符串了
+但是第二种有一个问题，就是它没有
+1
+<?xml version="1.0"?>
+这个头部定义内容：
+1
+'<root><head><title>Well Dola!</title></head><body>I love Dola!</body></root>'
+怎么办呢？
+有一个办法是使用 minidom 来实现，方法如下：
+
+from xml.dom import minidom
+# 使用 minidom 解析
+tree = minidom.parseString(xml_string)
+# 重新生成 xml 字符串
+xml_string = tree.toxml()
+虽然让计算机多运行了一些代码，但是这样可以把问题解决掉。
+最后生成的 xml 代码如下：
+1
+u'<?xml version="1.0" ?><root><head><title>Well Dola!</title></head><body>I love Dola!</body></root>'
+当然还可以使用 minidom 中 tree 对象的 toprettyxml 方法把 xml 打得漂亮一点。

@@ -1,0 +1,1 @@
+I find android studio -> Build -> Generate Signed APK -> Next -> key store path(if you Create new.. then it will be a key name only, SO to fix it(Choose existing),then key store path will be on Absolute address. In end it will be OK.

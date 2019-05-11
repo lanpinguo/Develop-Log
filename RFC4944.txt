@@ -1,0 +1,15 @@
+1\
+IPv6
+   packets MUST be carried on data frames.  
+
+2\
+ Starting from a maximum
+   physical layer packet size of 127 octets (aMaxPHYPacketSize) and a
+   maximum frame overhead of 25 (aMaxFrameOverhead), the resultant
+   maximum frame size at the media access control layer is 102 octets.
+   Link-layer security imposes further overhead, which in the maximum
+   case (21 octets of overhead in the AES-CCM-128 case, versus 9 and 13
+   for AES-CCM-32 and AES-CCM-64, respectively) leaves only 81 octets
+   available.  
+
+3\

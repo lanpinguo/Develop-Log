@@ -1,0 +1,79 @@
+
+
+
+ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video0 output.mkv
+
+ffmpeg  -framerate 25 -video_size 640x480 -i /dev/video0 output.mkv
+
+
+root@Orangepi:/home/share# ffmpeg  -framerate 25 -video_size 640x480 -i /dev/video0 output.mkv
+ffmpeg version 2.8.11-0ubuntu0.16.04.1 Copyright (c) 2000-2017 the FFmpeg developers
+  built with gcc 5.4.0 (Ubuntu/Linaro 5.4.0-6ubuntu1~16.04.4) 20160609
+  configuration: --prefix=/usr --extra-version=0ubuntu0.16.04.1 --build-suffix=-ffmpeg --toolchain=hardened --libdir=/usr/lib/aarch64-linux-gnu --incdir=/usr/include/aarch64-linux-gnu --cc=cc --cxx=g++ --enable-gpl --enable-shared --disable-stripping --disable-decoder=libopenjpeg --disable-decoder=libschroedinger --enable-avresample --enable-avisynth --enable-gnutls --enable-ladspa --enable-libass --enable-libbluray --enable-libbs2b --enable-libcaca --enable-libcdio --enable-libflite --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libgme --enable-libgsm --enable-libmodplug --enable-libmp3lame --enable-libopenjpeg --enable-libopus --enable-libpulse --enable-librtmp --enable-libschroedinger --enable-libshine --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libssh --enable-libtheora --enable-libtwolame --enable-libvorbis --enable-libvpx --enable-libwavpack --enable-libwebp --enable-libx265 --enable-libxvid --enable-libzvbi --enable-openal --enable-opengl --enable-x11grab --enable-libdc1394 --enable-libiec61883 --enable-libzmq --enable-frei0r --enable-libx264 --enable-libopencv
+  libavutil      54. 31.100 / 54. 31.100
+  libavcodec     56. 60.100 / 56. 60.100
+  libavformat    56. 40.101 / 56. 40.101
+  libavdevice    56.  4.100 / 56.  4.100
+  libavfilter     5. 40.101 /  5. 40.101
+  libavresample   2.  1.  0 /  2.  1.  0
+  libswscale      3.  1.101 /  3.  1.101
+  libswresample   1.  2.101 /  1.  2.101
+  libpostproc    53.  3.100 / 53.  3.100
+[video4linux2,v4l2 @ 0x47cb30] The driver changed the time per frame from 1/25 to 1/30
+Input #0, video4linux2,v4l2, from '/dev/video0':
+  Duration: N/A, start: 1281.041000, bitrate: 147456 kb/s
+    Stream #0:0: Video: rawvideo (YUY2 / 0x32595559), yuyv422, 640x480, 147456 kb/s, 30 fps, 30 tbr, 1000k tbn, 1000k tbc
+No pixel format specified, yuv422p for H.264 encoding chosen.
+Use -pix_fmt yuv420p for compatibility with outdated media players.
+[libx264 @ 0x47f760] using cpu capabilities: ARMv8 NEON
+[libx264 @ 0x47f760] profile High 4:2:2, level 3.0, 4:2:2 8-bit
+[libx264 @ 0x47f760] 264 - core 148 r2643 5c65704 - H.264/MPEG-4 AVC codec - Copyleft 2003-2015 - http://www.videolan.org/x264.html - options: cabac=1 ref=3 deblock=1:0:0 analyse=0x3:0x113 me=hex subme=7 psy=1 psy_rd=1.00:0.00 mixed_ref=1 me_range=16 chroma_me=1 trellis=1 8x8dct=1 cqm=0 deadzone=21,11 fast_pskip=1 chroma_qp_offset=-2 threads=6 lookahead_threads=1 sliced_threads=0 nr=0 decimate=1 interlaced=0 bluray_compat=0 constrained_intra=0 bframes=3 b_pyramid=2 b_adapt=1 b_bias=0 direct=1 weightb=1 open_gop=0 weightp=2 keyint=250 keyint_min=25 scenecut=40 intra_refresh=0 rc_lookahead=40 rc=crf mbtree=1 crf=23.0 qcomp=0.60 qpmin=0 qpmax=69 qpstep=4 ip_ratio=1.40 aq=1:1.00
+Output #0, matroska, to 'output.mkv':
+  Metadata:
+    encoder         : Lavf56.40.101
+    Stream #0:0: Video: h264 (libx264) (H264 / 0x34363248), yuv422p, 640x480, q=-1--1, 30 fps, 1k tbn, 30 tbc
+    Metadata:
+      encoder         : Lavc56.60.100 libx264
+Stream mapping:
+  Stream #0:0 -> #0:0 (rawvideo (native) -> h264 (libx264))
+Press [q] to stop, [?] for help
+Past duration 0.995018 too large     711kB time=00:00:12.06 bitrate= 482.4kbits/s dup=0 drop=76    
+frame=  238 fps=5.9 q=-1.0 Lsize=    1245kB time=00:00:18.50 bitrate= 551.2kbits/s dup=0 drop=452    
+video:1242kB audio:0kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 0.195966%
+[libx264 @ 0x47f760] frame I:1     Avg QP:23.72  size: 21252
+[libx264 @ 0x47f760] frame P:60    Avg QP:23.59  size: 11302
+[libx264 @ 0x47f760] frame B:177   Avg QP:25.73  size:  3232
+[libx264 @ 0x47f760] consecutive B-frames:  0.8%  0.0%  0.0% 99.2%
+[libx264 @ 0x47f760] mb I  I16..4: 20.4% 60.4% 19.2%
+[libx264 @ 0x47f760] mb P  I16..4:  0.5%  1.2%  0.1%  P16..4: 54.5% 18.2% 16.8%  0.0%  0.0%    skip: 8.8%
+[libx264 @ 0x47f760] mb B  I16..4:  0.0%  0.1%  0.0%  B16..8: 30.6%  1.4%  0.3%  direct:15.4%  skip:52.3%  L0:51.9% L1:41.9% BI: 6.2%
+[libx264 @ 0x47f760] 8x8 transform intra:63.9% inter:67.5%
+[libx264 @ 0x47f760] coded y,uvDC,uvAC intra: 62.3% 92.8% 83.9% inter: 13.3% 53.0% 11.7%
+[libx264 @ 0x47f760] i16 v,h,dc,p: 21%  3%  1% 75%
+[libx264 @ 0x47f760] i8 v,h,dc,ddl,ddr,vr,hd,vl,hu: 20%  5% 19%  8%  8%  6%  3% 26%  5%
+[libx264 @ 0x47f760] i4 v,h,dc,ddl,ddr,vr,hd,vl,hu: 17%  8% 12% 10% 15%  8%  5% 22%  3%
+[libx264 @ 0x47f760] i8c dc,h,v,p: 51%  5% 23% 20%
+[libx264 @ 0x47f760] Weighted P-Frames: Y:1.7% UV:1.7%
+[libx264 @ 0x47f760] ref P L0: 35.3%  6.3% 41.1% 17.2%
+[libx264 @ 0x47f760] ref B L0: 56.1% 33.9% 10.0%
+[libx264 @ 0x47f760] ref B L1: 84.2% 15.8%
+[libx264 @ 0x47f760] kb/s:229.78
+Exiting normally, received signal 2.
+
+
+
+用软件Cheese
+1) 插上 usb camera
+2)  软件中心 找 cheese 运行
+ref:
+http://www.ehow.com/how_5610857_mount-usb-camera-ubuntu.html
+
+通过 ffmpeg 捕获
+原来插了 usb camera 后，多了一个设备  /dev/video0
+ 
+ v4l2-ctl --list-devices　看设备
+ ffmpeg -f v4l2 -list_formats all -i /dev/video0　看格式
+ ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video0 output.mkv　录像
+ref: 
+https://trac.ffmpeg.org/wiki/Capture/Webcam
+http://wiki.dave.eu/index.PHP/Video_capture_from_USB_camera

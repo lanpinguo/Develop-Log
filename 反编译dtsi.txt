@@ -1,0 +1,12 @@
+反编译dtsi
+dtsi机制是linux kernel为了适配多设备做出来的模块，产品线拉的较长的话用它来控制最合适不过了。初步阅读了下代码和接口清晰简洁。
+
+这个东东出来的时候xml/json应该比较成熟了，疑惑的是为啥不用现成的。
+
+ 
+
+编译与反编译代码：kernel/scripts/dtc/
+
+反编译dtb：
+
+dtc -I dtb -O dts  product1.dtb  -o my.dtsi

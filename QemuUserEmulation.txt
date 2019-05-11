@@ -1,0 +1,100 @@
+
+
+Note:
+if chroot does't work, you can execute down cmd ,then everything showed up in /proc/sys/fs/binfmt_misc and the chroot works : 
+update-binfmts --importdir /var/lib/binfmts/ --import 
+
+
+QemuUserEmulation
+QEMU User Emulation
+This page describes how to setup and use QEMU user emulation in a "transparent" fashion, allowing execution of non-native target executables just like native ones (i.e. ./program).
+
+In this text, "target" means the system being emulated, and "host" means the system where QEMU is running.
+
+Note this setup is incompatible with Scratchbox (both use the binfmt_misc module to register the same formats), so it's recommended to remove it (or stop its init script) before continuing.
+
+Installing packages
+The binfmt-support package contains a helper script to easily register/unregister binary formats with the kernel using the binfmt_misc module.
+
+Install qemu, binfmt-support, and qemu-user-static:
+
+# apt-get install qemu binfmt-support qemu-user-static
+Check whether the binfmt entries were successfully registered:
+
+# update-binfmts --display
+This command should print entries for each supported target user emulator, except for the host system.
+Adjusting the system
+Depending on the your kernel settings, you may need to set 'vm.mmap_min_addr=0' sysctl option to allow a program being run under a regular user, not root.
+
+Running dynamically linked executables
+With the instructions above, you should be able to run statically linked target executables. To be able to run dynamically linked binaries, QEMU needs to have access to the target ELF interpreter. The libc6 package for the target architecture contains the target's ELF interpreter used by QEMU.
+
+Installing this can be done with multiarch from wheezy onwards, or with dpkg-cross on earlier (pre-multiarch) releases.
+
+Installing the target C libraries with multiarch
+For example purposes, let's assume the target system is "armhf".
+
+
+sudo dpkg --add-architecture armhf
+sudo apt-get update
+sudo apt-get install libc6:armhf
+That's it.
+
+Installing the target C libraries with dpkg-cross
+The target Debian package cannot be installed directly on the host, so we need to use dpkg-cross to "cross-install" the package.
+
+For example purposes, let's assume the target system is "armel".
+
+Install the dpkg-cross package:
+
+# apt-get install dpkg-cross
+Now download the target libc6 package from one of the Debian mirrors and install it using dpkg-cross:
+
+# dpkg-cross -i -a arm libc6_<version>_armel.deb
+Alternatively, you can install the libc6-dev-armhf-cross package from EmDebian:
+
+# wget http://www.emdebian.org/debian/pool/main/g/glibc/libc6-armel-cross_2.7-18lenny6_all.deb
+# dpkg -i libc6-armel-cross_2.7-18lenny6_all.deb
+Point QEMU to the target linux loader
+Under multiarch the target arch loader is in the usual place (/lib/<triplet>) so nothing special is needed. If using dpkg-cross it's installed in a non-standard path so you need to tell QEMU about that.
+
+for example, for the armel architecture: add the line
+
+EXTRA_OPTS="-L /usr/arm-linux-gnueabi"
+
+to the /etc/qemu-binfmt.conf.
+
+for armhf add: EXTRA_OPTS="-L /usr/arm-linux-gnueabihf"
+
+Testing the emulation environment
+We will use the "hello" ARM Debian package to test the new environment.
+
+Download the hello package (e.g. from http://http.us.debian.org/debian/pool/main/h/hello/hello_version_armel.deb)
+
+Unpack it with the command:
+
+$ dpkg -x hello_version_armel.deb /tmp/hello_armel
+Finally, run the hello executable with:
+
+$ /tmp/hello_armel/usr/bin/hello
+It should print "Hello, world!".
+
+That's it! You can now run non-native executables transparently, as long as QEMU supports the system calls used by it.
+
+Appendix: chrooting into target file systems
+To be able to chroot into a target file system, the qemu emulator for the target CPU needs to be accessible from inside the chroot jail. For this to work, you need first to install the qemu-user-static package:
+
+# apt-get install qemu-user-static
+You cannot use the dynamically linked qemu because the host libraries will not be accessible from inside the chroot.
+
+Next, copy the emulator for the target architecture to the path registered by binfmt-support. For example, for an ARM target file system, you need to do the following:
+
+# cp /usr/bin/qemu-arm-static /target_fs/usr/bin
+You should now be able to chroot into the file system:
+
+# chroot /target_fs/
+
+
+
+
+

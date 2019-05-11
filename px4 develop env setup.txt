@@ -1,0 +1,109 @@
+
+1\
+The user needs to be part of the group "dialout":
+	sudo usermod -a -G dialout $USER
+
+And then you have to logout and login again, as this is only changed after a new login.
+
+
+2\
+sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
+sudo apt-get update
+sudo apt-get install python-argparse git-core wget zip \
+    python-empy qtcreator cmake build-essential genromfs -y
+# simulation tools
+
+sudo apt-get install ant protobuf-compiler libeigen3-dev libopencv-dev openjdk-8-jdk openjdk-8-jre clang-3.5 lldb-3.5 -y
+
+3\
+install ant protobuf-compiler libeigen3-dev libopencv-dev openjdk-8-jdk openjdk-8-jre clang-3.5 lldb-3.5 -y
+
+
+NuttX based hardware
+
+Ubuntu comes with a serial modem manager which interferes heavily with any robotics related use of a serial port (or USB serial). It can deinstalled without side effects:
+
+
+sudo apt-get remove modemmanager
+
+
+Update the package list and install the following dependencies. Packages with specified versions should be installed with this particular package version.
+
+
+sudo apt-get install python-serial openocd \
+    flex bison libncurses5-dev autoconf texinfo build-essential \
+    libftdi-dev libtool zlib1g-dev \
+    python-empy  -y
+
+
+Make sure to remove leftovers before adding the arm-none-eabi toolchain.
+
+
+sudo apt-get remove gcc-arm-none-eabi gdb-arm-none-eabi binutils-arm-none-eabi gcc-arm-embedded
+sudo add-apt-repository --remove ppa:team-gcc-arm-embedded/ppa
+
+
+Then follow the toolchain installation instructions to install the arm-none-eabi toolchain version 4.9 or 5.4 manually.
+GCC 5.4:
+
+pushd .
+cd ~
+wget https://launchpad.net/gcc-arm-embedded/5.0/5-2016-q2-update/+download/gcc-arm-none-eabi-5_4-2016q2-20160622-linux.tar.bz2
+tar -jxf gcc-arm-none-eabi-5_4-2016q2-20160622-linux.tar.bz2
+exportline="export PATH=$HOME/gcc-arm-none-eabi-5_4-2016q2/bin:\$PATH"
+if grep -Fxq "$exportline" ~/.profile; then echo nothing to do ; else echo $exportline >> ~/.profile; fi
+. ~/.profile
+popd
+
+本地使用的路径配置
+exportline="export PATH=/work/tools/gcc-arm-none-eabi-5_4-2016q2/bin:\$PATH"
+
+4\
+The terminal starts in the home directory. We default to '~/src/Firmware' and clone the upstream repository. Experienced developers might clone their fork instead.
+
+
+mkdir -p ~/src
+cd ~/src
+git clone https://github.com/PX4/Firmware.git
+cd Firmware
+git submodule update --init --recursive
+cd ..
+
+
+Now its time to build the binaries by compiling the source code. But before going straight to the hardware, a simulation run is recommended as the next step. Users preferring to work in a graphical development environment should continue with the next section.
+
+
+
+NuttX / Pixhawk based boards
+cd Firmware
+make px4fmu-v2_default
+
+
+Note the syntax: 'make' is the build tool, 'px4fmu-v2' is the hardware / autopilot version and 'default' is the default configuration. All PX4 build targets follow this logic. A successful run will end with this output:
+
+
+[100%] Linking CXX executable firmware_nuttx
+[100%] Built target firmware_nuttx
+Scanning dependencies of target build_firmware_px4fmu-v2
+[100%] Generating nuttx-px4fmu-v2-default.px4
+[100%] Built target build_firmware_px4fmu-v2
+
+
+By appending 'upload' to these commands the compiled binary will be uploaded via USB to the autopilot hardware:
+
+
+make px4fmu-v2_default upload
+
+
+A successful run will end with this output:
+
+
+Erase  : [====================] 100.0%
+Program: [====================] 100.0%
+Verify : [====================] 100.0%
+Rebooting.
+
+[100%] Built target upload
+
+
+

@@ -1,0 +1,12 @@
+1.  安装 open ssh：
+sudo apt-get install openssh-server
+2
+2. 修改root密码
+#sudo passwd root
+3
+3. 辑配置文件，允许以 root 用户通过 ssh 登录：
+sudo vi /etc/ssh/sshd_config
+找到：PermitRootLogin prohibit-password禁用
+添加：PermitRootLogin yes
+sudo service ssh restart
+OK,正常登录！！！

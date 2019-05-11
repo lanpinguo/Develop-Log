@@ -1,0 +1,11 @@
+Ubuntu 12.04 安装Sphinx
+
+
+1、安装Sphinx
+
+
+sudo apt-get install sphinxsearch
+ 
+ 
+安装完之后，创建/etc/sphinxsearch/sphinx.conf 这个文件，这个目录有个sphinx.conf.sample文件，直接把他复制一份出来即可。
+ 

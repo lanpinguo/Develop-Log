@@ -1,0 +1,11 @@
+1.DCN
+
+DCN是英文Data Communication Network的缩写，中文意思为数据通信网络。它具有分布式网络计算环境和多级分布式数据仓库，在我国DCN网以邮电部电信总局的网管中心为网络中心，覆盖全国所有省、直辖市和自治 区的省网管中心，共计32个主干节点，形成一个全国性的骨干网络
+
+2.RAN
+
+居民接入网（Residential Access Network），简称RAN。又称为居民宽带网RBB（Residential BroadBand Network）。
+
+3.SDN
+
+软件定义网络（Software Defined Network, SDN ），是Emulex网络一种新型网络创新架构，其核心技术OpenFlow通过将网络设备控制面与数据面分离开来，从而实现了网络流量的灵活控制。

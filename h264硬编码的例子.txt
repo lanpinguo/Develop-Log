@@ -1,0 +1,5 @@
+
+硬件编码的例子：
+https://github.com/jemk/cedrus/tree/master/h264enc
+
+

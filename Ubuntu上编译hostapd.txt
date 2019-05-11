@@ -1,0 +1,80 @@
+1、下载hostapd
+
+可以到官网上下，主页：http://w1.fi/hostapd/ ，我选择使用hostapd-0.7.3
+
+也可以使用wget下载：
+
+wget http://w1.fi/releases/hostapd-x.y.z.tar.gz（这里改成自己选用的版本）
+
+解压并进入源码目录：
+
+tar xzvf hostapd-x.y.z.tar.gz
+
+cd hostapd-x.y.z/hostapd
+
+
+ 2、配置hostapd，使它编译为支持nl80211驱动
+
+cp defconfig .config
+
+vi .config
+
+找到“#CONFIG_DRIVER_NL80211=y”，去掉“#”符号。保存。
+
+
+3、编译hostapd
+
+make
+
+编译的过程中可能会遇到的问题及解决方法：
+
+a、../src/drivers/driver_nl80211.c:22:31: fatal error:netlink/genl/genl.h: No such file or directory
+
+原因：缺少libnl
+
+解决方法：下载并编译安装libnl
+
+可以到主页下载：http://www.infradead.org/~tgr/libnl/，也可以使用git下载：git clone git://github.com/tgraf/libnl-1.1-stable.git
+
+编译并安装libnl：
+
+cd libnl-1.1-stable
+
+./configure
+
+make
+
+sudo make install
+
+b、../src/crypto/tls_openssl.c:23:25:fatal error: openssl/ssl.h: No such file or directory
+
+原因：缺少openssl库
+
+解决方法：下载并安装openssl库
+
+sudo apt-get install libssl-dev
+
+
+ 4、安装编译好的hostapd
+
+sudo make install
+
+进行到这儿的时候可以进行一个简单的测试：
+
+新建一个hostapd的配置文件：hostapd-minimal.conf
+
+配置文件内容如下：
+
+#change wlan0 to your wirelessdevice
+
+interface=wlan0
+
+driver=nl80211
+
+ssid=test
+
+channel=1
+
+运行命令：sudo hostapd hostapd-minimal.conf
+
+这时，用手机能搜索到一个名为“test”的WiFi热点，但是不能连接。

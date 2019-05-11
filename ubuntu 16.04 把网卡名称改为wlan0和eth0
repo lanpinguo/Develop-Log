@@ -1,0 +1,17 @@
+方法:需要把/etc/default/grub文件里面的GRUB_CMDLINE_LINUX=改成GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0
+
+代码:
+
+#grub.sh
+
+
+#!/bin/sh
+
+
+sed -i 's/^.*GRUB_CMDLINE_LINUX="".*$/GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0"/' /etc/default/grub
+
+
+update-grub
+
+
+reboot

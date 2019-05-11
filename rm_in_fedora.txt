@@ -1,0 +1,2 @@
+[root@localhost raisecom]# rm -R -i .kde/
+rm: remove directory `.kde'? yes

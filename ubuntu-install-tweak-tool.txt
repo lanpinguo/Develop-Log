@@ -1,0 +1,3 @@
+The following linux command will install Tweak Tool for your Ubuntu 18.04 Gnome desktop. Open up terminal and enter:
+$ sudo apt install gnome-tweak-tool
+

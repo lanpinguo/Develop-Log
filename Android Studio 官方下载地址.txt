@@ -1,0 +1,472 @@
+ Android Studio 官方下载地址
+
+2017.6.8
+Android Studio 2.3.3.0
+https://dl.google.com/dl/android/studio/install/2.3.3.0/android-studio-bundle-162.4069837-windows.exe
+https://dl.google.com/dl/android/studio/install/2.3.3.0/android-studio-ide-162.4069837-windows.exe
+https://dl.google.com/dl/android/studio/ide-zips/2.3.3.0/android-studio-ide-162.4069837-windows.zip
+https://dl.google.com/dl/android/studio/ide-zips/2.3.3.0/android-studio-ide-162.4069837-windows32.zip
+https://dl.google.com/dl/android/studio/install/2.3.3.0/android-studio-ide-162.4069837-mac.dmg
+https://dl.google.com/dl/android/studio/ide-zips/2.3.3.0/android-studio-ide-162.4069837-linux.zip
+Get just the command line tools
+https://dl.google.com/android/repository/sdk-tools-windows-3859397.zip
+https://dl.google.com/android/repository/sdk-tools-darwin-3859397.zip
+https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip
+
+2017.5
+
+https://dl.google.com/dl/android/studio/install/2.3.2.0/android-studio-bundle-162.3934792-windows.exe
+
+https://dl.google.com/dl/android/studio/install/2.3.2.0/android-studio-ide-162.3934792-windows.exe
+
+https://dl.google.com/dl/android/studio/ide-zips/2.3.2.0/android-studio-ide-162.3934792-windows.zip
+
+https://dl.google.com/dl/android/studio/ide-zips/2.3.2.0/android-studio-ide-162.3934792-windows32.zip
+
+https://dl.google.com/dl/android/studio/install/2.3.2.0/android-studio-ide-162.3934792-mac.dmg
+
+https://dl.google.com/dl/android/studio/ide-zips/2.3.2.0/android-studio-ide-162.3934792-linux.zip
+
+ 
+
+2017.4
+
+https://dl.google.com/dl/android/studio/install/2.3.1.0/android-studio-bundle-162.3871768-windows.exe
+
+https://dl.google.com/dl/android/studio/install/2.3.1.0/android-studio-ide-162.3871768-windows.exe
+
+https://dl.google.com/dl/android/studio/ide-zips/2.3.1.0/android-studio-ide-162.3871768-windows.zip
+
+https://dl.google.com/dl/android/studio/ide-zips/2.3.1.0/android-studio-ide-162.3871768-windows32.zip
+
+https://dl.google.com/dl/android/studio/install/2.3.1.0/android-studio-ide-162.3871768-mac.dmg
+https://dl.google.com/dl/android/studio/ide-zips/2.3.1.0/android-studio-ide-162.3871768-linux.zip
+https://dl.google.com/android/repository/sdk-tools-windows-3859397.zip
+https://dl.google.com/android/repository/sdk-tools-darwin-3859397.zip
+https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip
+
+2016.12
+Android Studio 2.2.3
+Windows
+Includes Android SDK
+https://dl.google.com/dl/android/studio/install/2.2.3.0/android-studio-bundle-145.3537739-windows.exe
+No Android SDK
+https://dl.google.com/dl/android/studio/install/2.2.3.0/android-studio-ide-145.3537739-windows.exe
+No Android SDK ,no installer
+https://dl.google.com/dl/android/studio/ide-zips/2.2.3.0/android-studio-ide-145.3537739-windows.zip
+macOS
+https://dl.google.com/dl/android/studio/install/2.2.3.0/android-studio-ide-145.3537739-mac.dmg
+Linux
+https://dl.google.com/dl/android/studio/ide-zips/2.2.3.0/android-studio-ide-145.3537739-linux.zip
+Just the command line tools
+https://dl.google.com/android/installer_r24.4.1-windows.exe
+https://dl.google.com/android/android-sdk_r24.4.1-windows.zip
+https://dl.google.com/android/android-sdk_r24.4.1-macosx.zip
+https://dl.google.com/android/android-sdk_r24.4.1-linux.tgz
+
+2016.11
+
+NDK 13b
+
+从Android Studio 2.2开始，NDK已经很轻易的可以下载集成到AS中，无需单独下载安装。
+
+https://dl.google.com/android/repository/android-ndk-r13b-windows-x86.zip
+https://dl.google.com/android/repository/android-ndk-r13b-windows-x86_64.zip
+https://dl.google.com/android/repository/android-ndk-r13b-darwin-x86_64.zip
+https://dl.google.com/android/repository/android-ndk-r13b-linux-x86_64.zip
+
+ 
+
+2016.10
+Android Studio 2.2.1.0
+https://dl.google.com/dl/android/studio/install/2.2.1.0/android-studio-bundle-145.3330264-windows.exe
+https://dl.google.com/dl/android/studio/install/2.2.1.0/android-studio-ide-145.3330264-windows.exe
+https://dl.google.com/dl/android/studio/ide-zips/2.2.1.0/android-studio-ide-145.3330264-windows.zip
+https://dl.google.com/dl/android/studio/install/2.2.1.0/android-studio-ide-145.3330264-mac.dmg
+https://dl.google.com/dl/android/studio/ide-zips/2.2.1.0/android-studio-ide-145.3330264-linux.zip
+NDK r13
+https://dl.google.com/android/repository/android-ndk-r13-windows-x86.zip
+https://dl.google.com/android/repository/android-ndk-r13-windows-x86_64.zip
+https://dl.google.com/android/repository/android-ndk-r13-darwin-x86_64.zip
+https://dl.google.com/android/repository/android-ndk-r13-linux-x86_64.zip 
+
+2016.9
+Android Studio 2.2
+https://dl.google.com/dl/android/studio/install/2.2.0.12/android-studio-bundle-145.3276617-windows.exe
+https://dl.google.com/dl/android/studio/install/2.2.0.12/android-studio-ide-145.3276617-windows.exe
+https://dl.google.com/dl/android/studio/ide-zips/2.2.0.12/android-studio-ide-145.3276617-windows.zip
+https://dl.google.com/dl/android/studio/install/2.2.0.12/android-studio-ide-145.3276617-mac.dmg
+https://dl.google.com/dl/android/studio/ide-zips/2.2.0.12/android-studio-ide-145.3276617-linux.zip
+
+Command line tools
+https://dl.google.com/android/installer_r24.4.1-windows.exe
+https://dl.google.com/android/android-sdk_r24.4.1-windows.zip
+https://dl.google.com/android/android-sdk_r24.4.1-macosx.zip
+https://dl.google.com/android/android-sdk_r24.4.1-linux.tgz
+
+2016.6
+Android Studio 2.1
+https://dl.google.com/dl/android/studio/install/2.1.2.0/android-studio-bundle-143.2915827-windows.exe
+https://dl.google.com/dl/android/studio/install/2.1.2.0/android-studio-ide-143.2915827-windows.exe
+https://dl.google.com/dl/android/studio/ide-zips/2.1.2.0/android-studio-ide-143.2915827-windows.zip
+https://dl.google.com/dl/android/studio/install/2.1.2.0/android-studio-ide-143.2915827-mac.dmg
+https://dl.google.com/dl/android/studio/ide-zips/2.1.2.0/android-studio-ide-143.2915827-linux.zip
+
+Command line tools
+https://dl.google.com/android/installer_r24.4.1-windows.exe
+https://dl.google.com/android/android-sdk_r24.4.1-windows.zip
+https://dl.google.com/android/android-sdk_r24.4.1-macosx.zip
+https://dl.google.com/android/android-sdk_r24.4.1-linux.tgz
+
+NDK r12b
+http://dl.google.com/android/repository/android-ndk-r12b-windows-x86.zip
+http://dl.google.com/android/repository/android-ndk-r12b-windows-x86_64.zip
+http://dl.google.com/android/repository/android-ndk-r12b-darwin-x86_64.zip
+http://dl.google.com/android/repository/android-ndk-r12b-linux-x86_64.zip
+
+ 
+
+
+2015.12 Android 6
+SDK Tools Only
+http://dl.google.com/android/installer_r24.4.1-windows.exe
+http://dl.google.com/android/android-sdk_r24.4.1-windows.zip
+http://dl.google.com/android/android-sdk_r24.4.1-macosx.zip
+http://dl.google.com/android/android-sdk_r24.4.1-linux.tgz
+
+All Android Stido Package
+https://dl.google.com/dl/android/studio/install/1.5.0.4/android-studio-bundle-141.2422023-windows.exe
+https://dl.google.com/dl/android/studio/install/1.5.0.4/android-studio-ide-141.2422023-windows.exe
+https://dl.google.com/dl/android/studio/ide-zips/1.5.0.4/android-studio-ide-141.2422023-windows.zip
+https://dl.google.com/dl/android/studio/install/1.5.0.4/android-studio-ide-141.2422023-mac.dmg
+https://dl.google.com/dl/android/studio/ide-zips/1.5.0.4/android-studio-ide-141.2422023-linux.zip
+
+
+2015.9 Android 6DP3
+
+Android SDK only
+http://dl.google.com/android/installer_r24.3.4-windows.exe
+http://dl.google.com/android/android-sdk_r24.3.4-windows.zip
+http://dl.google.com/android/android-sdk_r24.3.4-macosx.zip
+http://dl.google.com/android/android-sdk_r24.3.4-linux.tgz
+
+Android Stuido
+https://dl.google.com/dl/android/studio/install/1.3.2.0/android-studio-bundle-141.2178183-windows.exe
+https://dl.google.com/dl/android/studio/install/1.3.2.0/android-studio-ide-141.2178183-windows.exe
+https://dl.google.com/dl/android/studio/install/1.3.2.0/android-studio-ide-141.2178183-mac.dmg
+https://dl.google.com/dl/android/studio/ide-zips/1.3.2.0/android-studio-ide-141.2178183-linux.zip
+
+NDK
+http://dl.google.com/android/ndk/android-ndk-r10e-windows-x86.exe
+http://dl.google.com/android/ndk/android-ndk-r10e-windows-x86_64.exe
+http://dl.google.com/android/ndk/android-ndk-r10e-darwin-x86_64.bin
+http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86.bin
+http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin
+
+2015.5 Android 5.1.1
+
+Android Studio 1.2
+https://dl.google.com/dl/android/studio/install/1.2.0.12/android-studio-bundle-141.1890965-windows.exe
+https://dl.google.com/dl/android/studio/install/1.2.0.12/android-studio-ide-141.1890965-windows.exe
+https://dl.google.com/dl/android/studio/ide-zips/1.2.0.12/android-studio-ide-141.1890965-windows.zip
+https://dl.google.com/dl/android/studio/install/1.2.0.12/android-studio-ide-141.1890965-mac.dmg
+https://dl.google.com/dl/android/studio/ide-zips/1.2.0.12/android-studio-ide-141.1890965-linux.zip
+
+SDK Tools Only
+http://dl.google.com/android/installer_r24.2-windows.exe
+http://dl.google.com/android/android-sdk_r24.2-windows.zip
+http://dl.google.com/android/android-sdk_r24.2-macosx.zip
+http://dl.google.com/android/android-sdk_r24.2-linux.tgz
+
+NDK
+没有变化同下边的 Anroid 5.0 r10d
+
+
+2015.4 Android 5.1
+
+Android Studio 1.1
+https://dl.google.com/dl/android/studio/install/1.1.0/android-studio-bundle-135.1740770-windows.exe
+https://dl.google.com/dl/android/studio/install/1.1.0/android-studio-ide-135.1740770-windows.exe
+https://dl.google.com/dl/android/studio/ide-zips/1.1.0/android-studio-ide-135.1740770-windows.zip
+https://dl.google.com/dl/android/studio/install/1.1.0/android-studio-ide-135.1740770-mac.dmg
+https://dl.google.com/dl/android/studio/ide-zips/1.1.0/android-studio-ide-135.1740770-linux.zip
+
+SDK Tools only
+http://dl.google.com/android/installer_r24.1.2-windows.exe
+http://dl.google.com/android/android-sdk_r24.1.2-windows.zip
+http://dl.google.com/android/android-sdk_r24.1.2-macosx.zip
+http://dl.google.com/android/android-sdk_r24.1.2-linux.tgz
+
+NDK
+没有变化同下边的 Anroid 5.0 r10d
+
+2014.12 Android 5.0
+
+Android Studio
+https://dl.google.com/dl/android/studio/install/1.0.1/android-studio-bundle-135.1641136.exe
+https://dl.google.com/dl/android/studio/install/1.0.1/android-studio-ide-135.1641136.exe
+https://dl.google.com/dl/android/studio/ide-zips/1.0.1/android-studio-ide-135.1641136-windows.zip
+https://dl.google.com/dl/android/studio/install/1.0.1/android-studio-ide-1641136.dmg
+https://dl.google.com/dl/android/studio/ide-zips/1.0.1/android-studio-ide-135.1641136-linux.zip
+
+SDK Tools only
+http://dl.google.com/android/installer_r24.0.2-windows.exe
+http://dl.google.com/android/android-sdk_r24.0.2-windows.zip
+http://dl.google.com/android/android-sdk_r24.0.2-macosx.zip
+http://dl.google.com/android/android-sdk_r24.0.2-linux.tgz
+
+NDK
+http://dl.google.com/android/ndk/android-ndk-r10d-windows-x86.exe
+http://dl.google.com/android/ndk/android-ndk-r10d-windows-x86_64.exe
+http://dl.google.com/android/ndk/android-ndk-r10d-darwin-x86.bin
+http://dl.google.com/android/ndk/android-ndk-r10d-darwin-x86_64.bin
+http://dl.google.com/android/ndk/android-ndk-r10d-linux-x86.bin
+http://dl.google.com/android/ndk/android-ndk-r10d-linux-x86_64.bin
+
+
+2014.7.2 Android 4.4
+
+ADT Bundle
+http://dl.google.com/android/adt/adt-bundle-windows-x86-20140702.zip
+http://dl.google.com/android/adt/adt-bundle-windows-x86_64-20140702.zip
+http://dl.google.com/android/adt/adt-bundle-mac-x86_64-20140702.zip
+http://dl.google.com/android/adt/adt-bundle-linux-x86-20140702.zip
+http://dl.google.com/android/adt/adt-bundle-linux-x86_64-20140702.zip
+
+SDK Tools Only
+http://dl.google.com/android/android-sdk_r23.0.2-windows.zip
+http://dl.google.com/android/installer_r23.0.2-windows.exe
+http://dl.google.com/android/android-sdk_r23.0.2-macosx.zip
+http://dl.google.com/android/android-sdk_r23.0.2-linux.tgz
+
+ADT Eclipse Plugin
+https://dl.google.com/android/ADT-23.0.6.zip
+
+Android Studio
+http://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-windows.exe
+http://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-mac.dmg
+http://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-linux.tgz
+
+Android NDK
+http://dl.google.com/android/ndk/android-ndk32-r10-windows-x86.zip
+http://dl.google.com/android/ndk/android-ndk32-r10-windows-x86_64.zip
+http://dl.google.com/android/ndk/android-ndk32-r10-darwin-x86.tar.bz2
+http://dl.google.com/android/ndk/android-ndk32-r10-darwin-x86_64.tar.bz2
+http://dl.google.com/android/ndk/android-ndk32-r10-linux-x86.tar.bz2
+http://dl.google.com/android/ndk/android-ndk32-r10-linux-x86_64.tar.bz2
+http://dl.google.com/android/ndk/android-ndk64-r10-windows-x86.zip
+http://dl.google.com/android/ndk/android-ndk64-r10-windows-x86_64.zip
+http://dl.google.com/android/ndk/android-ndk64-r10-darwin-x86.tar.bz2
+http://dl.google.com/android/ndk/android-ndk64-r10-darwin-x86_64.tar.bz2
+http://dl.google.com/android/ndk/android-ndk64-r10-linux-x86.tar.bz2
+http://dl.google.com/android/ndk/android-ndk64-r10-linux-x86_64.tar.bz2
+http://dl.google.com/android/ndk/android-ndk-r10-cxx-stl-libs-with-debug-info.zip
+
+ 
+
+2014.7
+
+ADT Bundle
+http://dl.google.com/android/adt/adt-bundle-windows-x86-20140702.zip
+http://dl.google.com/android/adt/adt-bundle-windows-x86_64-20140702.zip
+http://dl.google.com/android/adt/adt-bundle-mac-x86_64-20140702.zip
+http://dl.google.com/android/adt/adt-bundle-linux-x86-20140702.zip
+http://dl.google.com/android/adt/adt-bundle-linux-x86_64-20140702.zip
+
+SDK Tools Only
+http://dl.google.com/android/android-sdk_r23.0.2-windows.zip
+http://dl.google.com/android/installer_r23.0.2-windows.exe
+http://dl.google.com/android/android-sdk_r23.0.2-macosx.zip
+http://dl.google.com/android/android-sdk_r23.0.2-linux.tgz
+
+Android Studio
+http://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-windows.exe
+http://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-mac.dmg
+http://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-linux.tgz
+
+Android NDK
+http://dl.google.com/android/ndk/android-ndk32-r10-windows-x86.zip
+http://dl.google.com/android/ndk/android-ndk32-r10-windows-x86_64.zip
+http://dl.google.com/android/ndk/android-ndk32-r10-darwin-x86.tar.bz2
+http://dl.google.com/android/ndk/android-ndk32-r10-darwin-x86_64.tar.bz2
+http://dl.google.com/android/ndk/android-ndk32-r10-linux-x86.tar.bz2
+http://dl.google.com/android/ndk/android-ndk32-r10-linux-x86_64.tar.bz2
+http://dl.google.com/android/ndk/android-ndk64-r10-windows-x86.zip
+http://dl.google.com/android/ndk/android-ndk64-r10-windows-x86_64.zip
+http://dl.google.com/android/ndk/android-ndk64-r10-darwin-x86.tar.bz2
+http://dl.google.com/android/ndk/android-ndk64-r10-darwin-x86_64.tar.bz2
+http://dl.google.com/android/ndk/android-ndk64-r10-linux-x86.tar.bz2
+http://dl.google.com/android/ndk/android-ndk64-r10-linux-x86_64.tar.bz2
+http://dl.google.com/android/ndk/android-ndk-r10-cxx-stl-libs-with-debug-info.zip
+
+ 
+
+ 
+
+2014.6 
+
+Android Studio 0.8
+
+http://dl.google.com/android/studio/install/0.8.0/android-studio-bundle-135.1245622-windows.exe
+http://dl.google.com/android/studio/install/0.8.0/android-studio-bundle-135.1245622-mac.dmg
+http://dl.google.com/android/studio/install/0.8.0/android-studio-bundle-135.1245622-linux.tgz
+
+Android SDK only r23
+
+http://dl.google.com/android/android-sdk_r23-windows.zip
+http://dl.google.com/android/installer_r23-windows.exe
+http://dl.google.com/android/android-sdk_r23-macosx.zip
+http://dl.google.com/android/android-sdk_r23-linux.tgz
+
+ ADT Bundle r23
+
+http://dl.google.com/android/adt/adt-bundle-linux-x86_64-20140624.zip
+http://dl.google.com/android/adt/adt-bundle-linux-x86-20140624.zip
+http://dl.google.com/android/adt/adt-bundle-windows-x86-20140624.zip
+http://dl.google.com/android/adt/adt-bundle-windows-x86-20140624.zip
+http://dl.google.com/android/adt/adt-bundle-mac-x86_64-20140624.zip
+
+Android NDK r9d
+
+http://dl.google.com/android/ndk/android-ndk-r9d-windows-x86.zip
+http://dl.google.com/android/ndk/android-ndk-r9d-windows-x86_64.zip
+http://dl.google.com/android/ndk/android-ndk-r9d-darwin-x86.tar.bz2
+http://dl.google.com/android/ndk/android-ndk-r9d-linux-x86.tar.bz2
+http://dl.google.com/android/ndk/android-ndk-r9d-linux-x86_64.tar.bz2
+http://dl.google.com/android/ndk/android-ndk-r9d-cxx-stl-libs-with-debug-info.zip
+
+ 
+
+Android NDK r6b
+
+Windows
+
+http://dl.google.com/android/ndk/android-ndk-r6b-windows.zip
+
+Mac OS X(intel)
+
+http://dl.google.com/android/ndk/android-ndk-r6b-darwin-x86.tar.bz2
+
+Linux
+
+http://dl.google.com/android/ndk/android-ndk-r6b-linux-x86.tar.bz2
+
+ 
+
+Android SDK 3.2
+
+Windows
+
+http://dl.google.com/android/android-sdk_r12-windows.zip
+
+http://dl.google.com/android/installer_r12-windows.exe
+
+Mac OS X (intel)
+
+http://dl.google.com/android/android-sdk_r12-mac_x86.zip
+
+Linux(i386)
+
+http://dl.google.com/android/android-sdk_r12-linux_x86.tgz
+
+ 
+
+Android NDK r6
+
+Windows
+
+http://dl.google.com/android/ndk/android-ndk-r6-windows.zip
+
+Mac OS X(intel)
+
+http://dl.google.com/android/ndk/android-ndk-r6-darwin-x86.tar.bz2
+
+Linux 32/64-bit (x86)
+
+http://dl.google.com/android/ndk/android-ndk-r6-linux-x86.tar.bz2
+
+ 
+
+Android SDK 3.1
+
+Windows
+
+http://dl.google.com/android/android-sdk_r11-windows.zip
+
+http://dl.google.com/android/installer_r11-windows.exe
+
+Mac OS X(intel)
+
+http://dl.google.com/android/android-sdk_r11-mac_x86.zip
+
+Linux(i386)
+
+http://dl.google.com/android/android-sdk_r11-linux_x86.tgz
+
+ 
+
+Android NDK r5b
+
+Windows
+
+http://dl.google.com/android/ndk/android-ndk-r5b-windows.zip
+
+Mac OS X(intel)
+
+http://dl.google.com/android/ndk/android-ndk-r5b-darwin-x86.tar.bz2
+
+Linux
+
+http://dl.google.com/android/ndk/android-ndk-r5b-linux-x86.tar.bz2
+
+ 
+
+Android SDK 3.0
+
+Windows
+
+http://dl.google.com/android/installer_r10-windows.exe
+
+http://dl.google.com/android/android-sdk_r10-windows.zip
+
+Mac OS X(intel)
+
+http://dl.google.com/android/android-sdk_r10-mac_x86.zip
+
+Linux(i386)
+
+http://dl.google.com/android/android-sdk_r10-linux_x86.tgz
+
+ 
+
+Android SDK 2.3
+
+Windows
+
+http://dl.google.com/android/android-sdk_r08-windows.zip
+
+http://dl.google.com/android/installer_r08-windows.exe
+
+Linux (i386)
+
+http://dl.google.com/android/android-sdk_r08-linux_86.tgz
+
+MAC OS X (intel)
+
+http://dl.google.com/android/android-sdk_r08-mac_86.zip
+
+ 
+
+Android NDK r5
+
+Windows
+
+http://dl.google.com/android/ndk/android-ndk-r5-windows.zip
+
+Mac OS X (intel) r5
+
+http://dl.google.com/android/ndk/android-ndk-r5-darwin-x86.tar.bz2
+
+Linux 32/64-bit (x86) r5
+
+http://dl.google.com/android/ndk/android-ndk-r5-linux-x86.tar.bz2

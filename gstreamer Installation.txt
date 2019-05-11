@@ -1,0 +1,32 @@
+gstreamer Installation
+
+To install gstreamer packages on the computer and on the Odroid C1 and start the stream, follow the instruction given in the QGroundControl README. 
+
+If you cannnot start the stream on the Odroid with the uvch264s plugin, you can also try to start it with the v4l2src plugin:
+
+gst-launch-1.0 v4l2src device=/dev/video0 ! video/x-h264,width=1920,height=1080,framerate=24/1 ! h264parse ! rtph264pay ! udpsink host=xxx.xxx.xxx.xxx port=5000
+
+
+Where  xxx.xxx.xxx.xxx  is the IP address where QGC is running. If you get the system error:  Permission denied , you might need to prepend  sudo  to the command above. 
+
+If everything works, you should see the video stream on the bottom left corner in the flight-mode window of QGroundControl as shown in the screeenshot below. 
+
+
+gst-launch-1.0 v4l2src device=/dev/video0 ! video/x-h264,width=1920,height=1080,framerate=24/1  ! rtph264pay ! udpsink host=192.168.153.129  port=5000
+
+
+gst-launch-1.0 v4l2src ! video/x-raw-yuv,format=\(fourcc\)YUY2,width=320,height=240 ! xvimagesink
+
+gst-launch-1.0 v4l2src ! video/x-raw,width=320,height=240,framerate=20/1 ! xvimagesink
+
+测试摄像头：
+gst-launch-1.0 v4l2src ! xvimagesink
+
+gst-launch-1.0 videotestsrc ! xvimagesink
+
+自拍工具：
+cheese
+
+gst-launch-1.0 v4l2src ! udpsink host=192.168.1.7 port=5000
+
+gst-launch-1.0 udpsink port=5000 ! xvimagesink

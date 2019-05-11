@@ -1,0 +1,43 @@
+ Gstreamer for android 编译 
+ http://blog.csdn.net/yizhongliu/article/details/50666933
+ 
+ 
+
+Gstreamer 因为依赖库比较多，编译gstreamer的过程会碰到很多问题。
+
+Android 使用的不是标准的gnu c库，而是google自己搞的 bionic libc。这就导致gstreamer在编译时有些库需要修改代码，给交叉编译带来额外的工作。
+
+Gsteamer 提供了一个方便的工具cerbero，这是Python写的脚本能够方便地编译出gstreamer的库
+
+只需要下面三步：
+
+Git clone git://anongit.freedesktop.org/gstreamer/cerbero
+
+./cerbero-uninstalled -c config/cross-android.cbc bootstrap
+
+./cerbero-uninstalled -c config/cross-android.cbc package
+ gstreamer-1.0
+
+有些软件的下载可能需要翻墙，比如ndk。 大部分都能正常下载，如果发现下载失败，重新输下命令或将压缩包手动下载放到对应的文件夹下。cerbero会将代码包下到
+
+~/cerbero 下面对应的目录下。
+
+对应的gsteamer 1.0测试apk Tutorails 在我的资源上传页面：
+
+http://download.csdn.NET/detail/yizhongliu/9431666
+
+
+
+注：
+
+网上搜索Gstreamer SDK 会搜到下面的路径 git://anongit.freedesktop.org/gstreamer-sdk/cerbero。其实gstreamer-sdk好像是另外的project，跟gstreamer没有什么关系。
+
+git://anongit.freedesktop.org/gstreamer-sdk/cerbero is from
+ a different project
+
+and has nothing to do with the GStreamer project (yes, confusing I know). Same
+
+goes for all of the stuff from gstreamer.com
+
+
+

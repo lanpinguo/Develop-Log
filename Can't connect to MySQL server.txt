@@ -1,0 +1,73 @@
+一.问题的提出
+
+
+/usr/local/webserver/mysql/bin/mysql -u root -h 172.29.141.112  -p -S /tmp/mysql.sock
+Enter password: 
+ERROR 2003 (HY000): Can't connect to MySQL server on '172.29.141.112' (113)
+
+
+二.问题的分析
+
+ 
+
+出现上述问题，可能有以下几种可能
+
+ 
+
+1. my.cnf 配置文件中 skip-networking 被配置
+
+skip-networking 这个参数，导致所有TCP/IP端口没有被监听,也就是说出了本机，其他客户端都无法用网络连接到本mysql服务器
+
+所以需要把这个参数注释掉。
+
+ 
+
+2.my.cnf配置文件中 bindaddress 的参数配置
+
+bindaddress，有的是bind-address  ，这个参数是指定哪些ip地址被配置，使得mysql服务器只回应哪些ip地址的请求，所以需要把这个参数注释掉。
+
+ 
+
+3.防火墙的原因
+
+通过 /etc/init.d/iptables  stop  关闭防火墙
+
+我的问题，就是因为这个原因引起的。关闭mysql 服务器的防火墙就可以使用了。
+
+ 
+
+三.问题的解决
+
+1.  如果是上述第一个原因，那么 找到 my.cnf  ，注释掉 skip-networking 这个参数
+
+sed -i  's%skip-networking%#skip-networking%g'  my.cnf
+
+ 
+
+2. 如果是上述第二个原因，那么  找到 my.cnf  ，注释掉 bind-address  这个参数
+
+sed -i  's%bind-address%#bind-address%g'    my.cnf
+
+sed -i  's%bindaddress%#bindaddress%g'      my.cnf
+
+在UBUNTU 18.04中，配置文件所在位置：/etc/mysql/mysql.conf.d/mysqld.cnf
+
+最好修改完查看一下，这个参数。
+
+ 
+
+3.如果是上述第三个原因，那么 把防火墙关闭，或者进行相应配置
+
+ 
+
+/etc/init.d/iptables stop
+
+ 
+
+四.参考
+
+http://hi.baidu.com/vbkan/blog/item/cd5035030cefee793812bb56.html
+
+http://dev.firnow.com/course/7_databases/mysql/myxl/20090820/169010.html
+
+http://www.dnbcw.com/biancheng/sql/lojz182597.html

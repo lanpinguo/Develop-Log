@@ -1,0 +1,54 @@
+ Python格式化输出
+
+今天写程序又记不清格式化输出细节了……= =索性整理一下。
+
+python print格式化输出。
+
+1. 打印字符串
+
+print ("His name is %s"%("Aviad"))
+
+效果：
+
+2.打印整数
+
+print ("He is %d years old"%(25))
+
+效果：
+
+3.打印浮点数
+
+print ("His height is %f m"%(1.83))
+
+效果：
+
+4.打印浮点数（指定保留小数点位数）
+
+print ("His height is %.2f m"%(1.83))
+
+效果：
+
+5.指定占位符宽度
+
+print ("Name:%10s Age:%8d Height:%8.2f"%("Aviad",25,1.83))
+
+效果：
+
+6.指定占位符宽度（左对齐）
+
+print ("Name:%-10s Age:%-8d Height:%-8.2f"%("Aviad",25,1.83))
+
+效果：
+
+7.指定占位符（只能用0当占位符？）
+
+print ("Name:%-10s Age:%08d Height:%08.2f"%("Aviad",25,1.83))
+
+效果：
+
+8.科学计数法
+
+format(0.0015,'.2e')
+
+效果：
+

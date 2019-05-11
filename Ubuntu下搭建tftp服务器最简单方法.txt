@@ -1,0 +1,39 @@
+今天开始调试ARM的板子，要通过tftp下载到板子上，所以又要配置tftp服务器，真的烦死了... （本人酷爱装系统，所以经常都要搞配置）
+
+因为之前已经在Ubuntu下搭建过很多次tftp服务器了，但是一直记不住那一个配置文件的名字（记性太差），所以每次都要百度。
+
+可是每次百度出来的结果都不一样，而且出入很大，有的过程相当的繁琐，不仅很麻烦，而且搞到最后还没有配置成功。所以干脆写个日志记下来。
+
+tftp服务器最简单安装配置
+
+1.安装tftp-server
+
+sudo apt-get install tftpd-hpa
+
+sudo apt-get install tftp-hpa（如果不需要客户端可以不安装）
+
+tftp-hpa是客户端
+
+tftpd-hpa是服务器端
+
+2.配置TFTP服务器
+
+sudo vim /etc/default/tftpd-hpa
+
+将原来的内容改为:
+
+TFTP_USERNAME="tftp"
+
+TFTP_ADDRESS="0.0.0.0:69"
+
+TFTP_DIRECTORY="tftp根目录" #服务器目录,需要设置权限为777,chomd 777
+
+TFTP_OPTIONS="-l -c -s"
+
+3.重新启动TFTP服务
+
+sudo service tftpd-hpa restart
+
+4.测试
+
+其实真的很简单的过程不知为啥有些人把他写的很复杂，真的无语！

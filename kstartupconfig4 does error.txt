@@ -1,0 +1,4 @@
+Re: kstartupconfig4 does not exist or failed. The error code is 3. Check your install
+I may have found a workaround. For some reason ~/.kde belongs to root in my system. If that's your case, run
+Code:
+$ sudo chown -R username.username /home/username/.kde

@@ -1,0 +1,39 @@
+ubuntu设置系统时间与网络时间同步
+ 
+Linux的时间分为System Clock（系统时间）和Real Time Clock （硬件时间，简称RTC）。
+ 
+系统时间：指当前Linux Kernel中的时间。  www.2cto.com  
+ 
+硬件时间：主板上有电池供电的时间。
+ 
+查看系统时间的命令： #date
+ 
+设置系统时间的命令： #date –set（月/日/年 时：分：秒）
+ 
+例：#date –set “10/11/10 10:15”
+ 
+查看硬件时间的命令： # hwclock
+ 
+设置硬件时间的命令： # hwclock –set –date = （月/日/年 时：分：秒）
+ 
+上述提到的是手动设置时间到一个时间点，可能与当前网络的时间有误差。
+ 
+下面介绍一下与时间服务器上的时间同步的方法  www.2cto.com  
+ 
+1.  安装ntpdate工具
+ 
+# sudo apt-get install ntpdate
+ 
+2.  设置系统时间与网络时间同步
+ 
+# ntpdate cn.pool.ntp.org
+ 
+3.  将系统时间写入硬件时间# hwclock --systohc
+
+1.首先查看时区：
+
+swfsadmin@swfsubuntu:~$ date -R
+Tue, 17 Dec 2013 18:23:01 +0800
+如果要修改时区，执行sudo tzselect
+
+2.选择区域：亚洲

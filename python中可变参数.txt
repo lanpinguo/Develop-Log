@@ -1,0 +1,71 @@
+
+python 中参数*args, **kwargs
+def foo(*args, **kwargs):
+print 'args = ', args
+print 'kwargs = ', kwargs
+print '---------------------------------------'
+
+if __name__ == '__main__':
+foo(1,2,3,4)
+foo(a=1,b=2,c=3)
+foo(1,2,3,4, a=1,b=2,c=3)
+foo('a', 1, None, a=1, b='2', c=3)输出结果如下：
+
+args =  (1, 2, 3, 4) 
+kwargs =  {} 
+
+args =  () 
+kwargs =  {'a': 1, 'c': 3, 'b': 2} 
+
+args =  (1, 2, 3, 4) 
+kwargs =  {'a': 1, 'c': 3, 'b': 2} 
+
+args =  ('a', 1, None) 
+kwargs =  {'a': 1, 'c': 3, 'b': '2'}
+
+可以看到，这两个是python中的可变参数。*args表示任何多个无名参数，它是一个tuple；**kwargs表示关键字参数，它是一个 dict。并且同时使用*args和**kwargs时，必须*args参数列要在**kwargs前，像foo(a=1, b='2', c=3, a', 1, None, )这样调用的话，会提示语法错误“SyntaxError: non-keyword arg after keyword arg”。
+
+-------------------------------------------------------------------------------------------
+
+class testClass:
+def __init__(self, **kwargs):
+self.kwargs = kwargs
+def print_kwargs(self):
+i = 1
+for key in self.kwargs.keys():
+print "Kwarg %s (%s: %s)" % (i, key, self.kwargs[key])
+i += 1
+tc = testClass(hello=True, anumber=5, thisisgreat='Yes it is!')
+tc.print_kwargs()
+
+--------------------------------------------------------------------------------------------
+
+Using **kwargs and default values is easy. Sometimes, however, you shouldn't be using **kwargs in the first place.
+
+In this case, we're not really making best use of **kwargs.
+class ExampleClass( object ):
+    def __init__(self, **kwargs):
+        self.val = kwargs.get('val',"default1")
+        self.val2 = kwargs.get('val2',"default2")
+
+The above is a "why bother?" declaration. It is the same as
+class ExampleClass( object ):
+    def __init__(self, val="default1", val2="default2"):
+        self.val = val
+        self.val2 = val2
+
+When you're using **kwargs, you mean that a keyword is not just optional, but conditional. There are more complex rules than simple default values.
+
+When you're using **kwargs, you usually mean something more like the following, where simple defaults don't apply.
+class ExampleClass( object ):
+    def __init__(self, **kwargs):
+        self.val = "default1"
+        self.val2 = "default2"
+        if "val" in kwargs:
+            self.val = kwargs["val"]
+            self.val2 = 2*self.val
+        elif "val2" in kwargs:
+            self.val2 = kwargs["val2"]
+            self.val = self.val2 / 2
+        else:
+            raise TypeError( "must provide val= or val2= parameter values" )

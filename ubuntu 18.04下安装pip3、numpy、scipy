@@ -1,0 +1,16 @@
+ubuntu 18.04下安装pip3、numpy、scipy、matplot
+
+1、安装pip3
+
+$ apt-get install python3-dev
+$ apt-get install python3-pip
+2、安装numpy
+
+pip3 install numpy
+3、安装scipy
+
+pip3 install scipy
+
+4、安装matplot
+
+sudo pip3 install matplotlib

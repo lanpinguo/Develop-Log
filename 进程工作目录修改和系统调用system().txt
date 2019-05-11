@@ -1,0 +1,28 @@
+
+#include <sys/wait.h>
+
+int main(void)
+{
+	int status = 0;
+
+	status = system("date");
+	if(status < 0)
+	{
+	  ros_printf("\r\nsystem() error (%d)!!",status);
+	}
+
+	status = system("rm -rf /rsp/ritpapp");
+	if(status < 0)
+	{
+	  ros_printf("\r\nsystem() error (%d)!!",status);
+	}
+
+    if(chdir("/home") == -1)
+	{ /* ¸Ä±ä½ø³ÌµÄ¹¤×÷Ä¿Â¼ */
+	  ros_printf("fail to change dir");
+    }
+	
+	usrHardwareInit();
+
+	/*switchInit();*/
+}

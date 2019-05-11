@@ -1,0 +1,90 @@
+http://blog.csdn.net/huang3838438/article/details/7411938
+
+DHCP报文 
+DHCP报文是承载于UDP上的高层协议报文，采用67（DHCP服务器）和68（DHCP客户端）两个端口号。DHCP报文的格式如下图所示。 
+图1 DHCP报文格式 
+ 
+< 所有DHCP提供的配置信息都在options字段中，这才是精华部分 > 
+报文中各字段的描述如下： 
+op，报文类型，1表示请求报文，2表示回应报文。 
+htype，硬件地址类型，1表示10Mb/s的以太网的硬件地址。 
+hlen，硬件地址长度，以太网中该值为6。 
+hops，跳数。客户端设置为0，也能被一个代理服务器设置。 
+xid，事务ID，由客户端选择的一个随机数，被服务器和客户端用来在它们之间交流请求和响应，客户端用它对请求和应答进行匹配。该ID由客户端设置并由服务器返回，为32位整数。 
+secs，由客户端填充，表示从客户端开始获得IP地址或IP地址续借后所使用了的秒数。 
+flags，标志字段。这个16比特的字段，目前只有最左边的一个比特有用，该位为0，表示单播，为1表示广播。 
+ciaddr，客户端的IP地址。只有客户端是Bound、Renew、Rebinding状态，并且能响应ARP请求时，才能被填充。 
+yiaddr，"你自己的"或客户端的IP地址。 
+siaddr，表明DHCP协议流程的下一个阶段要使用的服务器的IP地址。 
+giaddr，DHCP中继器的IP地址。//注意：不是地址池中定义的网关 
+chaddr，客户端硬件地址。客户端必须设置它的"chaddr"字段。UDP数据包中的以太网帧首部也有该字段，但通常通过查看UDP数据包来确定以太网帧首部中的该字段获取该值比较困难或者说不可能，而在UDP协议承载的DHCP报文中设置该字段，用户进程就可以很容易地获取该值。 
+sname，可选的服务器主机名，该字段是空结尾的字符串，由服务器填写。 
+file，启动文件名，是一个空结尾的字符串。DHCP Discover报文中是"generic"名字或空字符，DHCP Offer报文中提供有效的目录路径全名。 
+options，可选参数域，格式为"代码+长度+数据"。 
+
+DHCP Options 
+Option id
+Length(字节）
+描述
+1
+4
+Subnet Mask
+3
+n*4
+Router(网关）
+6
+n*4
+DNS Server
+7
+n*4
+Log Server
+26
+2
+Interface MTU
+33
+n*8
+Static route
+35
+4
+ARP cache timeout
+42
+n*4
+NTP servers
+51
+4
+IP address lease time
+53
+1
+Message type 1-DHCPDISCOVER 2-DHCPOFFER 3-DHCPREQUEST 4-DHCPDECLINE 5-DHCPACK 6-DHCPNAK 7-DHCPRELEASE 8-DHCPINFORM
+54
+4
+DHCP Server Identifier
+60
+n
+华为自定义：可配置该终端设备在发起DHCP请求时，通过Option 60携带域信息。ME60收到DHCP报文时，可根据Option 60中携带的域信息来分配IP地址。
+82
+n
+华为自定义：ME60作为DHCP Relay，在中继用户DHCP报文时，可在Option 82中填写用户的物理位置信息，通知DHCP服务器按物理位置信息对为用户分配IP地址。
+
+DHCP报文类型 
+DHCP共有八种报文，分别为DHCP Discover、DHCP Offer、DHCP Request、DHCP ACK、DHCP NAK、DHCP Release、DHCP Decline、DHCP Inform。各报文类型功能如表1所述。 
+DHCP报文类型
+描述
+DHCP Discover
+DHCP客户端请求地址时，并不知道DHCP服务器的位置，因此DHCP客户端会在本地网络内以广播方式发送请求报文，这个报文成为Discover报文，目的是发现网络中的DHCP服务器，所有收到Discover报文的DHCP服务器都会发送回应报文，DHCP客户端据此可以知道网络中存在的DHCP服务器的位置。
+DHCP Offer
+DHCP服务器收到Discover报文后，就会在所配置的地址池中查找一个合适的IP地址，加上相应的租约期限和其他配置信息（如网关、DNS服务器等），构造一个Offer报文，发送给用户，告知用户本服务器可以为其提供IP地址。< 只是告诉client可以提供，是预分配，还需要client通过ARP检测该IP是否重复>
+DHCP Request
+DHCP客户端可能会收到很多Offer，所以必须在这些回应中选择一个。Client通常选择第一个回应Offer报文的服务器作为自己的目标服务器，并回应一个广播Request报文，通告选择的服务器。DHCP客户端成功获取IP地址后，在地址使用租期过去1/2时，会向DHCP服务器发送单播Request报文续延租期，如果没有收到DHCP ACK报文，在租期过去3/4时，发送广播Request报文续延租期。
+DHCP ACK
+DHCP服务器收到Request报文后，根据Request报文中携带的用户MAC来查找有没有相应的租约记录，如果有则发送ACK报文作为回应，通知用户可以使用分配的IP地址。
+DHCP NAK
+如果DHCP服务器收到Request报文后，没有发现有相应的租约记录或者由于某些原因无法正常分配IP地址，则发送NAK报文作为回应，通知用户无法分配合适的IP地址。
+DHCP Release
+当用户不再需要使用分配IP地址时，就会主动向DHCP服务器发送Release报文，告知服务器用户不再需要分配IP地址，DHCP服务器会释放被绑定的租约。
+DHCP Decline
+DHCP客户端收到DHCP服务器回应的ACK报文后，通过地址冲突检测发现服务器分配的地址冲突或者由于其他原因导致不能使用，则发送Decline报文，通知服务器所分配的IP地址不可用。
+DHCP Inform
+DHCP客户端如果需要从DHCP服务器端获取更为详细的配置信息，则发送Inform报文向服务器进行请求，服务器收到该报文后，将根据租约进行查找，找到相应的配置信息后，发送ACK报文回应DHCP客户端。< 极少用到>
+
+参考：华为ME60产品文档及RFC2131/RFC2132 

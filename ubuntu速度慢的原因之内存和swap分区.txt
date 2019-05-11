@@ -1,0 +1,29 @@
+ubuntu速度慢的原因之内存和swap分区
+ 
+ 
+ 
+我在日常使用ubuntu时，经常要同时打开10几个窗口和应用，有时候就会发生速度变得很慢的情况，甚至系统明显反应迟钝，这时一般是物理内存不够用，系统开始用换硬盘上的swap分区做虚拟内存，其速度可想而知。
+ 
+ 
+ 
+在ubuntu里面往往不是物理内存全部耗尽才去使用swap分区，swappiness的值的大小对如何使用swap分区是有着很大的联系的。swappiness=0的时候表示最大限度使用物理内存，然后才是 swap空间，swappiness＝100的时候表示积极的使用swap分区，并且把内存上的数据及时的搬运到swap空间里面。两个极端，对于ubuntu的默认设置，这个值等于60，建议修改为10。具体这样做：
+  
+ 
+1.查看你的系统里面的swappiness
+ 
+cat /proc/sys/vm/swappiness
+
+#不出意外的话，你应该看到是 60
+ 
+ 
+2.修改swappiness值为10
+ 
+sudo sysctl vm.swappiness=10
+ 
+但是这只是临时性的修改，在你重启系统后会恢复默认的60，所以，还要做一步：
+
+sudo gedit /etc/sysctl.conf
+ 
+在这个文档的最后加上这样一行:
+ 
+vm.swappiness=10

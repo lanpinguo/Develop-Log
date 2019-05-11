@@ -1,0 +1,1 @@
+未清理前发现硬盘根分区空间告急，用du -t 100M /var或journalctl --disk-usage命令一查，发现/var/log/journal日志文件占用了近3G空间，每个日志文件体积高达128M，这些日志文件记录了很长时间以来的systemd情况，毫无价值，用journalctl --vacuum-size=10M命令将其清理之后，腾出了2.7G的空间。用df命令一查，／根分区果然宽敞了很多。

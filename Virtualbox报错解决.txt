@@ -1,0 +1,8 @@
+ Virtualbox报错------> '/etc/init.d/vboxdrv setup'解决 
+
+解决方法：
+     这段提示让用户先安装 DKMS ，然后再执行 /dev/vboxdrv 如果没有权限，需要sudo
+    执行以下几个命令：
+sudo apt-get install dkms  
+sudo apt-get install linux-headers-`uname -r` build-essential  
+sudo /etc/init.d/vboxdrv setup  

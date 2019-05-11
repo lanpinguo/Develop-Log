@@ -1,0 +1,48 @@
+linux中如何检测设备驱动模块是否存在
+linux系统中的设备驱动是否安装好一般检查几个方面：
+1、系统日志。嵌入式系统多是直接dmesg一下，看有没有设备关键字相关的出错信息(通用系统可检查/var/log/messages文件)。
+2、已加载的模块。检查模块加载列表中有没有相关设备的模块。
+      lsmod
+3、设备列表。检查已加载的设备中有没有相关设备
+    cat /proc/devices
+4、设备入口。如果以上检查都正常，还需要检查设备目录下设备入口是否已经创建
+    ls /dev/xxxx
+
+如果以上检查都正常（驱动模块已经正常加载、设备入口存在且没有错误），而设备还不能正常工作，就需要检查设备驱动是否与芯片匹配或者驱动中的硬件资源配置是否与硬件对应了。
+
+如下是检查具体硬件的命令方式：
+查看CPU信息：cat /proc/cpuinfo
+查看板卡信息：cat /proc/pci
+查看PCI信息：lspci (相比cat /proc/pci更直观）
+查看内存信息：cat /proc/meminfo
+查看USB设备：cat /proc/bus/usb/devices
+查看键盘和鼠标:cat /proc/bus/input/devices
+查看系统硬盘信息和使用情况：fdisk & disk - l & df
+查看各设备的中断请求(IRQ):cat /proc/interrupts
+查看系统体系结构：uname -a
+在LINUX环境开发驱动程序，首先要探测到新硬件，接下来就是开发驱动程序。
+常用命令整理如下：
+用硬件检测程序kudzu探测新硬件：service kudzu start ( or restart)
+查看CPU信息：cat /proc/cpuinfo
+查看板卡信息：cat /proc/pci
+查看PCI信息：lspci (相比cat /proc/pci更直观）
+查看内存信息：cat /proc/meminfo
+查看USB设备：cat /proc/bus/usb/devices
+查看键盘和鼠标:cat /proc/bus/input/devices
+查看系统硬盘信息和使用情况：fdisk & disk - l & df
+查看各设备的中断请求(IRQ):cat /proc/interrupts
+查看系统体系结构：uname -a
+dmidecode查看硬件信息，包括bios、cpu、内存等信息
+dmesg | more 查看硬件信息
+
+
+对于“/proc”中文件可使用文件查看命令浏览其内容，文件中包含系统特定信息：
+Cpuinfo       主机CPU信息
+Dma          主机DMA通道信息
+Filesystems    文件系统信息
+Interrupts       主机中断信息
+Ioprots           主机I/O端口号信息
+Meninfo       主机内存信息
+Version           Linux内存版本信息
+
+勤苦修行得自在，道力有边边亦无边！

@@ -1,0 +1,12 @@
+route change -p 0.0.0.0 mask 0.0.0.0 192.168.1.1 metric 10
+
+route delete -p 0.0.0.0 mask 0.0.0.0 192.168.1.1 metric 10
+
+route change -p 192.168.1.0 mask 255.255.255.0 192.168.1.1 metric 10
+
+route delete -p 192.168.1.0 mask 255.255.255.0 192.168.1.1 metric 10
+
+route add -p 192.168.1.0 mask 255.255.255.0 192.168.1.1 metric 10 if 17
+
+route add -p 172.16.0.0 mask 255.255.0.0 192.168.1.1 metric 10 if 17
+route add -p 192.168.0.0 mask 255.255.255.0 192.168.1.1 metric 10 if 17

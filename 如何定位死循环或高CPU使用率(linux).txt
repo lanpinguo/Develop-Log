@@ -1,0 +1,81 @@
+确定是CPU过高
+
+使用top观察是否存在CPU使用率过高现象
+找出线程
+
+对CPU使用率过高的进程的所有线程进行排序
+
+ps H -e -o pid,tid,pcpu,cmd --sort=pcpu |grep xxx
+
+得到如下结果,其中线程2909使用了7.8%的CPU. 
+
+2907 2913 0.0 ./xxx 
+
+2907 2909 7.8 ./xxx
+
+也可以通过查看/proc中的信息来确定高CPU线程. 打印了4列,线程ID,线程名,用户时间和内核时间(排名未分先后) 
+
+awk '{print $1,$2,$14,$15}' /proc/2907/task/*/stat
+
+找出调用栈
+
+使用gdb attach nmsagent所在的进程,在gdb中使用 info threads显示所有线程
+
+gdb
+gdb>attach 2907
+gdb>info threads
+
+得到如下结果,可以发现2909线程的编号是12
+
+  13 Thread 0xad5f2b70 (LWP 2908)  0x004ef0d7 in mq_timedreceive () from /lib/tls/i686/cmov/librt.so.1
+  12 Thread 0xad58eb70 (LWP 2909)  0x006e0422 in __kernel_vsyscall ()
+  11 Thread 0xad52ab70 (LWP 2910)  0x006e0422 in __kernel_vsyscall ()
+  10 Thread 0xad4f8b70 (LWP 2911)  0x006e0422 in __kernel_vsyscall ()
+  9 Thread 0xad4c6b70 (LWP 2912)  0x006e0422 in __kernel_vsyscall ()
+  8 Thread 0xad3feb70 (LWP 2913)  0x004ef0d7 in mq_timedreceive () from /lib/tls/i686/cmov/librt.so.1
+  7 Thread 0xace08b70 (LWP 2914)  0x004ef0d7 in mq_timedreceive () from /lib/tls/i686/cmov/librt.so.1
+  6 Thread 0xac607b70 (LWP 2915)  0x006e0422 in __kernel_vsyscall ()
+  5 Thread 0xac5e6b70 (LWP 2916)  0x006e0422 in __kernel_vsyscall ()
+  4 Thread 0xac361b70 (LWP 2917)  0x006e0422 in __kernel_vsyscall ()
+  3 Thread 0xac2fdb70 (LWP 2918)  0x006e0422 in __kernel_vsyscall ()
+  2 Thread 0xac1fcb70 (LWP 2919)  0x004ef0d7 in mq_timedreceive () from /lib/tls/i686/cmov/librt.so.1
+* 1 Thread 0xb78496d0 (LWP 2907)  0x006e0422 in __kernel_vsyscall ()
+
+使用thread 切换线程,使用bt显示线程栈
+
+gdb>thread 12
+gdb>bt
+
+得到如下线程栈
+
+#0  0x006e0422 in __kernel_vsyscall ()
+#1  0x001cca26 in nanosleep () from /lib/tls/i686/cmov/libc.so.6
+#2  0x001fc2dc in usleep () from /lib/tls/i686/cmov/libc.so.6
+#3  0x0806b510 in OspTaskDelay ()
+#4  0x0805c710 in CDispatchTask::NodeMsgSendToSock() ()
+#5  0x0805cc74 in DispatchTaskEntry ()
+#6  0x0806a8e9 in OspTaskTemplateFunc(void*) ()
+#7  0x00d4780e in start_thread () from /lib/tls/i686/cmov/libpthread.so.0
+ #8  0x002027ee in clone () from /lib/tls/i686/cmov/libc.so.6
+
+ ps + strace
+
+得到进程ID 21465
+
+ps -e |grep cmu
+ 4996 ?        00:00:25 cmu_fjga_sp3
+21465 pts/5    00:08:10 cmu
+
+得到线程时间, 其中最占CPU的是 EpollRecvTask 21581
+
+ps -eL |grep 21465 
+
+21465 21579 pts/5 00:00:00 CamApp 
+
+21465 21580 pts/5 00:00:00 TimerMan Task 
+
+21465 21581 pts/5 00:09:02 EpollRecvTask 
+
+21465 21582 pts/5 00:00:00 
+
+使用 strace -p 21581 得到线程栈

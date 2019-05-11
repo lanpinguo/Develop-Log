@@ -1,0 +1,192 @@
+利用commands模块执行Linux shell命令 
+
+用Python写运维脚本时，经常需要执行Linux shell的命令，python中的commands模块专门用于调用linux shell命令，并返回状态和结果，下面是commands模块的3个主要函数：
+1. commands.getoutput('shell command')
+执行shell命令，返回结果（string类型）
+
+[python] view plain copy
+
+ print?
+>>> commands.getoutput('pwd')  
+'/home/oracle'  
+
+
+2. commands.getstatus('file')
+该函数已被python丢弃，不建议使用，它返回 ls -ld file 的结果（String）(返回结果太奇怪了，难怪被丢弃）
+
+[python] view plain copy
+
+ print?
+>>> commands.getstatus('admin.tar')  
+'-rw-rw-r-- 1 oracle oracle 829440 Jan 29 10:36 admin.tar'  
+
+3. commands.getstatusoutput('shell command')
+
+执行shell命令, 返回两个元素的元组tuple(status, result)，status为int类型，result为string类型。
+cmd的执行方式是{ cmd ; } 2>&1, 故返回结果包含标准输出和标准错误.
+
+[python] view plain copy
+
+ print?
+>>> commands.getstatusoutput('pwd')  
+(0, '/home/oracle')  
+
+下面的一个脚本利用commands模块检测磁盘使用率，标识出大于10%的磁盘（百分比可根据实际情况调整，一般设为90%，本例为了更好的说明情况，设为10%）：
+
+用Python写运维脚本时，经常需要执行Linux shell的命令，python中的commands模块专门用于调用linux shell命令，并返回状态和结果，下面是commands模块的3个主要函数：
+1. commands.getoutput('shell command')
+执行shell命令，返回结果（string类型）
+
+[python] view plain copy
+
+ print?
+>>> commands.getoutput('pwd')  
+'/home/oracle'  
+
+
+2. commands.getstatus('file')
+该函数已被python丢弃，不建议使用，它返回 ls -ld file 的结果（String）(返回结果太奇怪了，难怪被丢弃）
+
+[python] view plain copy
+
+ print?
+>>> commands.getstatus('admin.tar')  
+'-rw-rw-r-- 1 oracle oracle 829440 Jan 29 10:36 admin.tar'  
+
+3. commands.getstatusoutput('shell command')
+
+执行shell命令, 返回两个元素的元组tuple(status, result)，status为int类型，result为string类型。
+cmd的执行方式是{ cmd ; } 2>&1, 故返回结果包含标准输出和标准错误.
+
+[python] view plain copy
+
+ print?
+>>> commands.getstatusoutput('pwd')  
+(0, '/home/oracle')  
+
+下面的一个脚本利用commands模块检测磁盘使用率，标识出大于10%的磁盘（百分比可根据实际情况调整，一般设为90%，本例为了更好的说明情况，设为10%）：
+
+
+[python] view plain copy
+
+ print?
+import commands  
+  
+threshold = 10  
+flag = False  
+  
+title=commands.getoutput("df -h|head -1")  
+  
+''''' 
+Check sda disk space usage like below format: 
+/dev/sda2              20G  2.3G   17G  13% / 
+/dev/sda6              20G  306M   19G   2% /var 
+/dev/sda3              49G  2.8G   44G   7% /home 
+/dev/sda5              49G  4.5G   42G  10% /opt 
+/dev/sda1             194M   12M  172M   7% /boot 
+'''  
+  
+chkDiskList=commands.getoutput("df -h|grep sda").split('\n')  
+usedPercents=commands.getoutput("df -h|grep sda|awk '{print $5}'|grep -Eo '[0-9]+'").split('\n')  
+  
+for i in range(0,len(usedPercents)):  
+  if int(usedPercents[i]) >= threshold:  
+    chkDiskList[i] += '    ----Caution!!! space usage >= ' + str(threshold)  
+    flag = True  
+  
+''''' 
+Check disk space usage like below format: 
+/dev/mapper/backup-backup_lv 
+                      751G   14G  699G   2% /backup 
+/dev/mapper/data-data_lv 
+                      751G  172G  540G  25% /data 
+'''        
+  
+          
+chkDiskList_2=commands.getoutput("df -h|grep -v sda|grep -v tmp|grep -v system").split('\n')  
+usedPercents_2=commands.getoutput("df -h|grep -v map|grep -v sda|grep -v tmp|grep -v system|awk '{print $4}'|grep -Eo '[0-9]+'").split('\n')  
+  
+for i in range(0,len(usedPercents_2)):   
+  if int(usedPercents_2[i]) >= threshold:  
+    chkDiskList_2[i*2 + 1] += '    ----Caution!!! space usage >= ' + str(threshold)  
+    flag = True  
+  
+if flag == True:  
+  #combine tile, chkDiskList, chkDisklist_2  
+  result = [title,]  
+  result.extend(chkDiskList)  
+  result.extend(chkDiskList_2)  
+  for line in result:  
+    print line  
+
+假设当前的磁盘使用率如下：
+
+
+[plain] view plain copy
+
+ print?
+[oracle@lx200 ~/admin/python]$ df -h  
+Filesystem            Size  Used Avail Use% Mounted on  
+/dev/sda2              20G  2.3G   17G  13% /  
+/dev/sda6              20G  306M   19G   2% /var  
+/dev/sda3              49G  2.8G   44G   7% /home  
+/dev/sda5              49G  4.5G   42G  10% /opt  
+/dev/sda1             194M   12M  172M   7% /boot  
+tmpfs                  18G     0   18G   0% /dev/shm  
+/dev/mapper/backup-backup_lv  
+                      751G   14G  699G   2% /backup  
+/dev/mapper/data-data_lv  
+                      751G  174G  539G  25% /data  
+
+执行该脚本后的结果如下：
+
+
+[plain] view plain copy
+
+ print?
+Filesystem            Size  Used Avail Use% Mounted on  
+/dev/sda2              20G  2.3G   17G  13% /    ----Caution!!! space usage >= 10  
+/dev/sda6              20G  306M   19G   2% /var  
+/dev/sda3              49G  2.8G   44G   7% /home  
+/dev/sda5              49G  4.5G   42G  10% /opt    ----Caution!!! space usage >= 10  
+/dev/sda1             194M   12M  172M   7% /boot  
+/dev/mapper/backup-backup_lv  
+                      751G   14G  699G   2% /backup  
+/dev/mapper/data-data_lv  
+                      751G  174G  539G  25% /data    ----Caution!!! space usage >= 10   
+
+假设当前的磁盘使用率如下：
+
+
+[plain] view plain copy
+
+ print?
+[oracle@lx200 ~/admin/python]$ df -h  
+Filesystem            Size  Used Avail Use% Mounted on  
+/dev/sda2              20G  2.3G   17G  13% /  
+/dev/sda6              20G  306M   19G   2% /var  
+/dev/sda3              49G  2.8G   44G   7% /home  
+/dev/sda5              49G  4.5G   42G  10% /opt  
+/dev/sda1             194M   12M  172M   7% /boot  
+tmpfs                  18G     0   18G   0% /dev/shm  
+/dev/mapper/backup-backup_lv  
+                      751G   14G  699G   2% /backup  
+/dev/mapper/data-data_lv  
+                      751G  174G  539G  25% /data  
+
+执行该脚本后的结果如下：
+
+
+[plain] view plain copy
+
+ print?
+Filesystem            Size  Used Avail Use% Mounted on  
+/dev/sda2              20G  2.3G   17G  13% /    ----Caution!!! space usage >= 10  
+/dev/sda6              20G  306M   19G   2% /var  
+/dev/sda3              49G  2.8G   44G   7% /home  
+/dev/sda5              49G  4.5G   42G  10% /opt    ----Caution!!! space usage >= 10  
+/dev/sda1             194M   12M  172M   7% /boot  
+/dev/mapper/backup-backup_lv  
+                      751G   14G  699G   2% /backup  
+/dev/mapper/data-data_lv  
+                      751G  174G  539G  25% /data    ----Caution!!! space usage >= 10  

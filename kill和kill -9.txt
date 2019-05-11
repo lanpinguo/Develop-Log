@@ -1,0 +1,140 @@
+kill和kill -9
+ 
+
+很多时候，会有人建议你，如果kill杀不掉一个进程，就用kill -9. 为什么？
+ kill是Linux下常见的命令。其man手册的功能定义如下：
+ 
+
+kill – send a signal to a process
+ 
+明朗了，其实kill就是给某个进程id发送了一个信号。默认发送的信号是SIGTERM，而kill -9发送的信号是SIGKILL，即exit。exit信号不会被系统阻塞，所以kill -9能顺利杀掉进程。当然你也可以使用kill发送其他信号给进程。
+ 经常使用的killall呢？
+ 
+
+killall – kill processes by name
+ 
+即，通过指定进程名的方式杀死进程。
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+KILL(1)                    Linux User's Manual                   KILL(1)
+ 
+NAME
+        kill - send a signal to a process
+ 
+SYNOPSIS
+        kill [ -signal | -s signal ] pid ...
+        kill [ -L | -V, --version ]
+        kill -l  [ signal ]
+ 
+DESCRIPTION
+        The  default signal for kill is TERM. Use -l or -L to list avail‐
+        able signals.  Particularly  useful  signals  include  HUP,  INT,
+        KILL,  STOP,  CONT, and 0.  Alternate signals may be specified in
+        three ways: -9 -SIGKILL -KILL.  Negative PID values may  be  used
+        to choose whole process groups; see the PGID column in ps command
+        output. A PID of -1 is special; it indicates all processes except
+        the kill process itself and init.
+ 
+SIGNALS
+        The  signals  listed  below  may  be available for use with kill.
+        When known constant, numbers and default behavior are shown.
+ 
+       Name     Num   Action    Description
+        0          0   n/a       exit code indicates if a signal may be sen
+ t
+        ALRM      14   exit
+        HUP        1   exit
+        INT        2   exit
+        KILL       9   exit      cannot be blocked
+        PIPE      13   exit
+        POLL           exit
+        PROF           exit
+        TERM      15   exit
+        USR1           exit
+        USR2           exit
+        VTALRM         exit
+        STKFLT         exit      might not be implemented
+        PWR            ignore    might exit on some systems
+        WINCH          ignore
+        CHLD           ignore
+        URG            ignore
+        TSTP           stop      might interact with the shell
+        TTIN           stop      might interact with the shell
+        TTOU           stop      might interact with the shell
+        STOP           stop      cannot be blocked
+        CONT           restart   continue if stopped, otherwise ignore
+        ABRT       6   core
+        FPE        8   core
+        ILL        4   core
+        QUIT       3   core
+        SEGV      11   core
+        TRAP       5   core
+        SYS            core      might not be implemented
+        EMT            core      might not be implemented
+        BUS            core      core dump might fail
+        XCPU           core      core dump might fail
+        XFSZ           core      core dump might fail
+ 
+NOTES
+        Your shell (command line interpreter) may have  a  built-in  kill
+        command.   You  may  need  to  run  the command described here as
+        /bin/kill to solve the conflict.
+ 
+EXAMPLES
+        kill -9 -1
+               Kill all processes you can kill.
+ 
+       kill -l 11
+               Translate number 11 into a signal name.
+ 
+       kill -L
+               List the available signal choices in a nice table.
+ 
+       kill 123 543 2341 3453
+               Send the default signal, SIGTERM, to all those processes.
+ 
+SEE ALSO
+        pkill(1), skill(1), kill(2), renice(1), nice(1), signal(7),  kil‐
+        lall(1).
+ 
+STANDARDS
+        This  command  meets appropriate standards. The -L flag is Linux-
+        specific.
+ 
+AUTHOR
+        Albert  Cahalan  <albert@users.sf.net>  wrote  kill  in  1999  to
+        replace  a  bsdutils  one  that  was not standards compliant. The
+        util-linux one might also work correctly.
+ 
+       Please send bug reports to <procps-feedback@lists.sf.net>
+ 
+Linux                       November 21, 1999                    KILL(1)
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+kill -l
+  1) SIGHUP  2) SIGINT  3) SIGQUIT  4) SIGILL  5) SIGTRAP
+  6) SIGABRT  7) SIGBUS  8) SIGFPE  9) SIGKILL 10) SIGUSR1
+ 11) SIGSEGV 12) SIGUSR2 13) SIGPIPE 14) SIGALRM 15) SIGTERM
+ 16) SIGSTKFLT 17) SIGCHLD 18) SIGCONT 19) SIGSTOP 20) SIGTSTP
+ 21) SIGTTIN 22) SIGTTOU 23) SIGURG 24) SIGXCPU 25) SIGXFSZ
+ 26) SIGVTALRM 27) SIGPROF 28) SIGWINCH 29) SIGIO 30) SIGPWR
+ 31) SIGSYS 34) SIGRTMIN 35) SIGRTMIN+1 36) SIGRTMIN+2 37) SIGRTMIN+3
+ 38) SIGRTMIN+4 39) SIGRTMIN+5 40) SIGRTMIN+6 41) SIGRTMIN+7 42) SIGRTMIN+8
+ 43) SIGRTMIN+9 44) SIGRTMIN+10 45) SIGRTMIN+11 46) SIGRTMIN+12 47) SIGRTMIN+13
+ 48) SIGRTMIN+14 49) SIGRTMIN+15 50) SIGRTMAX-14 51) SIGRTMAX-13 52) SIGRTMAX-12
+ 53) SIGRTMAX-11 54) SIGRTMAX-10 55) SIGRTMAX-9 56) SIGRTMAX-8 57) SIGRTMAX-7
+ 58) SIGRTMAX-6 59) SIGRTMAX-5 60) SIGRTMAX-4 61) SIGRTMAX-3 62) SIGRTMAX-2
+ 63) SIGRTMAX-1 64) SIGRTMAX 

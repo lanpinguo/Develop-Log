@@ -1,0 +1,20 @@
+
+用python+scapy生成网络数据包
+
+协议测试是网络编程中一个重要环节，通过协议测试确保通信双方对协议的理解和实现是一致的。wireshark是强大的网络协议分析工具，能够捕获网络数据并进行协议解析，可是光有这个还不够，还需要能够生成指定内容的网络数据包的工具（packet forging / generation / crafting tool）。在wireshark的wiki中列出了一些traffic generation tool，尝试了scapy，还是挺不错的。
+
+scapy的项目主页是http://www.secdev.org/projects/scapy/，它是强大的交互式数据包操作工具，支持对广泛的网络协议解码和生成，进行数据包发送、捕获、请求匹配应答等等。scapy在windows平台的安装见http://www.secdev.org/projects/scapy/doc/installation.html#platform-specific-instructions。不知何故，用firefox下载scapy源码包总是出错，总是没有下载完所有数据就停止了，用flashget等支持断点续传的下载工具是没有问题的。
+
+一个简单的例子如下：
+import sys
+import struct
+from scapy.all import *
+
+data = struct.pack('=BHI', 0x12, 20, 1000)
+pkt = IP(src='192.168.1.81', dst='192.168.1.10')/UDP(sport=12345,dport=5555)/data
+send(pkt, inter=1, count=5)
+上面的代码由192.168.1.81:12345向192.168.1.10:5555发送UDP包，用户数据为:
+0x12 : unsigned short
+20   : unsigned char
+1000 : unsigned int
+间隔1 s，发送5次。

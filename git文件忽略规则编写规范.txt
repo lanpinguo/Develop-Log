@@ -1,0 +1,27 @@
+git忽略某文件夹，但保留文件夹内的其它文件夹
+
+需求：在构建Android Studio项目时，由于不需要把build文件夹内的文件track到仓库，但想track build文件夹内的outputs文件夹，故而需要修改.gitignore文件，在修改过程中遇到了很多坑；
+
+首先需要了解.gitignore一些通配符： 
+以斜杠“/”开头表示目录； 
+以星号“*”通配多个字符； 
+以问号“?”通配单个字符 
+以方括号“[]”包含单个字符的匹配列表； 
+以叹号“!”表示不忽略(跟踪)匹配到的文件或目录；
+
+了解了语法，接下来便是修改.gitignore了，忽略的文件夹与要track的文件夹语句要成对的写，如下（一个字符都不能多也不能少，不然失效）: 
+/app/build/* 
+!/app/build/outputs 
+错误的示范1： 
+/app/* 
+!/app/build/outputs 
+错误的示范2： 
+/app/build/ 
+!/app/build/outputs 
+以上错误的两个示范都会导致没有预期的效果，
+
+第三点也是最容易忽略的点，在AS项目里，不只项目根目录下有.gitignore文件，在module app目录下也有.gitignore，这个app目录下的文件也会导致.gitignore语法无效，所以最后一步就是将这个.gitignore文件删掉，最后 
+执行 
+git add . 
+git commit -m “edit .gitignore” 
+大功告成

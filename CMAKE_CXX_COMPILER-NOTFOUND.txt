@@ -1,0 +1,12 @@
+执行cmake命令，出现如下错误
+gqyang@gqyang-ubuntu:~/C_Project/Cmake/1.1/build$ cmake ../
+-- The C compiler identification is GNU
+-- The CXX compiler identification is unknown
+-- Check for working C compiler: /usr/bin/gcc
+-- Check for working C compiler: /usr/bin/gcc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+CMake Error: your CXX compiler: "CMAKE_CXX_COMPILER-NOTFOUND" was not found.   Please set CMAKE_CXX_COMPILER to a valid compiler path or name.
+-- Configuring incomplete, errors occurred!
+解决办法：安装g++编译器
+gqyang@gqyang-ubuntu:~/C_Project/Cmake/1.1/build$ sudo apt-get install g++

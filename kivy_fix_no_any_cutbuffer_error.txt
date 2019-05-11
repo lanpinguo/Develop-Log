@@ -1,0 +1,7 @@
+install xclip and xsel 
+
+
+fix kivy error :
+	no any cutbuffer 
+	
+	apt  install  xclip xsel 

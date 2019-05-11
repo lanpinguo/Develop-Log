@@ -1,0 +1,6 @@
+1、安装h5py
+
+(1)直接安装开发库更为便捷
+sudo apt-get install libhdf5-dev
+(2)
+HDF5_DIR=/usr/lib/aarch64-linux-gnu/hdf5/serial/ pip3 install h5py

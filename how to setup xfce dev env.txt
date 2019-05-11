@@ -1,0 +1,25 @@
+checking for libxfce4util-1.0 >= 4.6.0... not found
+*** The required package libxfce4util-1.0 was not found on your system.
+*** Please install libxfce4util-1.0 (atleast version 4.6.0) or adjust
+*** the PKG_CONFIG_PATH environment variable if you
+*** installed the package in a nonstandard prefix so that
+*** pkg-config is able to find it.
+
+
+sudo apt install libxfce4util-dev 
+sudo apt install intltool
+
+fix error:
+ gtk+-2.0  not found 
+sudo apt-get install gtk2.0
+
+
+sudo apt install libxfcegui4-dev
+
+sudo apt install libxfce4ui-1-dev
+
+sudo apt install libgarcon-1-dev
+
+sudo apt install gir1.2-wnck-1.0
+sudo apt install libwnck-dev
+

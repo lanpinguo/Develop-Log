@@ -1,0 +1,5 @@
+无意之间，使用sudo chmod -R 777 /usr命令修改了usr文件的所有者，导致sudo:must be setuid root问题的出现，即sudo命令无法使用。网上介绍的方法差不多都相同，就是通过下面两条命令：
+
+chown root:root /usr/bin/sudo
+
+chmod 4755 /usr/bin/sudo

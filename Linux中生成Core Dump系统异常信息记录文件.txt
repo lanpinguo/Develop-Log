@@ -1,0 +1,59 @@
+1 什么是 Core Dump
+Core Dump 又叫核心转储。在程序运行过程中发生异常时，将其内存数据保存到文件中，这个过程叫做 Core Dump。
+
+2 Core Dump 的作用
+在开发过程中，难免会遇到程序运行过程中异常退出的情况，这时候想要定位哪里出了问题，仅仅依靠程序自身的信息打印（日志记录）往往是不够的，这个时候就需要 Core Dump 文件来帮忙了。
+一个完整的 Core Dump 文件实际上相当于恢复了异常现场，利用 Core Dump 文件，可以查看到程序异常时的所有信息，变量值、栈信息、内存数据，程序异常时的运行位置（甚至记录代码行号）等等，定位所需要的一切信息都可以从 Core Dump文件获取到，能够非常有效的提高定位效率。
+
+3 如何生成 Core Dump
+3.1 Core Dump 文件生成开关
+Core Dump 文件的生成是由Core文件大小限制，Linux中默认的Core文件大小设置为零，也就是不生成 Core Dump 文件，可以使用ulimit -c命令来查看当前的Core文件大小限制。
+要生成 Core Dump 文件，只需要执行下面的命令设置Core文件的大小即可（其中filesize参数的单位为KByte）：
+
+
+复制代码代码如下:
+
+ulimit -c filesize
+
+如果要设置Core文件大小无限制（即把程序完整的运行内存都保存下来），则执行如下命令：
+
+复制代码代码如下:
+
+ulimit -c unlimited
+
+可以使用命令 ulimit -c unlimited 来开启 core dump 功能，并且不限制 core dump 文件的大小； 如果需要限制文件的大小，将 unlimited 改成你想生成 core 文件最大的大小，注意单位为 blocks（KB）。 
+用上面命令只会对当前的终端环境有效，如果想需要永久生效，可以修改文件/etc/bash.bashrc文件，添加一行ulimit -c unlimited，然后执行命令source /etc/bash.bashrc生效。此时通过ulimit -a查看： 
+
+
+3.2 Core Dump 文件名设置
+Core Dump 文件默认的名字为core，而且新的Core文件会把老的覆盖，这样我们只能看到最后一次的 Core Dump 信息，可以通过设置Core文件名称模板，使每次生成的 Core Dump 文件区分开来。
+Core Dump 文件的命名规则定义在/proc/sys/kernel/core_pattern文件中，规则中还可以加入预设的变量来更好的区分Core文件，支持的变量列表如下：
+变量	
+说明
+%%	%字符
+%p	进程ID(PID)
+%u	用户ID(UID)
+%g	用户组ID
+%s	触发 Core Dump 的信号
+%t	触发 Core Dump 的时间(单位为秒，从 1970-01-01 00:00:00 开始计算)
+%h	主机名称(主机名可以通过uname命令来查看)
+%e	程序名称(无路径信息)
+%E	程序的路径名称(路径中的/会被!替代)
+%c	Core文件的限制大小值(Linux 2.6.24版本后开始支持)
+注：Core Dump 文件名的最大长度为128字节（在 Linux 2.6.19 版本前，最大长度为64字节）。
+例如：可以通过下面的命令，生成文件名为core-程序名称-进程ID-时间的 Core Dump 文件：
+echo "core-%e-%p-%t" > /proc/sys/kernel/core_pattern
+从 Linux 2.4 版本开始，提供了一种比较原始的Core文件名设置方式，直接设置/proc/sys/kernel/core_uses_pid文件中的值为1，生成的Core文件名中便会自动加上.PID后缀，即生成的文件名为core.PID这种形式。执行下面的命令可以设置该值：
+
+复制代码代码如下:
+
+echo "1" > /proc/sys/kernel/core_uses_pid
+4 如何使用 Core Dump
+有了 Core Dump 文件后，可以使用GDB来加载分析，执行如下命令（假设可执行程序名称及路径为/home/hutaow/test_dump，生成的Core文件名为core）：
+
+
+复制代码代码如下:
+
+gdb /home/hutaow/test_dump -c core
+
+加载完成后，即可以在GDB中查看程序异常时的各种运行信息了（查看变量值、线程信息、调用栈、反汇编等等）。

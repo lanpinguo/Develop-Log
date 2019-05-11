@@ -1,0 +1,206 @@
+Login:
+Login:
+Login:raisecom
+Password:
+Raisecom>enable
+Password:1970-01-01,12:04:23 User-5-LOGIN_SUCCESS:The user 'raisecom' from console login successful
+
+Raisecom#config
+Configuration mode, one command input per times. End with CTRL-Z.
+CONFIG-I:Configured from console ...
+Raisecom(config)#interface client       
+  {1-4}  Port number list
+  <1-4>  Port number
+Raisecom(config)#interface client  1
+Raisecom(config-port)#show iin
+show iin
+      ^
+Error input in the position market by '^'.
+Raisecom(config-port)#show interface client 1
+Port        Admin     Operate                Speed   Duplex  Active MAU type   State       MTU
+---------------------------------------------------------------------------------------
+client1     enable    up(100M/full)          auto    auto    1000BASE-T        Block       2000      
+Raisecom(config-port)#show vlan detail
+Raisecom(config-port)#show vlan
+Switch Mode: --
+VLAN Name                             State   Status  Priority Member-Ports        
+-----------------------------------------------------------------------------------
+Raisecom(config-port)#ex
+Raisecom(config)#create vlan 100 active 
+Set successfully
+Raisecom(config)#ex
+Raisecom#conf t
+Configuration mode, one command input per times. End with CTRL-Z.
+CONFIG-I:Configured from console ...
+Raisecom(config)#interface client 1
+Raisecom(config-port)#sw mo ac
+Set successfully
+Raisecom(config-port)#sw ac vl 100
+Set successfully
+Raisecom(config-port)#interface clien 2
+Raisecom(config-port)#sw mo ac
+Set successfully
+Raisecom(config-port)#sw ac vl 100
+Set successfully
+Raisecom(config-port)#interface client 3
+Raisecom(config-port)#sw moa c
+sw moa c
+     ^
+Error input in the position market by '^'.
+Raisecom(config-port)#sw mo ac
+Set successfully
+Raisecom(config-port)#sw ac vl 100
+Set successfully
+Raisecom(config-port)#interface client 4
+Raisecom(config-port)#sw mo ac
+Set successfully
+Raisecom(config-port)#sw ac vl 100
+Set successfully
+Raisecom(config-port)#
+Raisecom(config-port)#
+Raisecom(config-port)#
+Raisecom(config-port)#
+Raisecom(config-port)#no sw protect 
+Set successfully.
+Raisecom(config-port)#sho run   
+
+ System current configuration:
+!command in view_mode
+!
+!command in config_mode first-step
+create vlan 100 active
+!
+!command in aclmap_mode
+!
+!command in qos mapping mode
+!
+!command in wred mode
+!
+!command in enable_mode
+!
+!command in service_mode
+!
+!command in mpls_bidirection_ingress_mode
+!
+!command in mpls_bidirection_transit_mode
+!
+!command in mpls_bidirection_egress_mode
+!
+!command in mpls_tunnelif_mode
+!
+!command in l2cp profile mode
+!
+!command in aggregation_mode
+!
+!command in port_mode
+!
+interface client 1
+switchport access vlan 100
+!
+interface client 2
+switchport access vlan 100
+!
+interface client 3
+switchport access vlan 100
+!
+interface client 4
+switchport access vlan 100
+no switchport protect
+!
+!command in vlan configuration mode
+!
+!command in ip interface mode
+!
+Raisecom(config-port)#interface client 3
+Raisecom(config-port)#no sw protect 
+Set successfully.
+Raisecom(config-port)#interface client 2
+Raisecom(config-port)#no sw  protect 
+Set successfully.
+Raisecom(config-port)#interface client 1
+Raisecom(config-port)#no sw protect 
+Set successfully.
+Raisecom(config-port)#
+Raisecom(config-port)#
+Raisecom(config-port)#sho run 
+
+ System current configuration:
+!command in view_mode
+!
+!command in config_mode first-step
+create vlan 100 active
+!
+!command in aclmap_mode
+!
+!command in qos mapping mode
+!
+!command in wred mode
+!
+!command in enable_mode
+!
+!command in service_mode
+!
+!command in mpls_bidirection_ingress_mode
+!
+!command in mpls_bidirection_transit_mode
+!
+!command in mpls_bidirection_egress_mode
+!
+!command in mpls_tunnelif_mode
+!
+!command in l2cp profile mode
+!
+!command in aggregation_mode
+!
+!command in port_mode
+!
+interface client 1
+switchport access vlan 100
+no switchport protect
+!
+interface client 2
+switchport access vlan 100
+no switchport protect
+!
+interface client 3
+switchport access vlan 100
+no switchport protect
+!
+interface client 4
+switchport access vlan 100
+no switchport protect
+!
+!command in vlan configuration mode
+!         
+!command in ip interface mode
+!
+!command in loopback interface mode
+!
+!command in traffic policer mode
+!
+!command in cmap_mode
+!
+!command in pmap_mode
+!
+!command in pmap_vlan_mode
+!
+!command in pmap_cos_mode
+!
+!command in mpls_expath_mode
+!
+!command in keychain_mode
+!
+!command in tdm port mode
+!
+!command in iccp mode
+!
+Raisecom(config-port)#sho vlan 
+Switch Mode: --
+VLAN Name                             State   Status  Priority Member-Ports        
+-----------------------------------------------------------------------------------
+100  VLAN0100                         active  static  --       client 1-4         
+Raisecom(config-port)#
+Raisecom#write 
+Saving  current configuration..
+Save current configuration successfully.
+Raisecom#

@@ -1,0 +1,6 @@
+
+python2:
+sudo apt-get install python-setuptools
+
+python3:
+sudo apt-get install python3-setuptools

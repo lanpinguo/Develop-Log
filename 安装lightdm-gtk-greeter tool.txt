@@ -1,0 +1,3 @@
+
+安装lightdm-gtk-greeter tool
+husq-4668@husq4668-OptiPlex:~$ sudo apt install lightdm-gtk-greeter

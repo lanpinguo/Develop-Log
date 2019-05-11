@@ -1,0 +1,7 @@
+pip2
+
+$ sudo apt-get install python-pip python-dev build-essential
+
+解决出现错误提示：RequirementParseError
+wget https://bootstrap.pypa.io/get-pip.py
+sudo python get-pip.py

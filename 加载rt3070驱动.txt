@@ -1,0 +1,12 @@
+拷贝RT2870AP.dat文件
+
+cp  MODULE/RT2870AP.dat  /etc/Wireless/RT2870AP/RT2870AP.dat
+
+ 
+
+拷贝固件 rt2870.bin /lib/firmware目录下
+
+ 
+insmod UTIL/os/linux/rtutil3070ap.ko
+insmod MODULE/os/linux/rt3070ap.ko
+insmod NETIF/os/linux/rtnet3070ap.ko

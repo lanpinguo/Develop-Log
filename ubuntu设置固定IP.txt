@@ -1,0 +1,80 @@
+ubuntu 设置固定IP
+按照网上的步骤进行配置静态IP，方法如下 ：
+
+1、vi /etc/network/interfaces
+
+添加内容：
+auto eth0
+ iface eth0 inet static
+ address 192.168.8.100    
+ netmask 255.255.255.0
+ gateway 192.168.8.2
+ dns-nameserver 119.29.29.29
+
+
+
+
+dns-nameserver 119.29.29.29这句一定需要有，
+
+
+因为以前是DHCP解析，所以会自动分配DNS 服务器地址。
+
+而一旦设置为静态IP后就没有自动获取到DNS服务器了，需要自己设置一个
+
+设置完重启电脑后，/etc/resolv.conf 文件中会自动添加 nameserver 119.29.29.29
+
+(或者nameserver 8.8.8.8)可以根据访问速度，选择合适的公共DNS 
+
+
+
+待验证：
+1\
+首先用root用户登陆，然后输入你root的密码。
+
+2\
+然后编辑interfaces文件，该文件位于/etc/network/下，执行如下命令：
+
+vim /etc/network/interfaces.d/eth0，回车
+
+3\
+添加：
+
+# interfaces(5) file used by ifup(8) and ifdown(8)auto loiface lo inet loopback
+这以下的是为添加上去该文件上的内容：
+# The primary network interface 
+auto eth0 
+    iface eth0 inet static 
+    address 192.168.1.100 
+    netmask 255.255.255.0 
+    gateway 192.168.1.1
+
+4\
+添加完毕后，保存退出，接下来就是配置DNS解析了，DNS解析文件在/etc/resolv.conf。执行：vim /etc/resolv.conf
+
+5、
+再该文件下添加：
+
+nameserver 192.168.1.1
+
+nameserver 220.170.64.68
+
+
+6、
+改完上面，如果重启的话，还是会变为原来的样子，所以要让其永久改变，因此，执行： vim /etc/resolvconf/resolv.conf.d/base
+
+7、
+在里面添加：
+nameserver 192.168.1.1
+nameserver 220.170.64.68
+
+8、
+
+
+然后保存退出，到这里基本就是完成了，然后还是不能连上网，要将/etc/NetworkManager/目录下的system-connections删除，或者移动到其他目录下。
+
+
+9、
+最后执行/etc/NetworkManager/就可以连上网了。
+
+
+

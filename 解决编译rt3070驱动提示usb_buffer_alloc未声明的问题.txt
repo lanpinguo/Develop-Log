@@ -1,0 +1,7 @@
+内核版本差异造成的，经过努力发现2.6.35 内核后， usb_buffer_alloc 和 usb_buffer_free 被替换成 usb_alloc_coherent 和 usb_free_coherent。所以编译才会报错。修改 include/os/rt_linux.h 文件。如下
+
+#define RTUSB_URB_ALLOC_BUFFER(pUsb_Dev, BufSize, pDma_addr) usb_buffer_alloc(pUsb_Dev, BufSize, GFP_ATOMIC, pDma_addr)
+#define RTUSB_URB_FREE_BUFFER(pUsb_Dev, BufSize, pTransferBuf, Dma_addr) usb_buffer_free(pUsb_Dev, BufSize, pTransferBuf, Dma_addr)
+替换成：
+#define RTUSB_URB_ALLOC_BUFFER(pUsb_Dev, BufSize, pDma_addr) usb_alloc_coherent(pUsb_Dev, BufSize, GFP_ATOMIC, pDma_addr)
+#define RTUSB_URB_FREE_BUFFER(pUsb_Dev, BufSize, pTransferBuf, Dma_addr) usb_free_coherent(pUsb_Dev, BufSize, pTransferBuf, Dma_addr)

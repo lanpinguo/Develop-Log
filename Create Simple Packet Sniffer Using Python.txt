@@ -1,0 +1,989 @@
+
+BITFORESTINFO
+Hackers Ground. Learn Technical Things Easily.
+
+
+SEARCH
+
+Home  Github  Projects  About Us  Need help?
+Create Simple Packet Sniffer Using Python
+Wednesday, February 15, 2017  By Suraj Singh
+Namaste Friends,
+
+
+
+
+                                     Friends, Today's Tutorial Is About How To Create Simple Packet Sniffer Using Python Language. or How To Write Python Script For Capturing Packets. or how to extract captured packets manually using python.
+
+Friend, If You Are New on our Blog, Then Don't Forget To Follow Us On Social Media Because We Create These Types of Tutorials in Every Small Gap of the week and of course, with social media, you can easily get updates of this blog or you can also directly connect with me on facebook.
+
+But before starting today's tutorial, Note it If You are a beginner in networking, then this tutorial can be difficult to understand to you but friends, don't lose your hope because to increase our knowledge we always need to try harder.
+
+And To Make more familiar with python and socket module. You Can Also Read Our Other Networking Posts Also.
+
+
+HTTP Sniffer Script In Python
+Ping Sweeper Script In Python
+Server Banner Grabber Script In Python
+Login Page Finder
+Code for IPv4 header in python
+
+Or You Can Also Check Our Complete Project List Here
+
+
+Introduction
+
+In today's life networks is playing a very important role in telecommunication. without the network, almost all types of communication and service are useless. hence, this makes network concept more important for all programmers and network administrators.
+
+To maintain and manage the security of network communication, many times network administrators Or network maintainers need to find and control the traffic flowing into the network wire and also find exactly what and which types of data packets are actually flowing into the networks.
+For this situation, there are many types of Network analyzing tools are available On the internet.  basically, these types of tool come on the ground to help network administrator like Wireshark and other. These tools are fast, easy and reliable to handle many types of network problems but as we know, networking concept is not that easy. so, many time these types of tools do not support our exact situation requirement and we have to find any other solution for our problem and at that time python and its socket module comes on the ground like a big boy to help network administrators.
+
+Well, as we know python is really the very awesome language and also very powerful language. With Python, a programmer can do almost any types of programming in fastest and easiest way. hence, with python and socket module, our today project is very easy to codes if compared to other programming languages. But as usual, Networking is always very harder for mostly all programmers Because networking concept is very big and complex to understand.
+That's why Friends, Today's topic can be hard to understand for beginners. why hard? well because for this topic, you need basic knowledge of networking, sockets, packets and the data formats types. But don't worry, I will try my best to explain today's topic in the simplest way.
+
+So, Let's Start Our Topic Step By Step
+Some Basic Queries To Under Stand Networking
+Q 1. What is Packet Sniffer?
+
+Ans. Friends, As I already told you, Sniffers are the special programs and tools that can capture network traffic packets from the network and then parse/ analyze them for various purposes. actually, sniffing tools have the ability to capture flowing data packets from networks. Data packets like TCP, UDP, ICMP etc. and after capturing these packets, sniffer also provides the facilities to extract these data packets and represent these packets in easy to understand interface. Well, There are many types of sniffers are available but my favorite one is Wireshark. still not Understand? hmm, In Simple Words, Every Client Use Various Types Of Data Packets Like TCP, UDP etc To Interact With Server. These data packets always travel from any network source. and what we are going to do? is Just capture those traveling packets from networks and for this purpose, we will try to create a python script that can capture those Data Packets and also analyze and represent packets in easy to understandable form. Normally, This Types of programs used by pentesters and by network administrators. But For Understanding Networking Concept Clearly, You Can Also Create This Sniffer.
+
+Now, Second Query which comes to our mind Is exactly
+Q 2. How This Programs Going to Works?
+Ans. Actually, This Programs works on a Very Clear Concept. As I already told you in previous lines, Every Client Interact With Server Through Sending and receiving various types of data Packets like TCP, UDP etc. so, our program is going to capture all those data packets from our local computer network and then analyze and represent those packets in easy to understandable ways.  In Simple Words, every networking service and networking program works on sending and receiving packet concept so what we need? is just to capture all traveling packets from our network.
+
+
+Q 3. How To Capture Packets?
+
+Ans.  Of course, for this job we are going to use socket module. basically, socket module is the main player in our games because in python programming language socket module provides us the facility to play with network concept. so here for capturing packets, we are going to use socket.socket module.
+
+For sniffing with socket module in python we have to create a socket.socket class object with special configuration. In simple words, we have to configure socket.socket class object to capture low-level packets from the network so that it can capture packet from low-level networks and provides us output without doing any type of changes in capture packets.
+
+Actually, Friends, there is a small difference in Python socket module codes based on operating systems. Because Windows kernel works in a different way compared to Linux kernel.
+
+
+If You Are Using  Windows Then, Use This Codes,
+
+
+s = socket.socket(socket.AF_INET,socket.SOCK_RAW,socket.IPPROTO_IP)
+s.bind(("YOUR_INTERFACE_IP",0))
+s.setsockopt(socket.IPPROTO_IP,socket.IP_HDRINCL,1)
+s.ioctl(socket.SIO_RCVALL,socket.RCVALL_ON)
+
+
+or if you are using *nix then, use this code.
+
+s=socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0800))
+
+
+Now our socket object is ready to capture packets. friends, it's time to do dirty your hands with python programs. so, let's create a simplest packet sniffer script in python.
+
+
+SimpleSniffer.py
+
+
+#!/usr/bin/python
+#
+# Simplest Form Of Packet sniffer in python
+# Works On Linux Platform 
+ 
+#import module
+import socket
+ 
+#create an INET, raw socket
+s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP)
+ 
+# receive a packet
+while True:
+
+   # print output on terminal
+   print s.recvfrom(65565)
+
+Above Codes Explanation.
+
+Line 7 is for importing modules
+Line 10 for creating a socket.socket class object.
+Line 13 for while loop
+Line 16 for printing output on the terminal.
+
+
+
+Done!
+
+To Run This Program, Just Copy These Codes in Script and Run it With Sudo permission.
+
+In Linux:
+
+:~# sudo SimpleSniffer.py
+
+
+Q 4. How To Parse/Extract Captured Packets?
+
+Ans. Actually, There Are Various Types Of Data Formats Are Available In Networking. But For practice purpose Here, I Am only going to describe few Important And Most Usable Data Formats. In Order To Understand These Data formats, Let's Take A Look At Data Structure Diagrams.
+
+So, Pay Attention To These Diagrams.
+Ethernet Frame Format 
+
+Friends, As you can see in Ethernet Frame Format Diagram There are more than 3 fields to extract but here, for this project we are only going to extract only 3 fields, Source Mac Address, Destination Mac Address and Ethernal Protocol Type.
+
+Well, I am assuming that you already aware of the struct and binascii python module.
+
+To Extract Source Address, Destination Address, and Ethernet Type Address, We have to use struct module which can unpack network packets for us.
+
+Basically, To Extract Data From Network Packets we have to pass an argument that going to represent field types, we want to extract in struct.unpack function.
+
+
+For Example:
+
+
+pattern = <SourceMac> + <DestinationMac> + <EthernetType>
+pattern = <"6s"> + <"6s"> + <"H">
+pattern = "!6s6sH"
+
+In this example, s represent string data type, H represent Unsigned Short data types and numbers means times to use. like "6s" = "ssssss"
+And at the starting ! means, extract data in reverse order. I hope you already know that receiver always receive data in reverse order because of various networking reasons.
+Let's create a dummy function to extract data from Ethernet frame and represent it in simplest form.
+
+
+
+# Ethernet Header
+def eth_header(data):
+  storeobj=data
+  storeobj=struct.unpack("!6s6sH",storeobj)
+  destination_mac=binascii.hexlify(storeobj[0])
+  source_mac=binascii.hexlify(storeobj[1])
+  eth_protocol=storeobj[2]
+  data={"Destination Mac":destination_mac,
+  "Source Mac":source_mac,
+  "Protocol":eth_protocol}
+  return data
+
+I hope now you got the idea exactly how our program is going to work.
+
+Now, from here I am going to left other packet extracting function on user to understand it yourself.
+
+
+ICMP Header Format
+
+
+
+
+# ICMP HEADER Extraction
+
+
+def icmp_header(data):
+
+
+  icmph=struct.unpack('!BBH', data)
+
+
+  icmp_type = icmph[0]
+
+
+  code = icmph[1]
+
+
+  checksum = icmph[2]
+
+
+  data={'ICMP Type':icmp_type,
+
+
+"Code":code,
+
+
+"CheckSum":checksum}
+
+
+return data 
+
+IP Header Format
+
+
+
+
+
+# IP Header Extraction
+
+
+def ip_header(data):
+
+
+  storeobj=struct.unpack("!BBHHHBBH4s4s", data)
+
+
+  _version=storeobj[0] 
+
+
+  _tos=storeobj[1]
+
+
+  _total_length =storeobj[2]
+
+
+  _identification =storeobj[3]
+
+
+  _fragment_Offset =storeobj[4]
+
+
+  _ttl =storeobj[5]
+
+
+  _protocol =storeobj[6]
+
+
+  _header_checksum =storeobj[7]
+
+
+  _source_address =socket.inet_ntoa(storeobj[8])
+
+
+  _destination_address =socket.inet_ntoa(storeobj[9])
+
+
+  data={'Version':_version,
+
+
+"Tos":_tos,
+
+
+"Total Length":_total_length,
+
+
+"Identification":_identification,
+
+
+"Fragment":_fragment_Offset,
+
+
+"TTL":_ttl,
+
+
+"Protocol":_protocol,
+
+
+"Header CheckSum":_header_checksum,
+
+
+"Source Address":_source_address,
+
+
+"Destination Address":_destination_address}
+
+
+return data
+
+
+
+TCP Header Format
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Tcp Header Extraction
+
+
+def tcp_header(data):
+
+
+  storeobj=struct.unpack('!HHLLBBHHH',data)
+
+
+  _source_port =storeobj[0] 
+
+
+  _destination_port =storeobj[1]
+
+
+  _sequence_number =storeobj[2]
+
+
+  _acknowledge_number =storeobj[3]
+
+
+  _offset_reserved =storeobj[4]
+
+
+  _tcp_flag =storeobj[5]
+
+
+  _window =storeobj[6]
+
+
+  _checksum =storeobj[7]
+
+
+  _urgent_pointer =storeobj[8]
+
+
+  data={"Source Port":_source_port,
+
+
+"Destination Port":_destination_port,
+
+
+"Sequence Number":_sequence_number,
+
+
+"Acknowledge Number":_acknowledge_number,
+
+
+"Offset &amp; Reserved":_offset_reserved,
+
+
+"Tcp Flag":_tcp_flag,
+
+
+"Window":_window,
+
+
+"CheckSum":_checksum,
+
+
+"Urgent Pointer":_urgent_pointer
+
+}
+
+return data 
+
+UDP Header Format
+
+
+ # ICMP HEADER Extraction
+ def icmp_header(data):
+  icmph=struct.unpack('!BBH', data)
+  icmp_type = icmph[0]
+  code = icmph[1]
+  checksum = icmph[2]
+  data={'ICMP Type':icmp_type,
+  "Code":code,
+  "CheckSum":checksum}
+  return data
+
+PyPacket Project
+i hope friends, from above examples you got the basic idea how our program is exactly going to work. Actually, Now we are going to assemble all above previewed functions in one program so that our program can extract various types of informations during sniffing. well here to make this project easy to understand i am going to divide our project in two script. 
+First script is for sniffing packets and
+another script for extracting data from captured packets.
+
+So, let's Start our Python Packet Sniffer Coding.
+
+For This Purpose, We will Create 2 Script.
+
+1. For Capturing Packets (pypackets.py)
+
+2. For Extracting Captured Data (pye.py)
+
+So Here it's Our Demo Codes
+
+1. For Capturing Packets
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+#!/usr/bin/python
+
+# ---------------- READ ME ---------------------------------------------
+# This Script is Created Only For Practise And Educational Purpose Only
+# This Script Is Created For http://bitforestinfo.blogspot.com
+# This Script is Written By
+__author__='''
+
+######################################################
+                By S.S.B Group                          
+######################################################
+
+    Suraj Singh
+    Admin
+    S.S.B Group
+    surajsinghbisht054@gmail.com
+    http://bitforestinfo.blogspot.in/
+
+    Note: We Feel Proud To Be Indian
+######################################################
+'''
+
+# import modules
+import socket 
+import struct
+import binascii
+import os
+import pye
+
+# print author details on terminal
+print pye.__author__
+
+# if operating system is windows
+if os.name == "nt":
+    s = socket.socket(socket.AF_INET,socket.SOCK_RAW,socket.IPPROTO_IP)
+    s.bind(("YOUR_INTERFACE_IP",0))
+    s.setsockopt(socket.IPPROTO_IP,socket.IP_HDRINCL,1)
+    s.ioctl(socket.SIO_RCVALL,socket.RCVALL_ON)
+
+# if operating system is linux
+else:
+    s=socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0800))
+
+# create loop 
+while True:
+
+    # Capture packets from network
+    pkt=s.recvfrom(65565)
+
+    # extract packets with the help of pye.unpack class 
+    unpack=pye.unpack()
+
+    print "\n\n===&gt;&gt; [+] ------------ Ethernet Header----- [+]"
+
+    # print data on terminal
+    for i in unpack.eth_header(pkt[0][0:14]).iteritems():
+        a,b=i
+        print "{} : {} | ".format(a,b),
+    print "\n===&gt;&gt; [+] ------------ IP Header ------------[+]"
+    for i in unpack.ip_header(pkt[0][14:34]).iteritems():
+        a,b=i
+        print "{} : {} | ".format(a,b),
+    print "\n===&gt;&gt; [+] ------------ Tcp Header ----------- [+]"
+    for  i in unpack.tcp_header(pkt[0][34:54]).iteritems():
+        a,b=i
+        print "{} : {} | ".format(a,b),
+
+    
+
+Here, Above Code will capture Data packets and pass them to another module for extraction.
+2. For Extracting Captured Data (pye.py)
+  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+ 11
+ 12
+ 13
+ 14
+ 15
+ 16
+ 17
+ 18
+ 19
+ 20
+ 21
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+ 37
+ 38
+ 39
+ 40
+ 41
+ 42
+ 43
+ 44
+ 45
+ 46
+ 47
+ 48
+ 49
+ 50
+ 51
+ 52
+ 53
+ 54
+ 55
+ 56
+ 57
+ 58
+ 59
+ 60
+ 61
+ 62
+ 63
+ 64
+ 65
+ 66
+ 67
+ 68
+ 69
+ 70
+ 71
+ 72
+ 73
+ 74
+ 75
+ 76
+ 77
+ 78
+ 79
+ 80
+ 81
+ 82
+ 83
+ 84
+ 85
+ 86
+ 87
+ 88
+ 89
+ 90
+ 91
+ 92
+ 93
+ 94
+ 95
+ 96
+ 97
+ 98
+ 99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+#!usr/bin/python
+# Importing Modules
+import socket, struct, binascii
+__author__='''
+# =========================================================================|
+#   This Script is Created Only for Practise And Educational Purpose Only
+# =========================================================================|
+
+######################################################
+   By S.S.B Group       
+######################################################
+
+ Suraj Singh
+ Admin
+ S.S.B Group
+ surajsinghbisht054@gmail.com
+ http://bitforestinfo.blogspot.com
+
+ Note: We Feel Proud To Be Indian
+######################################################
+
+ Sniffing Data Packet Extractor
+'''
+__headers_support__="""
+Ethernet header Extraction
+IPv4 header Extraction
+Tcp header Extraction
+ICMP header Extraction
+UDP header Extraction
+
+"""
+
+class unpack:
+ def __cinit__(self):
+  self.data=None
+
+ # Ethernet Header
+ def eth_header(self, data):
+  storeobj=data
+  storeobj=struct.unpack("!6s6sH",storeobj)
+  destination_mac=binascii.hexlify(storeobj[0])
+  source_mac=binascii.hexlify(storeobj[1])
+  eth_protocol=storeobj[2]
+  data={"Destination Mac":destination_mac,
+  "Source Mac":source_mac,
+  "Protocol":eth_protocol}
+  return data
+
+ # ICMP HEADER Extraction
+ def icmp_header(self, data):
+  icmph=struct.unpack('!BBH', data)
+  icmp_type = icmph[0]
+  code = icmph[1]
+  checksum = icmph[2]
+  data={'ICMP Type':icmp_type,
+  "Code":code,
+  "CheckSum":checksum}
+  return data
+
+ # UDP Header Extraction
+ def udp_header(self, data):
+  storeobj=struct.unpack('!HHHH', data)
+  source_port = storeobj[0]
+  dest_port = storeobj[1]
+  length = storeobj[2]
+  checksum = storeobj[3]
+  data={"Source Port":source_port,
+  "Destination Port":dest_port,
+  "Length":length,
+  "CheckSum":checksum}
+  return data
+
+ # IP Header Extraction
+ def ip_header(self, data):
+  storeobj=struct.unpack("!BBHHHBBH4s4s", data)
+  _version=storeobj[0] 
+  _tos=storeobj[1]
+  _total_length =storeobj[2]
+  _identification =storeobj[3]
+  _fragment_Offset =storeobj[4]
+  _ttl =storeobj[5]
+  _protocol =storeobj[6]
+  _header_checksum =storeobj[7]
+  _source_address =socket.inet_ntoa(storeobj[8])
+  _destination_address =socket.inet_ntoa(storeobj[9])
+
+  data={'Version':_version,
+  "Tos":_tos,
+  "Total Length":_total_length,
+  "Identification":_identification,
+  "Fragment":_fragment_Offset,
+  "TTL":_ttl,
+  "Protocol":_protocol,
+  "Header CheckSum":_header_checksum,
+  "Source Address":_source_address,
+  "Destination Address":_destination_address}
+  return data
+
+ # Tcp Header Extraction
+ def tcp_header(self, data):
+  storeobj=struct.unpack('!HHLLBBHHH',data)
+  _source_port =storeobj[0] 
+  _destination_port  =storeobj[1]
+  _sequence_number  =storeobj[2]
+  _acknowledge_number  =storeobj[3]
+  _offset_reserved  =storeobj[4]
+  _tcp_flag  =storeobj[5]
+  _window  =storeobj[6]
+  _checksum  =storeobj[7]
+  _urgent_pointer =storeobj[8]
+  data={"Source Port":_source_port,
+  "Destination Port":_destination_port,
+  "Sequence Number":_sequence_number,
+  "Acknowledge Number":_acknowledge_number,
+  "Offset & Reserved":_offset_reserved,
+  "Tcp Flag":_tcp_flag,
+  "Window":_window,
+  "CheckSum":_checksum,
+  "Urgent Pointer":_urgent_pointer
+  }
+  return data 
+
+# Mac Address Formating
+def mac_formater(a):
+ b = "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x" % (ord(a[0]), ord(a[1]), ord(a[2]), ord(a[3]), ord(a[4]) , ord(a[5]))
+ return b
+
+def get_host(q):
+ try:
+  k=socket.gethostbyaddr(q)
+ except:
+  k='Unknown'
+ return k
+
+Here,  Above Codes Will Extract Provided Data Packets According To Their Specified Format.
+
+Hence, Now Our Code Finished Here. so, let's see how it's working.
+
+For This Demo Trial here, I am using Ubuntu.
+
+(Run this program with root privileges or sudo on Ubuntu)
+
+
+hmm, it's working... Cool!
+
+
+Features of this script
+ No External Dependencies
+ Using Custom Cython Script For Extracting Header
+ Supported Header: TCP/IP, IPv4 , UDP, ICMP
+ Fast Header Extraction
+
+Usage:
+ python pypacket.py (run as administrative privileges)
+
+
+
+If You Want Latest Example Of Python Script For Packet Sniffing (pypacket) Click Here: Download Script
+
+
+And For Other Python Socket Related Tutorials.
+You Can Read Below Provided Tutorials Also.
+
+
+HTTP Sniffer Script In Python
+Ping Sweeper Script In Python
+Server Banner Grabber Script In Python
+Login Page Finder
+
+
+Done! I hope you enjoyed this tutorial.
+
+Thanks For Reading.
+
+For More Update, Visit Our Blog Regularly. 
+, Subscribe Our Blog, 
+Follow Us and share it.
+For Any Type of Suggestion, Help Or Question
+Contact me:
+S.S.B
+surajsinghbisht054@gmail.com
+or Comment Below
+Comments
+
+Shell Voide20 October 2017 at 10:30
+Hey, i don't like it. I advise you to provide commands with it, that what are you doing at which step. What have you done so far is just coding, which is straightforward as looking a program code. The purpose is to understand it. So you better be add something before copy paste something.
+
+REPLY
+
+suraj singh bisht20 October 2017 at 20:40
+Well My Friend, I Know this tutorial is really very hard to understand but my friend, you also need to think about 
+
+Q. why these codes are difficult to understand?
+Ans. This Tutorial is Difficult Because I want to teach you how you can write new applications, how to solve new problems, how you can do all your work on your own, how to work with the limited material.
+
+Friend, If you really want to be a professional Python programmer in future. Then, Don't Need To Give Excuses To Your Learning Brain Because This Difficulty Level is Nothing against Professionals Projects.
+
+Q. what if even after trying harder, codes are very difficult to understand?
+
+Ans. First, Try to Understand Given Reference Posts Like Ping Sweeper, HTTP Sniffer Script, Banner Grabber. and then, give a try here. Or You Can also ask your Questions to here.
+
+
+Q. Why I'm Not Simplifying My Codes?
+Ans. This Blog is Different From Others, Because Here I'm not also trying to increase your knowledge but also trying to increase your capabilities because other blogs and even my blog, can only help you to understand only basics python programs after that you have to do all your work on your own. and another reason is when I can do it, why you can't (even after providing references, example codes and Support). I am not a Professional, Genius Or Expert.
+
+
+
+At The End, A Quote To Ignite Your Mind,
+
+"My message, especially to young people is to have the courage to think differently, courage to invent, to travel the unexplored path, courage to discover the impossible and to conquer the problems and succeed." - APJ Abdul Kalam
+
+
+
+Anonymous4 May 2018 at 10:02
+thanks for sharing this article! great article.
+
+REPLY
+
+Suraj Singh Bisht26 July 2018 at 06:42
+:)
+
+
+Anonymous30 September 2018 at 18:33
+I get socket.error; [Errno 107] transport endpoint is not connected. No worries, I'll have this figured out by the time you reply.
+
+REPLY
+
+Suraj Singh Bisht8 October 2018 at 08:11
+I like your attitude.
+
+
+Mania4Zoe8 October 2018 at 15:49
+I am unable to get the first part of the tutorial to work. It will not create the s object and it won't run. Please help!
+
+REPLY
+Post a Comment
+
+ 
+Related Post
+
+ 
+Top Visited
+how to install burp suite in Linux/Ubuntu 16.04
+By Suraj Singh  Monday, August 21, 2017
+1 COMMENT
+READ POSTS »
+Big List Of Google Dorks For Sqli Injection
+By Suraj Singh  Tuesday, August 01, 2017
+POST A COMMENT
+READ POSTS »
+how to configure burpsuite with firefox?
+By Suraj Singh  Wednesday, August 23, 2017
+POST A COMMENT
+READ POSTS »
+Latest Google Dorks List
+By Suraj Singh  Monday, August 14, 2017
+POST A COMMENT
+READ POSTS »
+Python Beautiful Soup Module - Tutorial - Part 2
+By Suraj Singh  Tuesday, February 14, 2017
+1 COMMENT
+READ POSTS »
+Create Ping Sweeping Script Using Python
+By Suraj Singh  Wednesday, February 15, 2017
+1 COMMENT
+READ POSTS »
+List of Keyboard Shortcuts Keys for GNOME Desktop (Kali linux / Linux / Ubuntu/*nix )
+By Suraj Singh  Wednesday, January 18, 2017
+POST A COMMENT
+READ POSTS »
+What is Burp Suite And its Features?
+By Suraj Singh  Monday, August 21, 2017
+POST A COMMENT
+READ POSTS »
+What is the use of Pseudo header in TCP/UDP packets?
+By Suraj Singh  Tuesday, December 26, 2017
+POST A COMMENT
+READ POSTS »
+
+
+ 
+About Me
+
+
+Hi! I'm Suraj Singh. 
+Technical Student,Who Believes That Hardwork & Failuer, Are Two Sides Of A Coin . I like to learn about Penetration Testing,
+Programming, Blogging, Computer Science Web Application Technologies, Cracking, Web scraping, CTFs Games, Networking And much more.
+Follow Me Here
+Facebook
+Github
+Twitter
+Labels
+Share
+
+ 
+Terms Of Service
+Disclaimer
+Privacy Policy
+Comments Policy
+SQL-ORM Documentation
+Forum
+Need help?
+Archive
+
+ 
+Translate
+ Powered by Blogger
+Bitforestinfo
+Share to Qzone
+Share to Sina Weibo
+Share to Tencent Weibo
+Share to WeChat
+Share to Facebook
+, Number of shares
+Share to Twitter
+Share to 打印
+Share to 收藏夾
+Share to Pinterest
+, Number of shares
+Share to 更多...
+, Number of shares
+SHARES
+Follow

@@ -1,0 +1,2 @@
+网络连接状态
+netstat -tlp

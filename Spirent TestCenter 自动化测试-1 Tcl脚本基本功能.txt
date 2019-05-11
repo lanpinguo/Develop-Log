@@ -1,0 +1,239 @@
+#!/bin/sh
+# aTemplate.tcl \
+exec tclsh "$0" ${1+"$@"}
+#-----------------------------------------------------
+#
+#
+#-----------------------------------------------------
+
+#引用STC API ,SpirentTestCenter.tcl的路径
+source {C:\Program Files\Spirent Communications\Spirent TestCenter 4.20\Spirent TestCenter Application\SpirentTestCenter.tcl}
+
+#开启日志，-logTo ：日志保存路径 ，使用stdout为标准输出；  -loglevel ： 可选 DEBUG、 INFO 、WARN 和 ERROR 四种；
+stc::config automationoptions -logTo "aTemplateLog.txt" -logLevel DEBUG
+
+#配置机框Ip 槽位 端口号
+
+set chassisAddress "192.168.0.100"
+
+set slotPort1 "8/25"
+
+set slotPort2 "8/26"
+
+#创建一个项目
+
+set ProjectA [stc::create project]
+
+#在项目ProjextA 下创建一个发送端口 和一个接收端口
+
+set TxPort [stc::create port -under $ProjectA]
+
+set RxPort [stc::create port -under $ProjectA]
+
+set portReturn [stc::config $TxPort -location "//$chassisAddress/$slotPort1"]
+
+set portReturn [stc::config $RxPort -location "//$chassisAddress/$slotPort2"]
+
+#配置端口类型，根据实际端口类型选择参数：Ethernet10GigFiber、Ethernet100GigFiber、Ethernet40GigFiber、Ethernet10GigCopper、EthernetCopper等；
+
+set ethernetFiber(1) [stc::create "Ethernet10GigFiber" -under $TxPort -Name "ethernetFiber 1"]
+
+set ethernetFiber(2) [stc::create "Ethernet10GigFiber" -under $RxPort -Name "ethernetFiber 2"]
+
+#在发送端口下创建StreamBlock(1)
+
+set StreamBlock(1) [stc::create "StreamBlock" \
+ -under $TxPort \
+                  -frameConfig "" \
+ -FrameLengthMode "FIXED" \
+ -FixedFrameLength "222"  \
+                  -name "StreamBlock_1"]
+
+#在StreamBlock(1)中添加EthII头
+
+set StrEthII [stc::create ethernet:EthernetII -under $StreamBlock(1) -name eht_1 -srcMac 11:11:11:11:11:11 -dstMac 22:22:22:22:22:22 ]
+
+#添加IPv4头 
+
+set strIPv4 [stc::create ipv4:IPv4 -under $StreamBlock(1) -name Ipv4_1 -sourceAddr 10.10.10.10 -destAddr 20.20.20.20]
+
+#添加TCP头
+
+set strTcp [stc::create tcp:Tcp -under $StreamBlock(1) -name tcp1 -sourcePort 10 -destPort 20 ]
+
+#创建Streamblock2
+
+set StreamBlock(2) [stc::create "StreamBlock" \
+ -under $TxPort \
+ -frameConfig "" \
+ -FrameLengthMode "FIXED" \
+ -FixedFrameLength "222"  \
+ -name "StreamBlock_2"]
+
+set StrEthII [stc::create ethernet:EthernetII -under $StreamBlock(2) -name eht_2 -srcMac 31:11:11:11:11:11 -dstMac 42:22:22:22:22:22 ]
+#添加IPv4头 
+
+set strIPv4 [stc::create ipv4:IPv4 -under $StreamBlock(2) -name Ipv4_2 -sourceAddr 40.40.40.40 -destAddr 50.50.50.50]
+
+#添加TCP头
+
+set strTcp [stc::create udp:Udp -under $StreamBlock(2) -name tcp_2 -sourcePort 40 -destPort 50 ]
+
+#配置StreamBlock(1)的modifier 可以选择 RangeModifer 、RandomModifier 、TableModifier
+
+#StreamBlock1 源Ip 随机
+
+set RandomModifier1 [stc::create RandomModifier -under $StreamBlock(1) -Mask {0.0.0.255}  -RecycleCount 10 -Offset 0 -EnableStream FALSE -OffsetReference {Ipv4_1.sourceAddr} ]
+
+#StreamBlock2 目的Ip 递增
+
+set RangeModifier2 [stc::create RangeModifier -under $StreamBlock(2) -ModifierMode INCR -Mask {0.0.255.0} -StepValue {0.0.1.0} -RecycleCount 10 -RepeatCount 0 -Data {0.0.50.0} -EnableStream FALSE -Offset 0 -OffsetReference {Ipv4_2.destAddr} -Active true]
+
+#在发送端口创建 generator
+
+set generator1 [stc::get $TxPort -children-Generator ] 
+
+stc::config $generator1 -Name "Generator_1"
+
+#配置 generator1 ,
+
+set generatorConfig1 [stc::get $generator1 -children-GeneratorConfig ]
+
+#-------------------------------配置说明--------------------------------------------
+#SchedulingModes属性，可选参数：PORT_BASED 、RATE_BASED 、PRIORITY_BASED 、MANUAL_BASED
+#DurationMode属性，可选参数：CONTINUOUS 、BURSTS 、SECONDS 等，
+#LoadUnit属性，可选参数：PERCENT_LINE_RATE 、FRAMES_PER_SECOND 、BITS_PER_SECOND 、
+#                  KILOBITS_PER_SECOND 、MEGABITS_PER_SECOND 、INTER_BURST_GAP
+#---------------------------------------------------------------------------------
+
+stc::config $generatorConfig1 -SchedulingMode "PORT_BASED" \
+                              -DurationMode "BURSTS" \
+                              -BurstSize 1 \
+   -Duration 20 \
+
+#在接收端口创建analyzer   
+
+set analyzer1 [stc::get $RxPort -children-Analyzer]
+
+#配置analyzer
+
+stc::config $analyzer1 -Name "Analyzer 1"
+
+set analyzerConfig1 [stc::get $analyzer1 -children-AnalyzerConfig]
+
+
+#-------------------------------配置说明--------------------------------------------
+#TimestampLatchMode 属性 ，可选参数：START_OF_FRAME 、END_OF_FRAME
+#
+#---------------------------------------------------------------------------------
+
+stc::config $analyzerConfig1 -TimestampLatchMode "END_OF_FRAME" -JumboFrameThreshold "1500" -OversizeFrameThreshold "2000" -UndersizeFrameThreshold "64" -AdvSeqCheckerLateThreshold "1000" -Name "AnalyzerConfig_1"
+
+#配置实时结果获取
+#结果保存在 与脚本相同路径下，结果文件名为 result
+
+set generatorResult [ stc::subscribe -Parent $ProjectA \
+-ResultParent $TxPort \
+-ConfigType Generator \
+-resulttype GeneratorPortResults \
+-filenameprefix "result"]
+
+set analyzerResult [ stc::subscribe -Parent $ProjectA \
+ -ResultParent $RxPort \
+ -ConfigType Analyzer \
+ -resulttype AnalyzerPortResults \
+ -filenameprefix "result" ] 
+
+#连接机框
+
+set resultReturn [ stc::connect $chassisAddress]
+
+#占用端口
+
+set resultReturn [ stc::reserve "//$chassisAddress/$slotPort1"]
+
+set resultReturn [ stc::reserve "//$chassisAddress/$slotPort2"]
+
+#配置抓包端口
+
+set captureRx [stc::get $RxPort -children-capture]
+
+set captureTx [stc::get $TxPort -children-capture]
+
+#-----------------------------------配置说明-------------------------------------
+#
+#mode 属性，可选参数：REGULAR_MODE，抓所有报文； SIG_MODE：抓有signature的报文。
+#Buffermode 属性， 可选参数：WRAP 当缓冲区写满时，回滚，继续抓包，   STOP_ON_FULL ：当缓冲区写满时，停止
+#srcMode 属性，可选参数： TX_MODE 、 RX_MODE 、 TX_RX_MODE
+#
+#-----------------------------------------------------------------------------
+
+stc::config  $captureRx -mode REGULAR_MODE -BufferMode WRAP -srcMode RX_MODE 
+
+#stc::perform StreamBlockUpdate -streamBlock "$StreamBlock(1)"
+
+#stc::perform StreamBlockUpdate -streamBlock "$StreamBlock(2)"
+
+#建立逻辑端口与物理端口的映射
+
+set resultReturn [stc::perform setupPortMappings]
+
+#执行apply
+
+set resultReturn [stc::apply]
+
+#-------------------------------------------------------------------------------
+#                                     配置完成
+#-------------------------------------------------------------------------------
+
+#开始analyzer
+
+set analyzerCurrent [stc::get $RxPort -children-analyzer ]
+
+stc::perform analyzerStart -analyzerList $analyzerCurrent
+
+#开启抓包
+
+stc::perform CaptureStart -captureProxyId $captureRx
+
+#开始发包
+
+set generatorCurrent [stc::get $TxPort -children-generator ]
+
+stc::perform generatorStart -generatorList $generatorCurrent
+
+#等待执行结束
+stc::sleep 20
+
+# 停止发包
+
+stc::perform generatorStop -generatorList $generatorCurrent
+
+#停止抓包
+
+stc::perform CaptureStop -captureProxyId $captureRx
+#保存抓包结果
+
+stc::perform CaptureDataSave -captureProxyId $captureRx -FileName "template.R.pcap" -FileNamePath "D:\\eclipse\\workspace\\Result\\"
+
+#停止analyzer
+
+stc::perform analyzerStop -analyzerList $analyzerCurrent
+
+#释放端口
+
+stc::release [stc::get $TxPort -location]
+
+stc::release [stc::get $RxPort -location]
+
+#与机框断开连接
+
+stc::disconnect $chassisAddress
+
+#删除 project
+
+stc::delete $ProjectA
+
+stc::perform ResetConfig -config system1
+
+puts "ok"

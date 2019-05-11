@@ -1,0 +1,2 @@
+solve problem:*** /lib/modules/3.10.65/build: No such file or directory
+sudo apt-get install kernel-package 

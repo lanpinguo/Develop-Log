@@ -1,0 +1,47 @@
+
+1、挂载windows共享文件夹
+mount -t cifs -o  username=share,password=share //172.16.1.28/object/hushouqiang cloud
+
+2、手工挂载sabma共享文件夹
+ 有两个命令可以用来手工挂载samba文件系统，一个是mount，一个是smbmount。
+2.1 使用mount命令挂载
+  mount就是用于挂载文件系统的，SMB做为网络文件系统的一种，也能用mount挂载   一般挂载的用法为：
+mount -t smbfs -o codepage=cp936,username=用户名,password=密码 , -l //ip地址/共享文件夹名 挂载点
+或
+mount -t smbfs -o codepage=cp936,username=用户名,password=密码 , -l //计算机名/共享文件夹名 挂载点
+若没有设置用户名和密码，则可以简化为:
+mount -t smbfs -o  //ip地址或计算机名/共享文件夹名 挂载点
+
+例如(在ubuntu 16.06上不需要codepage选项):
+mount -t cifs -o  username=orangepi,password=orangepi //192.168.2.200/orangePi orangepi
+
+2.2 使用smbmount命令挂载
+  smbmount说到底也是用mount的一个变种,因此，类似于mount命令，smbmount的用法为：
+smbmount -o username=用户名,password=密码 , -l //ip地址/共享文件夹名 挂载点
+smbmount -o username=用户名,password=密码 , -l //计算机名/共享文件夹名 挂载点
+smbmount //ip地址或计算机名/共享文件夹名 挂载点
+
+3 自动挂载
+
+ 要让linux在启动时自动挂载samba文件系统，就需要用root用户编辑/etc/fstab文件，在其中加入一行
+
+//ip地址或计算机名/共享文件夹名 挂载点  smbfs   username=用户名,password=密码       0       0
+
+
+
+
+
+
+
+PS:
+
+ubuntu12.10之后，smbfs被cifs代替。因此需要
+
+（1） 安装cifs-utils
+
+          sudo apt-get install cifs-utils
+
+（2） 将上面命令中的smbfs改为 cifs
+
+
+  (3)    若系统启动时报挂载smbfs/cifs失败(我一开始的时候报了-101),请检查是否安装了autofs服务

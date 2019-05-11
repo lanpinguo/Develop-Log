@@ -1,0 +1,3 @@
+英文Ubuntu系统安装中文支持
+
+sudo apt-get install fonts-wqy-zenhei

@@ -1,0 +1,33 @@
+ 
+
+(gdb) info line *0x400a10 
+
+
+ 
+程序异常终止时打印异常程序调用堆栈 
+gcc -g -rdynamic BackTraceTest.c -o BackTraceTest 
+
+运行程序出现错误: 
+System error, Stack trace: 
+./BackTraceTest(SystemErrorHandler+0x77) [0x40095b] 
+/lib64/libc.so.6() [0x3a4fe326b0] 
+./BackTraceTest(Fun1+0x10) [0x400a10] 
+./BackTraceTest(Fun+0xe) [0x400a23] 
+./BackTraceTest(main+0x37) [0x400a5c] 
+/lib64/libc.so.6(__libc_start_main+0xfd) [0x3a4fe1ed5d] 
+./BackTraceTest() [0x400829] 
+Segmentation fault (core dumped) 
+
+gdb打印错误行信息 
+gdb BackTraceTest 
+(gdb) info line *0x400a10 
+Line 66 of "BackTraceTest.c" starts at address 0x400a0c <Fun1+12> and ends at 0x400a13 <Fun1+19>. 
+(gdb) list *0x400a10 
+0x400a10 is in Fun1 (BackTraceTest.c:66). 
+warning: Source file is more recent than executable. 
+
+
+
+addr2line 定位程序地址对应的源代码位置 
+addr2line  -e BackTraceTest -i 0x400a10 
+/home/cyf/workspace/BackTraceTest/BackTraceTest.c:66 

@@ -1,0 +1,49 @@
+c++2numpy
+
+#include "boost/numpy.hpp"
+
+namespace bp = boost::python;
+namespace bn = boost::numpy;
+
+std::vector<double> myfunc(...);
+
+bn::ndarray mywrapper(...) {
+    std::vector<double> v = myfunc(...);
+    Py_intptr_t shape[1] = { v.size() };
+    bn::ndarray result = bn::zeros(1, shape, bn::dtype::get_builtin<double>());
+    std::copy(v.begin(), v.end(), reinterpret_cast<double*>(result.get_data()));
+    return result;
+}
+
+BOOST_PYTHON_MODULE(example) {
+    bn::initialize();
+    bp::def("myfunc", mywrapper);
+}
+
+
+numpy2c++
+
+#include <boost/python.hpp>
+#include <boost/python/numpy.hpp>
+
+#include <iostream>
+
+namespace bpy = boost::python;
+namespace bnp = boost::python::numpy;
+
+void do_stuff(const bnp::ndarray& input_array) {
+    ...
+};
+
+/*
+ * This is a macro Boost.Python provides to signify a Python extension module. This enables me to import example_boost.cpp and call do_stuff() within a Python file. 
+ */
+BOOST_PYTHON_MODULE(crf) {
+    // Expose the functions
+    boost::python::def("compute_factor_out_msgs", compute_factor_out_msgs);
+}
+
+编译注意事项：
+To resolve the make issue, the Makefile would have to also link -lboost_numpy.
+Even though it would compile, the result would be a seg fault (stack overflow) because we need to first initialize with
+Py_Initialize(); bnp::initialize();

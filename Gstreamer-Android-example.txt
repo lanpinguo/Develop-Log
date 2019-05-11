@@ -1,0 +1,6 @@
+
+Gstreamer-Android-example
+
+https://github.com/jaroslavas/Gstreamer-Android-example
+
+https://github.com/jaroslavas/Gstreamer-Android-example.git

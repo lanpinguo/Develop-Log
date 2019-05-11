@@ -1,0 +1,15 @@
+Ubuntu / Kubuntu / Xubuntu / Lubuntu (13.10 Saucy Salamander以及之后更新的版本)
+1 首先要根据你的喜好来选择一个PPA源添加到你的系统里：
+
+（译者注：这里稳定版和每夜版二选一就可以，如果要体验最新特性，可以使用每夜版，但是如果用于长期使用追求稳定，推荐用稳定版，二者千万不要同时添加，避免出现混乱和错误。）
+
+sudo add-apt-repository ppa:kivy-team/kivy #稳定版
+sudo add-apt-repository ppa:kivy-team/kivy-daily  #每夜版
+2 然后就要用包管理器来更新一下包列表了：
+
+sudo apt-get update
+3 更新列表完毕之后，如果没有错误，就可以安装了：
+
+sudo apt-get install python-kivy #Python2 用这个来安装
+sudo apt-get install python3-kivy #Python3 要加一个3  
+sudo apt-get install python-kivy-examples #可选的样例代码

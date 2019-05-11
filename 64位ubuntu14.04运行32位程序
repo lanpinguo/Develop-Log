@@ -1,0 +1,6 @@
+To run 32bit executable file in a 64 bit multi-arch Ubuntu system, you have to add i386 architecture and install libc6:i386,libncurses5:i386,libstdc++6:i386 these three library packages.
+
+sudo dpkg --add-architecture i386
+sudo apt-get update
+sudo apt-get install libc6:i386 libncurses5:i386 libstdc++6:i386
+sudo ./adb

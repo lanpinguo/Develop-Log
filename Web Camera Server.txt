@@ -1,0 +1,30 @@
+Web Camera Server
+According to the above,the USB camera works well on OP, we can watch the video on monitor connected to OP. But sometimes we want use OP to play a role as IP camera so that it has much fun. It can be used to monitor your house frome anywhere so that nobody dare to break into your lovely house.
+ 
+1. Reference to the above ,use command "lsusb" to check the usb camera has been identified by our OP. Now we need to install the software, we are going to be using a great little application called Motion, this will do a few things for us including accessing the USB cam, getting the images, and streaming them via a built in web server. As the name suggests it will also track and trigger events on motion been detected in the video frames #:(more on that later).
+
+sudo apt-get install motion
+2. Make sure that your OP has access to internet and check the IP address of your OP:
+ifconfig
+3. Configure the software
+sudo nano /etc/motion/motion.conf
+In here there are a few basic changes that you need to perform:
+Daemon = OFF to ON
+stream_localhost = ON to OFF
+
+You can change other settings but it’s recommend you don’t take more than 2 frames, and you been the default frame pixel size, for stability.
+4. Start the software To ensure that the motion service will actually start as a daemon we need to change another configuration setting, so enter the following:
+sudo nano /etc/default/motion
+Then change the value "start_motion_daemon=no" to "yes" 
+
+
+Finally you can start the motion service to stream the web cam images
+sudo service motion start
+or,
+sudo /etc/init.d/motion start
+
+Then after about 30 seconds using your PC browse to the new web interface, which should be at the below URL (where 192.168.1.125 is your Orange PI's IP address) 
+http://192.168.1.125:8081
+Note:1.Use Firefox browser.Because I test it in other browsers,such as IE , Google Chrome, Cheetah Browser(in China,liebao), 360 etc.Maybe they lack necessary plugin about web usb server,or other reasons.2.You can modify the image width and image height(default 352,288) to suitable srceen .If you cannot get the result,you also are recommended to try to modify the image width and image height. 
+
+If all goes well, you can watch the frames captured by the USB camera.

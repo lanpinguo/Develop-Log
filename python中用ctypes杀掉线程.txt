@@ -1,0 +1,72 @@
+orangepi hw addr:
+eth.addr == 00:1d:43:10:00:27
+
+xiaomi phone:
+eth.addr == 34:80:b3:f1:38:72
+
+下面的代码是 用ctypes 杀掉线程的样例，不推荐使用，因为太粗暴了.
+?
+
+import ctypes
+  
+def terminate_thread(thread):
+  if not thread.isAlive():
+    return
+  
+  exc = ctypes.py_object(SystemExit)
+  res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
+    ctypes.c_long(thread.ident), exc)
+  if res == 0:
+    raise ValueError("nonexistent thread id")
+  elif res > 1:
+    ctypes.pythonapi.PyThreadState_SetAsyncExc(thread.ident, None)
+    raise SystemError("PyThreadState_SetAsyncExc failed")
+咱们简单look一下PyThreadState源代码，总而言之触发线程的异常模式。 有兴趣的人可以阅读 python pystate.c 的设计，配合着youtube的一些视频分享。
+?
+
+int
+PyThreadState_SetAsyncExc(long id, PyObject *exc) {
+  PyInterpreterState *interp = GET_INTERP_STATE();
+  ...
+  HEAD_LOCK();
+  for (p = interp->tstate_head; p != NULL; p = p->next) {
+    if (p->thread_id == id) {
+      从链表里找到线程的id，避免死锁，我们需要释放head_mutex。
+      PyObject *old_exc = p->async_exc;
+      Py_XINCREF(exc); #增加该对象的引用数
+      p->async_exc = exc; # 更为exc模式
+      HEAD_UNLOCK();
+      Py_XDECREF(old_exc); # 因为要取消，当然也就递减引用
+      ...
+      return 1; #销毁线程成功
+    }
+  }
+  HEAD_UNLOCK();
+  return 0;
+}
+原生posix pthread 可以使用 ptread_cancel(tid) 在主线程中结束子线程。但是 Python 的线程库不支持这样做，理由是我们不应该强制地结束一个线程，这样会带来很多隐患，应该让该线程自己结束自己。所以在 Python 中，推荐的方法是在子线程中循环判断一个标志位，在主线程中改变该标志位，子线程读到标志位改变，就结束自己。
+类似这个逻辑:
+
+def consumer_threading():
+ t1_stop= threading.Event()
+ t1 = threading.Thread(target=thread1, args=(1, t1_stop))
+  
+ t2_stop = threading.Event()
+ t2 = threading.Thread(target=thread2, args=(2, t2_stop))
+  
+ time.sleep(duration)
+ #stop the thread2
+ t2_stop.set()
+  
+def thread1(arg1, stop_event):
+ while(not stop_event.is_set()):
+   #similar to time.sleep()
+   stop_event.wait(time)
+   pass
+  
+  
+def thread2(arg1, stop_event):
+ while(not stop_event.is_set()):
+   stop_event.wait(time)
+   pass
+简单的总结，虽然我们可以用ctypes里的pystats来控制线程，但这种粗暴中断线程的方法是不合理的。 请选用 自杀模式 ！如果你的线程正在发生io阻塞，而不能判断事件怎么办？ 你的程序需要做优化了，最少在网络io层需要有主动的timeout，避免一直的阻塞下去。

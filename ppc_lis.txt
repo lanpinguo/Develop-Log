@@ -1,0 +1,13 @@
+addis addis
+Add Immediate Shifted
+addis rD,rA,SIMM
+if rA = 0 then rD ¨ EXTS(SIMM || (16)0)
+else rD ¨ (rA) + EXTS(SIMM || (16)0)
+The sum (rA|0) + (SIMM || 0x0000) is placed into rD.
+The addis instruction is preferred for addition because it sets few status bits. Note that
+addis uses the value 0, not the contents of GPR0, if rA = 0.
+Other registers altered:
+• None
+Simplified mnemonics:
+	lis rD,value 		equivalent to 		addis rD,0,value
+	subis rD,rA,value 	equivalent to 		addis rD,rA,–value

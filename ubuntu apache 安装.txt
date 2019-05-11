@@ -1,0 +1,10 @@
+
+Apache的第二个配置文件000-default.conf的路径
+在终端窗口中输入"ls /etc/apache2/sites-available"-->回车-->有一个"000-default.conf"的配置文件。
+
+修改网站的根目录
+1、在终端窗口中输入"sudo vi /etc/apache2/apache2.conf"-->回车-->找到"<Directory /var/www/>"的位置-->更改"/var/www/"为新的根目录就可以了。
+2、在终端窗口中输入"sudo vi /etc/apache2/sites-available/000-default.conf"-->回车-->找到"DocumentRoot /var/www/html"的位置-->更改"/var/www/html"为新的根目录就可以了，这里我把它更改为"/var/www/"。
+
+重启Apache
+在终端窗口中输入"sudo /etc/init.d/apache2 restart"-->回车-->"输入root用户密码"-->回车-->重启成功。

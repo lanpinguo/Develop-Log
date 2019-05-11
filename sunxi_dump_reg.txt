@@ -1,0 +1,6 @@
+lanpinguo@lanpinguo-vm:/work/orangePi/OrangePi_H5SDK$ grep -r -n "sunxi-reg" kernel/drivers/
+kernel/drivers/gpio/gpio-sunxi.c:1:/* driver/misc/sunxi-reg.c
+kernel/drivers/char/dump_reg/dump_reg.c:985:	.name  = "sunxi-reg",
+Binary file kernel/drivers/char/dump_reg/dump_reg.o matches
+Binary file kernel/drivers/char/dump_reg/built-in.o matches
+Binary file kernel/drivers/char/built-in.o matches

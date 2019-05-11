@@ -1,0 +1,52 @@
+$vncserver :0 -geometry 1600x1200
+$vncserver :1 -geometry 1440x900
+
+ubuntu@ip-172-26-0-148:~/.vnc$ vncserver -kill :1
+Killing Xvnc4 process ID 2206
+ubuntu@ip-172-26-0-148:~/.vnc$ vncserver :1 -geometry 1920x1080
+
+New 'ip-172-26-0-148:1 (ubuntu)' desktop is ip-172-26-0-148:1
+
+Starting applications specified in /home/ubuntu/.vnc/xstartup
+Log file is /home/ubuntu/.vnc/ip-172-26-0-148:1.log
+
+ubuntu@ip-172-26-0-148:~/.vnc$ vncserver -kill :1              
+Killing Xvnc4 process ID 3385
+ubuntu@ip-172-26-0-148:~/.vnc$ vncserver :1 -geometry 1024x768
+
+New 'ip-172-26-0-148:1 (ubuntu)' desktop is ip-172-26-0-148:1
+
+Starting applications specified in /home/ubuntu/.vnc/xstartup
+Log file is /home/ubuntu/.vnc/ip-172-26-0-148:1.log
+
+ubuntu@ip-172-26-0-148:~/.vnc$ 
+ubuntu@ip-172-26-0-148:~/.vnc$ vncserver -kill :1             
+Killing Xvnc4 process ID 3665
+ubuntu@ip-172-26-0-148:~/.vnc$ 
+ubuntu@ip-172-26-0-148:~/.vnc$ 
+ubuntu@ip-172-26-0-148:~/.vnc$ vncserver :1 -geometry 1024x576
+
+New 'ip-172-26-0-148:1 (ubuntu)' desktop is ip-172-26-0-148:1
+
+Starting applications specified in /home/ubuntu/.vnc/xstartup
+Log file is /home/ubuntu/.vnc/ip-172-26-0-148:1.log
+
+ubuntu@ip-172-26-0-148:~/.vnc$ 
+ubuntu@ip-172-26-0-148:~/.vnc$ vncserver -kill :1             
+Killing Xvnc4 process ID 3987
+ubuntu@ip-172-26-0-148:~/.vnc$ vncserver :1 -geometry 1280x720
+
+New 'ip-172-26-0-148:1 (ubuntu)' desktop is ip-172-26-0-148:1
+
+Starting applications specified in /home/ubuntu/.vnc/xstartup
+Log file is /home/ubuntu/.vnc/ip-172-26-0-148:1.log
+
+ubuntu@ip-172-26-0-148:~/.vnc$ 
+ubuntu@ip-172-26-0-148:~/.vnc$ vncserver -kill :1             
+Killing Xvnc4 process ID 4277
+ubuntu@ip-172-26-0-148:~/.vnc$ vncserver :1 -geometry 896x504
+
+New 'ip-172-26-0-148:1 (ubuntu)' desktop is ip-172-26-0-148:1
+
+Starting applications specified in /home/ubuntu/.vnc/xstartup
+Log file is /home/ubuntu/.vnc/ip-172-26-0-148:1.log

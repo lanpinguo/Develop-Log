@@ -1,0 +1,29 @@
+There are a few packages that will need installing to use I2C. The first command to run is :
+sudo apt-get install i2c-tools
+ If this fails, try running sudo apt-get updateand try again, else run crying to your nearest nerd. The other package needed can be installed by running:
+sudo apt-get install python-smbus.
+
+To configure the software, we will add the Pi user to the I2C access group, by running the command :
+sudo adduser pi i2c.
+Now run sudo reboot to reboot, and test the new software.
+
+To test the software, run the command:
+i2cdetect -y 0 
+
+to see if there is anything connected. On my setup, it returned this output, because there was nothing connected:
+root@Orangepi:~# i2cdetect -y 0
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:          -- -- -- -- -- -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+40: 40 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --   
+
+sudo i2cdetect -l
+
+可能需要安装的工具：
+root@Orangepi:/# apt install python3-setuptools
+root@Orangepi:/# apt install python3-dev

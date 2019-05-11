@@ -1,0 +1,353 @@
+脚本
+# P device : SWAP 
+
+# MPLS Packets ingressed at GE1 with tunnel labels 0x1111 and VC label 0x2222 0x3333
+
+# 00 00 00 00 02 22 00 00 00 00 00 BB 81 00 00 0B 88 47 01 11 10 40 02 22 21 40 03 33 30 40 45 00 00 62 00 00 00 00 40 72 E2 00 C6 13 0B 02 C6 13 01 01
+
+#------------------------------------------------------------------------------------------------------------
+
+ 
+
+sdk 6.6 版本的，需要vpn_id>=0x3000, 之前5.5 的配置为0x2000就可以   20140918
+
+ 
+
+ 
+
+cint
+
+cint_reset();
+
+int unit=0;
+
+bcm_port_t port_1 = 11 ;
+
+bcm_port_t port_2 = 12;  
+
+bcm_gport_t gport_1, gport_2;
+
+    
+
+bcm_port_gport_get(unit, port_1, &gport_1);
+
+printf("gport_1=0x%x\n", gport_1);
+
+bcm_port_gport_get(unit, port_2, &gport_2);
+
+printf("gport_2=0x%x\n", gport_2);
+
+ 
+
+bcm_switch_control_set(0, bcmSwitchL3EgressMode, 1);
+
+bcm_vlan_control_set(0, bcmVlanTranslate, 1);
+
+bcm_switch_control_set(0, bcmSwitchL2StaticMoveToCpu, 1);
+
+ 
+
+bcm_vlan_create(0,21);
+
+print bcm_vlan_gport_add(0, 21, gport_1, 0);
+
+    
+
+bcm_vlan_create(0, 1);
+
+print bcm_vlan_gport_add(0, 1, gport_2, 0);
+
+exit;
+
+ 
+
+ 
+
+l3 intf add vlan=1 mac=0x10 intf=10
+
+ 
+
+l3 egress add mac=0x110 intf=10 port=0x800000c
+
+ 
+
+mpls tunnel init set EgrTunnelLabel=0x999 EgrLabelOptions=1  EgrTTL=44 INtf=10
+
+ 
+
+ 
+
+mpls init
+
+ 
+
+mpls vpn create vpws VPN=0x3000
+
+ 
+
+mpls vpn port add vpn=0x3000  portmatch=portvlan  port=0x800000b  vlan=21  IntfFlaGs=CouNTed
+
+ 
+
+mpls vpn port add vpn=0x3000  portmatch=Label port=0x800000c  \
+
+egrobj=100002  IntfFlaGs=Network,EgressTunnel  VCTermLabel=0x1000  VCInitLabel=0x2000
+
+ 
+
+ 
+
+/*POP  操作*/
+
+mpls tunnel switch add action=2   IngLabel=0x111  vpn=0x3001
+
+mpls tunnel l2 add mac=0x10 vlan=23
+
+
+
+
+VPLS 实现
+
+
+cint> cint_reset();
+
+cint> int unit=0;
+
+cint> bcm_port_t port_1 = 11 ;
+
+cint> bcm_port_t port_2 = 12;
+
+cint> bcm_gport_t gport_1, gport_2;
+
+cint>
+
+cint> bcm_port_gport_get(unit, port_1, &gport_1);
+
+cint> printf("gport_1=0x%x\n", gport_1);
+
+gport_1=0x800000b
+
+cint> bcm_port_gport_get(unit, port_2, &gport_2);
+
+cint> printf("gport_2=0x%x\n", gport_2);
+
+gport_2=0x800000c
+
+cint>
+
+cint> bcm_switch_control_set(0, bcmSwitchL3EgressMode, 1);
+
+cint> bcm_vlan_control_set(0, bcmVlanTranslate, 1);
+
+cint> bcm_switch_control_set(0, bcmSwitchL2StaticMoveToCpu, 1);
+
+cint>
+
+cint>
+
+cint> bcm_vlan_create(0,21);
+
+cint> print bcm_vlan_gport_add(0, 21, gport_1, 0);
+
+int $$ = 0 (0x0)
+
+cint>
+
+cint> bcm_vlan_create(0, 23);
+
+cint> print bcm_vlan_gport_add(0, 23, gport_2, 0);
+
+int $$ = 0 (0x0)
+
+cint>
+
+cint> exit;
+
+BCM.0>
+
+BCM.0>
+
+BCM.0> vlan show
+
+vlan 1  ports cpu,ge,hg (0x000000000000000000000000000000000000000000000000000000003ffffffd), untagged ge (0x0000000000000000000000000000000000000000000000000000000003fffffc) MCAST_FLOOD_UNKNOWN
+
+vlan 21 ports ge9 (0x0000000000000000000000000000000000000000000000000000000000000800), untagged none (0x0000000000000000000000000000000000000000000000000000000000000000) MCAST_FLOOD_UNKNOWN
+
+vlan 23 ports ge10 (0x0000000000000000000000000000000000000000000000000000000000001000), untagged none (0x0000000000000000000000000000000000000000000000000000000000000000) MCAST_FLOOD_UNKNOWN
+
+BCM.0>
+
+BCM.0>
+
+BCM.0> l3 intf add vlan=23 mac=0x10 intf=10
+
+BCM.0> l3 egress add mac=0x110 intf=10 port=0x800000c
+
+New egress object index: 100002
+
+Environment variable (egr_object_id) was set
+
+BCM.0>
+
+BCM.0> mpls tunnel init set EgrTunnelLabel=0x999  EgrLabelOptions=1  EgrTTL=44 intf=10
+
+BCM.0>
+
+BCM.0>
+
+BCM.0>
+
+BCM.0> mpls vpn create vpls vpn=0x3001   BcastGroup=7
+
+MPLS_CLI: Error: bcm_mpls_vpn_id_create failed, Invalid parameter
+
+BCM.0>
+
+BCM.0>
+
+BCM.0>
+
+BCM.0> mpls vpn create vpls vpn=0x2001   BcastGroup=3
+
+MPLS_CLI: Error: bcm_mpls_vpn_id_create failed, Invalid parameter
+
+BCM.0> mpls vpn create vpls vpn=0x2005   BcastGroup=0
+
+MPLS_CLI: Error: bcm_multicast_create failed, Entry exists
+
+BCM.0>  mpls mcast group create vpls McastGroup=6
+
+env var added : $mcast_type_id=0x03000006
+
+BCM.0>
+
+BCM.0> mpls vpn port add vpn=0x3001  portmatch=portvlan  port=0x800000b  vlan=21  IntfFlaGs=CouNTed
+
+env var added : $mpls_port_id=0x18000001
+
+BCM.0>
+
+BCM.0> mpls mcast group port add McastGroup=0x03000006  MplsPort=0x18000001
+
+BCM.0> mpls vpn port add vpn=0x3001  portmatch=Label port=0x800000c  \
+
+? egrobj=100002  IntfFlaGs=Network,EgressTunnel  VCTermLabel=0x1000  VCInitLabel=0x2000
+
+env var added : $mpls_port_id=0x18000003
+
+BCM.0> mpls mcast group port add McastGroup=0x03000006  MplsPort=0x18000002
+
+MPLS_CLI: Error: _bcm_esw_gport_resolve failed, Entry not found
+
+BCM.0> mpls mcast group port add McastGroup=0x03000006  MplsPort=0x18000003
+
+BCM.0>
+
+
+
+
+脚本实现LER功能（标签push 、pop）
+
+
+# P device : 
+
+# MPLS Packets ingressed at GE1 with tunnel labels 0x1111 and VC label 0x2222 0x3333
+
+# 00 00 00 00 02 22 00 00 00 00 00 BB 81 00 00 0B 88 47 01 11 10 40 02 22 21 40 03 33 30 40 45 00 00 62 00 00 00 
+
+00 40 72 E2 00 C6 13 0B 02 C6 13 01 01
+
+#------------------------------------------------------------------------------------------------------------
+
+cint
+
+cint_reset();
+
+int unit=0;
+
+bcm_port_t port_1 = 11 ;
+
+bcm_port_t port_2 = 12;  
+
+bcm_gport_t gport_1, gport_2;
+
+    
+
+bcm_port_gport_get(unit, port_1, &gport_1);
+
+printf("gport_1=0x%x\n", gport_1);
+
+bcm_port_gport_get(unit, port_2, &gport_2);
+
+printf("gport_2=0x%x\n", gport_2);
+
+ 
+
+bcm_switch_control_set(0, bcmSwitchL3EgressMode, 1);
+
+bcm_vlan_control_set(0, bcmVlanTranslate, 1);
+
+bcm_switch_control_set(0, bcmSwitchL2StaticMoveToCpu, 1);
+
+ 
+
+bcm_vlan_create(0,21);
+
+print bcm_vlan_gport_add(0, 21, gport_1, 0);
+
+    
+
+bcm_vlan_create(0, 23);
+
+print bcm_vlan_gport_add(0, 23, gport_2, 0);
+
+exit;
+
+ 
+
+ 
+
+l3 intf add vlan=23 mac=0x10 intf=10
+
+ 
+
+l3 egress add mac=0x110 intf=10 port=0x800000c
+
+ 
+
+mpls tunnel init set EgrTunnelLabel=0x555 EgrLabelOptions=1  EgrTTL=44 INtf=10
+
+ 
+
+ 
+
+mpls vpn create vpws VPN=0x3000
+
+ 
+
+mpls vpn port add vpn=0x3000  portmatch=portvlan  port=0x800000b  vlan=21  IntfFlaGs=CouNTed
+
+ 
+
+mpls vpn port add vpn=0x3000  portmatch=Label port=0x800000c  \
+
+egrobj=100002  IntfFlaGs=Network,EgressTunnel  VCTermLabel=0x777  VCInitLabel=0x666
+
+ 
+
+ 
+
+/*POP  操作*/
+
+mpls tunnel switch add action=2   IngLabel=0x888  vpn=0x3001
+
+mpls tunnel l2 add mac=0x10 vlan=23
+
+ 
+
+/*注意要设置下satation*/
+
+ApiSetDefaultMplsStation
+
+
+

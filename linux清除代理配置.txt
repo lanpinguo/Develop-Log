@@ -1,0 +1,19 @@
+linux系统通过export http_proxy=     配置了上网代理临时使用
+
+方法：
+unset http_proxy 
+
+Linux下常用程序的代理服务器(proxy)配置
+Linux下有很多程序都只有命令行接口，对于这类程序，它们通过代理服务器(proxy)访问网络的方式也不尽相同。在本文中Easwy总结了一些常用Linux程序配置代理服务器的方法。 
+[ 通用代理服务器配置 ]
+对于大多数Linux控制台程序，例如Debian或Ubuntu中的apt-get和aptitude命令、git命令、wget命令，这些程序都使用http_proxy和ftp_proxy环境变量来获取代理服务的配置。 
+方法是在你的~/.bashrc里加上类似下面的话： 
+export http_proxy=http://username:password@proxyserver:port/
+export ftp_proxy=http://username:password@proxyserver:port/ 
+如果你的代理服务器需要用户名和密码才能访问，需要填写上面的username和passwd部分，否则的话，省略这两部分。 
+例如，假设你的代理服务器为192.168.1.1，端口是8080，用户名为easwy，密码是123456，那么应该这样设置这两个环境变量： 
+export http_proxy=http://easwy:123456@192.168.1.1:8080 
+export ftp_proxy=http://easwy:123456@192.168.1.1:8080 
+这样配置之后，退出再登录一次，或者直接使用下面的命令source一下.bashrc： 
+source ~/.bashrc
+现在，上述程序就可以通过代理服务器访问网络了。 

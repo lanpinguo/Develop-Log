@@ -1,0 +1,36 @@
+
+错误：
+Can't locate Shell.pm in @INC (you may need to install the Shell module) (@INC contains: /etc/perl /usr/local/lib/perl/5.18.2 /usr/local/share/perl/5.18.2 /usr/lib/perl5 /usr/share/perl5 /usr/lib/perl/5.18 /usr/share/perl/5.18 /usr/local/lib/site_perl .) at /eptn/eos/vobs/openflow/ofdpa/tools/swig/python/genifile.pl line 19.
+
+解决方法：
+
+Ubuntu中Shell命令行下自动安装Perl模块
+Posted on 2011年4月26日 by Yixf
+Windows下，可以用Perl Module Manager（Perl包管理器，PPM）来自动安装Perl模块。
+
+而在Ubuntu的shell命令行下，则可通过以下方式自动安装需要的模块：
+
+使用cpan
+
+直接在终端中输入：cpan 模块名称
+或者
+sudo cpan进入CPAN.pm自己的Shell，基本命令如下所示：
+h	帮助
+install	安装模块
+upgrade all	升级所有已安装模块
+
+使用cpanp（CPANPLUS）
+
+sudo cpanp进入交互式Shell，基本命令如下所示：
+h	帮助
+i	安装模块
+s selfupdate all	升级所有已安装模块
+
+
+具体命令：
+sudo apt-get install liblocal-lib-perl
+sudo apt-get install cpanminus
+sudo cpan
+install Shell
+exit
+

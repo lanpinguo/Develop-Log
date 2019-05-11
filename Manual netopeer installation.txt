@@ -1,0 +1,146 @@
+https://wiki.opendaylight.org/view/OpenDaylight_Controller:Config:Examples:Netconf:Manual_netopeer_installation
+OpenDaylight.org
+Get Software
+Documentation
+User Stories
+Community
+Blog
+Q&A Form
+Wiki
+ 
+
+
+
+Jump to: navigation, search
+
+
+
+OpenDaylight Controller:Config:Examples:Netconf:Manual netopeer installation
+
+
+
+Manual libnetconfd/netopeer installation
+ 1. Download, compile and install libnetconfd/netopeer. The instructions below are for Ubuntu 14.04
+ 2. Configure netconf client and server as described in: 
+
+Editing_Netconf_Client_Configuration_by_Creating_Initial_Controller_Config_File 
+
+
+
+
+In general compiling libnetconf and netopeer on Ubuntu should not be more
+difficult than compiling any other software from its source code.
+
+
+10. Install libxml2 (http://xmlsoft.org/)
+
+        sudo apt-cache search libxml2
+        sudo apt-get install libxml2
+		sudo apt-get install libssl-dev
+20. Install libxslt
+
+        sudo apt-cache search libxslt
+        sudo apt-get install libxslt1.1
+
+	You might find this error when 
+
+	config.status: executing libtool commands
+	/bin/rm: cannot remove 'libtoolT': No such file or directory
+
+	Solution:
+
+	edit file <configure> and change this line:
+
+	$RM "$cfgfile"
+
+	to
+
+	$RM -f "$cfgfile"
+
+
+30. Install libssh (www.libssh.org/)
+        Unfortunately at least version 0.6.4 is required and as long as
+        there is not a package with this version or higher available, you
+        must compile it from source.
+
+        git clone http://git.libssh.org/projects/libssh.git
+        cd libssh
+        mkdir build
+        cd build
+        cmake ..
+        make
+        sudo make install
+        
+  It will need openssl or libgcrypt
+
+40. Install doxygen (optionally, this one's a big one ... took 50 minutes
+                     to download on my system)
+
+	sudo apt-get install doxygen
+
+51. Install libcurl-dev
+
+	sudo apt-get install libcurl4-gnutls-dev
+
+60. Pull, Compile and Install libnetconf (github.com/CESNET/libnetconf/)
+
+	git clone https://github.com/CESNET/libnetconf
+        cd libnetconf
+	./configure
+	make
+	sudo make install
+
+        Note: in some Ubuntu distributions (14.10, for example) you may have to
+        install libxml2-dev xsltproc and libxslt-dev .
+需要安装python包
+apt-get install python-pip
+root@lanpinguo-vm:/work/libnetconf# pip install pyang  
+70. Pull netopeer, you will get 4 directories.
+
+	git clone https://github.com/CESNET/netopeer
+
+71. Compiling server
+
+	netopeer/server: ./configure --sysconfdir=/etc
+	make
+	sudo make install
+	
+	Note: in some Ubuntu distributions (14.10, for example) you may have to
+	sudo apt-get install python-libxml2
+ 
+ 
+80. Compiling cli
+
+	If you get this error:
+
+	checking for readline in -lreadline... no
+	configure: error: Missing libreadline
+
+	You might need to install ncurses (http://ftp.gnu.org/pub/gnu/ncurses/)
+        and readline (http://ftp.gnu.org/gnu/readline/). 
+        If you already have these installed, you might need the dev version of
+        the libraries.
+
+    sudo apt-get install libncurses5-dev
+	sudo apt-get install libreadline-dev
+
+	After each step you should do <sudo ldconfig>
+
+	Finally:
+        cd cli
+        ./configure
+        make
+        make install
+
+ 
+
+
+
+
+
+Privacy policy
+About OpenDaylight Project
+Disclaimers
+
+ 
+

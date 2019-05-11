@@ -1,0 +1,37 @@
+The kernel log levels are:
+
+0 (KERN_EMERG)
+
+  The system is unusable.
+
+1 (KERN_ALERT)
+
+Actions that must be taken care of immediately.
+
+2 (KERN_CRIT)
+
+Critical conditions.
+
+3 (KERN_ERR)
+
+Noncritical error conditions.
+
+4 (KERN_WARNING)
+
+Warning conditions that should be taken care of.
+
+5 (KERN_NOTICE)
+
+Normal, but significant events.
+
+6 (KERN_INFO)
+
+Informational messages that require no action.
+
+7 (KERN_DEBUG)
+
+Kernel debugging messages, output by the kernel if the developer enabled debugging at compile time.
+
+ 
+
+KERN_ERR, KERN_DEBUG等是一些宏定义，在$Linux_SRC/include/linux/printk.h中可以查看到。

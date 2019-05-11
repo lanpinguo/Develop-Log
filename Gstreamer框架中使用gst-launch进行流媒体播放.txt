@@ -1,0 +1,123 @@
+
+
+Gstreamer框架中使用gst-launch-1.0进行流媒体播放
+
+Gstreamer是一套开源的流媒体框架，用其也可以进行流媒体开发，Gstreamer是基于glib库编写的，需要将多个不同功能的元件(element)装进一个箱柜(bin)中，在进行程序编写前，我们可以使用Gstreamer提供的一个小工具gst-launch-1.0在终端中在验证我们的想法，验证我们选择的元件和配置的管道是否正确，如果验证正确，编码对于各位小伙伴们就是小case啦！
+
+不用废话了，直接进入我们的主题，一下列出了我以前学习使用Gstreamer进行流媒体开发过程中的一些实例，都是使用gst-launch-1.0实现的。
+
+一、RDP协议实现mp3播放
+
+1、服务端
+
+gst-launch-1.0 filesrc location=/mnt/hgfs/fedshare/source/audio/test.mp3 ! mad! audioconvert \
+
+! audio/x-raw-int,channels=1,depth=16,width=16, rate=44100 !rtpL16pay ! udpsink host=127.0.0.1 port=5000
+
+2、接收端
+
+gst-launch-1.0 udpsrc port=5000 ! "application/x-rtp,media=(string)audio,clock-rate=(int)44100, width=16, height=16, \
+
+encoding-name=(string)L16, encoding-params=(string)1, channels=(int)1,channel-positions=(int)1, payload=(int)96" ! gstrtpjitterbufferdo-lost=true ! rtpL16depay ! audioconvert ! alsasink sync=false
+
+二、摄像头远程监控
+
+1、发送端
+
+gst-launch-1.0 -v gstrtpbin name=rtpbin v4l2src device=/dev/video0 ! videorate! videoscale ! ffmpegcolorspace ! 'video/x-raw, width=(int)320,height=(int)240, framerate=(fraction)15/1' !  rtpvrawpay ! rtpbin.send_rtp_sink_0 rtpbin.send_rtp_src_0 ! multiudpsinkclients="127.0.0.1:9996" rtpbin.send_rtcp_src_0 ! multiudpsinkclients="127.0.0.1:9997" sync=false async=false udpsrc port=10000 ! rtpbin.recv_rtcp_sink_0
+
+2、接收端
+
+gst-launch-1.0 udpsrc caps=" application/x-rtp,media=(string)video, clock-rate=(int)90000, encoding-name=(string)RAW,sampling=(string)YCbCr-4:2:0, depth=(string)8, width=(string)320,height=(string)240, colorimetry=(string)SMPTE240M, ssrc=(guint)4294234526,payload=(int)96, clock-base=(guint)520513122, seqnum-base=(guint)28177"port=9996 ! queue ! rtpvrawdepay ! queue ! tee name="splitter"! queue ! ffmpegcolorspace ! autovideosink splitter. ! queue ! ffmpegcolorspace! jpegenc ! avimux ! filesink location=osug-udp-2.avi
+
+三、音频流媒体传输(
+
+1、发送端
+
+gst-launch-1.0 -v gstrtpbin name=rtpbin latency=100 \
+
+uridecodebin uri=file:///mnt/hgfs/fedshare/source/audio/test.mp3name=decoder \
+
+decoder. ! tee name=tee0 \
+
+tee0. ! queue2 ! audioconvert ! ffenc_aac ! rtpmp4apay pt=96 ! queue2 !rtpbin.send_rtp_sink_1 rtpbin.send_rtp_src_1 ! queue2 ! udpsink host=127.0.0.1port=5002 async=false
+
+2、接收端
+
+gst-launch-1.0 -v gstrtpbin name=rtpbin latency=100 \
+
+udpsrccaps="application/x-rtp,media=(string)audio,clock-rate=(int)44100,encoding-name=(string)MP4A-LATM,cpresent=(string)0,config=(string)40002420,ssrc=(uint)4204015526,payload=(int)96,clock-base=(uint)4274968681,seqnum-base=(uint)44368"\
+
+port=5002 ! queue2 ! rtpbin.recv_rtp_sink_1 rtpbin. ! rtpmp4adepay ! teename=teeaudio \
+
+teeaudio. ! queue2 ! ffdec_aac ! audioconvert ! autoaudiosink
+
+四、视频文件只传输音频流
+
+1、发送端
+
+gst-launch-1.0 -v gstrtpbin name=rtpbin latency=100 \
+
+uridecodebin uri=file:///mnt/hgfs/fedshare/source/video/loveStyle.mp4name=decoder \
+
+decoder. ! tee name=tee0 \
+
+tee0. ! queue2 ! ffmpegcolorspace ! x264enc ! rtph264pay pt=96 ! queue2 !rtpbin.send_rtp_sink_0 rtpbin.send_rtp_src_0 ! queue2 ! udpsink host=127.0.0.1port=5000 async=false \
+
+rtpbin.send_rtcp_src_0 ! queue2 ! udpsink host=127.0.0.1 port=5001async=false \
+
+udpsrc port=5005 ! queue2 ! rtpbin.recv_rtcp_sink_0
+
+2、接收端
+
+gst-launch-1.0 -v gstrtpbin name=rtpbin latency=100 \
+
+udpsrc caps="application/x-rtp,media=(string)video,clock-rate=(int)90000,encoding-name=(string)H264,ssrc=(uint)340005641,payload=(int)96,clock-base=(uint)2625017333,seqnum-base=(uint)5894"port=5000 \
+
+! queue ! rtpbin.recv_rtp_sink_0 rtpbin. ! rtph264depay ! teename=teevideo \
+
+teevideo. ! queue ! ffdec_h264 ! videoscale ! ffmpegcolorspace !xvimagesink \
+
+udpsrc port=5001 ! queue ! rtpbin.recv_rtcp_sink_0 rtpbin.send_rtcp_src_0! queue ! udpsink host=127.0.0.1 port=5005 sync=true async=false
+
+五、音视频混合流媒体
+
+1、发送端
+
+gst-launch-1.0 -v gstrtpbin name=rtpbin latency=100 \
+
+uridecodebin uri=file:///mnt/hgfs/fedshare/source/video/loveStyle.mp4name=decoder \
+
+decoder. ! tee name=tee0 \
+
+tee0. ! queue2 ! ffmpegcolorspace ! x264enc ! rtph264pay pt=96 ! queue2 !rtpbin.send_rtp_sink_0 rtpbin.send_rtp_src_0 ! queue2 ! udpsink host=127.0.0.1port=5000 async=false \
+
+rtpbin.send_rtcp_src_0 ! queue2 ! udpsink host=127.0.0.1 port=5001async=false \
+
+udpsrc port=5005 ! queue2 ! rtpbin.recv_rtcp_sink_0 \
+
+decoder. ! tee name=tee1 \
+
+tee1. ! queue2 ! audioconvert ! ffenc_aac ! rtpmp4apay pt=96 ! queue2 !rtpbin.send_rtp_sink_1 rtpbin.send_rtp_src_1 ! queue2 ! udpsink host=127.0.0.1port=5002 async=false \
+
+rtpbin.send_rtcp_src_1 ! queue2 ! udpsink host=127.0.0.1 port=5003async=false \
+
+udpsrc port=5006 ! queue2 ! rtpbin.recv_rtcp_sink_1
+
+2、接收端
+
+gst-launch-1.0 -v gstrtpbin name=rtpbin latency=100 \
+
+udpsrccaps="application/x-rtp,media=(string)video,clock-rate=(int)90000,encoding-name=(string)H264,ssrc=(uint)340005641,payload=(int)96,clock-base=(uint)2625017333,seqnum-base=(uint)5894"port=5000 \
+
+! queue2 ! rtpbin.recv_rtp_sink_0 rtpbin. ! rtph264depay ! teename=teevideo \
+
+teevideo. ! queue2 ! ffdec_h264 ! videoscale ! ffmpegcolorspace ! xvimagesink\
+
+udpsrc port=5001 ! queue2 ! rtpbin.recv_rtcp_sink_0 rtpbin.send_rtcp_src_0! queue2 ! udpsink host=127.0.0.1 port=5005 sync=true async=false \
+
+udpsrccaps="application/x-rtp,media=(string)audio,clock-rate=(int)44100,encoding-name=(string)MP4A-LATM,cpresent=(string)0,config=(string)40002420,ssrc=(uint)4204015526,payload=(int)96,clock-base=(uint)4274968681,seqnum-base=(uint)44386"port=5002 ! queue2 ! rtpbin.recv_rtp_sink_1 rtpbin. ! rtpmp4adepay ! teename=teeaudio \
+
+teeaudio. ! queue2 ! ffdec_aac ! audioconvert ! autoaudiosink \
+
+udpsrc port=5003 ! queue2 ! rtpbin.recv_rtcp_sink_1 rtpbin.send_rtcp_src_1! queue2 ! udpsink host=127.0.0.1 port=5006 sync=true async=false

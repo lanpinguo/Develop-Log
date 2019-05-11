@@ -1,0 +1,17 @@
+error description:
+
+sdn@sdn-develop:/eptn/linux$ make menuconfig
+  HOSTCC  scripts/kconfig/conf.o
+ *** Unable to find the ncurses libraries or the
+ *** required header files.
+ *** 'make menuconfig' requires the ncurses libraries.
+ *** 
+ *** Install ncurses (ncurses-devel) and try again.
+ *** 
+make[1]: *** [scripts/kconfig/dochecklxdialog] Error 1
+make: *** [menuconfig] Error 2
+
+fix method:
+
+ sudo apt-get install ncurses-dev
+

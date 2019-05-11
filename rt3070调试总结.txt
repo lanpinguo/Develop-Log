@@ -1,0 +1,125 @@
+rt3070 调试总结
+
+OK 以这篇文档为模板：http://blog.csdn.net/yingqiangli/article/details/8752549
+
+说说我遇到的问题：
+
+1，编译出来insmod rt3070sta 没问题，但是在ifconfig ra0 up 的时候提示<-- ERROR in Alloc Bulk buffer for HTTxContext!
+经查是dma pool 不够分配导致的，在启动阶段，加入uboot 参数coherent_pool=2m 即可.
+例如：
+    在uboot启动界面是如下命令：
+    setenv bootargs console=ttyS0,115200 coherent_pool=2M earlyprintk mtdparts=atmel_nand:1536k(spare)ro,512k(dtb),6M(kernel)ro,-(rootfs) rootfstype=ubifs ubi.mtd=3 root=ubi0:rootfs
+
+2，在测试wireless_tools 的时候执行iwlist 命令总是提示 not found 什么的。
+经查有可能是库文件不对，用readelf 命令看一下：
+
+toolchain/bin/arm-none-linux-gnueabi-readelf -d iwconfig 
+
+Dynamic section at offset 0x9f10 contains 25 entries:
+  Tag        Type                         Name/Value
+ 0x00000001 (NEEDED)                     Shared library: [libm.so.6]
+ 0x00000001 (NEEDED)                     Shared library: [libc.so.6]
+ 0x0000000c (INIT)                       0x8ad0
+ 0x0000000d (FINI)                       0xf0b0
+ 0x00000019 (INIT_ARRAY)                 0x19de4
+ 0x0000001b (INIT_ARRAYSZ)               4 (bytes)
+ 0x0000001a (FINI_ARRAY)                 0x19de8
+ 0x0000001c (FINI_ARRAYSZ)               4 (bytes)
+ 0x00000004 (HASH)                       0x81a8
+ 0x00000005 (STRTAB)                     0x867c
+ 0x00000006 (SYMTAB)                     0x831c
+ 0x0000000a (STRSZ)                      485 (bytes)
+ 0x0000000b (SYMENT)                     16 (bytes)
+ 0x00000015 (DEBUG)                      0x0
+ 0x00000003 (PLTGOT)                     0x1a000
+ 0x00000002 (PLTRELSZ)                   392 (bytes)
+ 0x00000014 (PLTREL)                     REL
+ 0x00000017 (JMPREL)                     0x8948
+ 0x00000011 (REL)                        0x8920
+ 0x00000012 (RELSZ)                      40 (bytes)
+ 0x00000013 (RELENT)                     8 (bytes)
+ 0x6ffffffe (VERNEED)                    0x88d0
+ 0x6fffffff (VERNEEDNUM)                 2
+ 0x6ffffff0 (VERSYM)                     0x8862
+ 0x00000000 (NULL)                       0x0
+
+上面可知它依赖libm.so.6   libc.so.6 两个库文件，要把他们放在/system/lib 里面，于是我便去交叉编译器所在目录/usr/local/arm/4.3.2/arm-none-linux-gnueabi/libc/armv4t/lib下的动态库中寻找所需的上面三个库libiw.so.29 、libm.so.6 和libc.so.6  
+具体参考链接：http://blog.csdn.net/yx_l128125/article/details/7418882 说的很详细
+
+我这里要说的是，我照着这样做了，还是不对，然后我就把/system/bin/ 目录下的其他可以执行的命令pull 出来，用readelf 命令读，发现他们的格式是这样的：
+Dynamic section at offset 0x6e20 contains 26 entries:
+  Tag        Type                         Name/Value
+ 0x00000003 (PLTGOT)                     0x7f3c
+ 0x00000002 (PLTRELSZ)                   368 (bytes)
+ 0x00000017 (JMPREL)                     0xccc
+ 0x00000014 (PLTREL)                     REL
+ 0x00000011 (REL)                        0x90c
+ 0x00000012 (RELSZ)                      960 (bytes)
+ 0x00000013 (RELENT)                     8 (bytes)
+ 0x6ffffffa (RELCOUNT)                   117
+ 0x00000015 (DEBUG)                      0x0
+ 0x00000006 (SYMTAB)                     0x148
+ 0x0000000b (SYMENT)                     16 (bytes)
+ 0x00000005 (STRTAB)                     0x528
+ 0x0000000a (STRSZ)                      592 (bytes)
+ 0x00000004 (HASH)                       0x778
+ 0x00000001 (NEEDED)                     Shared library: [libc.so]
+ 0x00000001 (NEEDED)                     Shared library: [libstdc++.so]
+ 0x00000001 (NEEDED)                     Shared library: [libm.so]
+ 0x00000020 (PREINIT_ARRAY)              0x7e08
+ 0x00000021 (PREINIT_ARRAYSZ)            0x8
+ 0x00000019 (INIT_ARRAY)                 0x7e10
+ 0x0000001b (INIT_ARRAYSZ)               8 (bytes)
+ 0x0000001a (FINI_ARRAY)                 0x7e18
+ 0x0000001c (FINI_ARRAYSZ)               8 (bytes)
+ 0x0000001e (FLAGS)                      BIND_NOW
+ 0x6ffffffb (FLAGS_1)                    Flags: NOW
+ 0x00000000 (NULL)                       0x0
+elf很显然格式不一样，比如他们的动态库不是放在开头，于是我就考虑是不是编译器的问题，Android有自己的一套编译工具，很顺利的是我的猜测是对的，应该放在Android里编译
+于是解决方法在这个链接里：http://blog.chinaunix.net/uid-741742-id-359301.html
+
+照着做，一切顺利编译出来的命令iwlist ，用readelf 去读，格式跟Android自带的一样了，然后就可以执行了。
+
+第二点介绍结束，先写到这里，后面有问题再增补。
+
+==================================================
+
+终端去掉内核log:
+
+echo 1 1 1 1 > /proc/sys/kernel/printk
+
+./device/friendly-arm/tiny4412/init.rc
+
+# give system access to wpa_supplicant.conf for backup and restore
+mkdir /data/misc/wifi 0770 wifi wifi
+mkdir /data/misc/wifi/sockets 0770 wifi wifi
+chmod 0770 /data/misc/wifi
+chmod 0660 /data/misc/wifi/wpa_supplicant.conf
+chown wifi wifi /data/misc/wifi
+chown wifi wifi /data/misc/wifi/wpa_supplicant.conf
+# wpa_supplicant socket (unix socket mode)
+mkdir /data/system/wpa_supplicant 0771 wifi wifi
+chmod 0771 /data/system/wpa_supplicant
+chown wifi wifi /data/system/wpa_supplicant
+
+mkdir /system/etc/wifi 0771 wifi wifi
+chmod 0771 /system/etc/wifi
+chmod 0660 /system/etc/wifi/wpa_supplicant.conf
+chown wifi wifi /system/etc/wifi/wpa_supplicant.conf
+
+setprop wifi.interface "wlan0"   
+setprop wlan.driver.status "ok"
+
+android/device/friendly-arm/tiny4412$ vi BoardConfigCommon.mk
+
+#speci the wifi driver
+WIFI_DRIVER_MODULE_PATH :="/system/lib/modules/rt5572sta.ko"
+WIFI_DRIVER_MODULE_NAME :="rt5572sta"
+
+init.tiny4412.rc
+
+/system/bin/wpa_supplicant -dd -Dwext -iwlan0 -c/system/etc/wifi/wpa_supplicant.conf
+
+详细规则参考：
+http://blog.csdn.net/wh_19910525/article/details/7392199
+

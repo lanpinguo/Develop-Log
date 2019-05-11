@@ -1,0 +1,104 @@
+A.开始使用git
+ 半年前我开始使用git，之前一直在用svn和cvs。 git命令很多，看起来很复杂，但在最开始的时候了解几个简单的就够用了。
+相信很多人在使用git之前都使用过svn，这里不讨论git和svn的不同，也不对这两个代码管理软件进行比较和评论，只是在我个人使用的角度做的一些记录。
+svn
+需要搭建一个svn服务器（HTTP/SVN），搭建svn服务器需要看一些手册
+git
+不需要git服务器，任何一台安装git的PC都可以是git服务器，其他人可以用任何现有的方式（SSH/HTTP/本地文件系统）更新上传代码
+我有两台PC：A和B，他们在一个网段（192.168.6.0/24），为了使得这个git使用记录更加严谨，以下的每一个命令都在这两台PC上进行测试。其中A地址为192.168.6.1, B地址为192.168.6.15, B可以通过ssh登录到A
+
+1.初始化一个A机器上的git目录
+最近在开始学习scala，在A机器上有一个目录是/home/le/workspace/scala_test，在这个目录下初始话一个git目录
+
+$ git init
+
+此时你在当前目录下会发现一个.git的目录
+$ ls -la
+
+2.向git库中提交文件
+
+$ touch Test1.scala
+$ vim Test1.scala
+$ git status . #git会告诉你新的改动，接下来选择需要提交的文件
+
+$ git add Test1.scala
+$ git status . #再来看看，git会告诉你将要commit什么
+$ git commit -m 'initial git repo' #提交到本地branch
+
+A可以作为git server了，接下来到B上操作。
+
+2. 从A上克隆代码到B上，位于/home/le/workspace/git/repo1/
+$ git clone le@192.168.6.1:/home/le/workspace/scala_test
+
+3. 创建分支，切换分支，提交分支到远程git库
+$ git branch scala_dev       #创建分支
+$ git checkout scala_dev    #切换到该分支
+$ git branch                        #查看本地当前的分支
+$ git push origin scala_dev #提交scala_dev分支到远程git库
+$ git branch -r                     #查看远程所有的分支
+$ git branch -a                     #查看本地和远程所有的分支
+
+4.修改文件，并且提交到远程库
+$ touch Test2.scala
+$ git add Test2.scala
+$ git commit
+$ git log #在push之前确认commit是否正确
+$ git push
+5.从远程git库克隆指定的分支，这次在B机器的/home/le/workspace/git/repo2/目录重新克隆一份代码
+$ git clone -b scala_dev le@192.168.6.1:/home/le/workspace/scala_test
+$ git branch  #查看当前分支
+#提交新的代码
+$ touch Test3.scala
+$ git add Test3.scala
+$ git commit 
+$ git log #在push之前确认commit是否正确
+$ git push
+6.回到/home/le/workspace/git/repo2/更新代码
+$ git pull #如果有错误，请按照错误提示修改.git/config文件
+
+
+B.一些可能会遇到的问题
+1.合并多个commit多一个commit
+在本地的git库commit了多次，在push到远程的git库时，可以在本地合并这些commit。
+每次合并两个commit
+$ git reset --soft HEAD^1
+$ git commit --amend
+合并最后n个commit
+$ git rebase -i HEAD~n
+#替换第n个pick为s保存
+ 
+2.取消本地的commit
+有时候commit了代码到了本地git库中，之后某种原因想删掉最后1条commit，可以直接恢复到之前的commit
+$git reset --hard HEAD~1
+ 
+3.使用git stash
+如果你跟我一样也使用gerrit做code review，那么有可能遇到这样问题：
+在同一个分支上有多个bug需要fix，fix完一个bug然后就commit代码到gerrit server上等待code review，在等待的过程中又开始fix另外一个bug，就在这个时候之前提交的代码被reviewer提示出错误，需要更新之前的代码，这个时候可以 使用git stash来保存当前本地的修改。
+在一个分支上修改了代码但是不想commit到本地git库，需要切换一个分支去修改代码，这个时候也可以使用git stash
+$ git stash
+# modify your code or checkout to another branch
+# git commit --amend
+$ git stash pop
+ 
+4.从另外一个分支里面挑选一些commit到当前分支
+假如你有两个分支，一个是dev分支，一个是release分支，在dev分支上已经有很了很多的commit，有时需要从dev分支上挑选一些commit到release分支上。
+$ git log #查找到需要的commit id, 假设为5b531cb8c62cdb8b5f10c406e41824a6388e3a82
+$ git checkout release
+$ git log #看一下当前的commit log
+$ git cherry-pick 5b531cb8c62cdb8b5f10c406e41824a6388e3a82
+$ git log #此时可以看到commit log增加了
+ 
+5. 出现error: The following untracked working tree files would be overwritten by checkout 
+$ git clean -d -fx ""
+ 
+6.我一次commit 5个文件到gerrit上面，然后发现有一个不需要提交，只要提交4个就好，我想重新提交一次在同一个commit ID下面，我该怎么做？
+前提代码还没有被merge进库
+例如要取消文件2.txt, 那么先恢复2.txt到commit id 9a42e8e3f41dcf5029a11ce651f36cbdf37fc84d，你提交之前的那一个commit id
+git reset 9a42e8e3f41dcf5029a11ce651f36cbdf37fc84d -- 2.txt
+git checkout -- 2.txt
+git add .
+git commit --amend
+C.一些参考资料
+http://www.vogella.com/articles/Git/article.html [中文译文版本]
+https://www.kernel.org/pub/software/scm/git/docs/
+http://pcottle.github.com/learnGitBranching/ [这个很好玩]

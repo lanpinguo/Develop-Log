@@ -1,0 +1,2 @@
+root@Orangepi:/sys/devices/virtual/misc/sunxi-reg/rw#echo 0x01C2086C,0x01C20878 > dump 
+root@Orangepi:/sys/devices/virtual/misc/sunxi-reg/rw#cat dump

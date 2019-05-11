@@ -1,0 +1,89 @@
+1、linux种类太多，每种设置IP和网关的方法不尽相同，不过检查方法相同
+netstat -rn
+2、你说的这种方法重起就丢了.
+在 rc.local 里面用 route add 或者(ip route add)添加行
+ /sbin/route add -net 192.168.0.0/16 gw 10.1.1.254
+3、CentOS和RHEL为例，有的适合只有一个网关的情况，有些适合多个路由的情况
+a)vi  /etc/sysconfig/network
+GATEWAY=192.168.0.1
+ 
+b)vi /etc/sysconfig/network-scripts/ifcfg-eth0
+GATEWAY=192.168.0.1
+ 
+c)vi /etc/sysconfig/network-scripts/eth0.route
+ ADDRESS0=192.168.0.0
+ NETMASK0=255.255.0.0
+ GATEWAY0=10.1.1.254
+ ADDRESS1=172.16.0.0
+ NETMASK1=255.240.0.0
+ GATEWAY1=10.1.1.254
+ 
+d)vi /etc/sysconfig/network-scripts/route-eth0 192.168.0.0/16 via 10.1.1.254
+ 172.16.0.0/12 via 10.1.1.254
+ 
+e)vi /etc/sysconfig/static-routes eth0 net 192.168.0.0 netmask 255.255.0.0 gw 10.1.1.254
+
+4\查看IP
+
+[root@localhost ~]# ifconfig
+em1       Link encap:Ethernet  HWaddr F0:1F:AF:D6:17:DD  
+          inet addr:115.238.54.116  Bcast:115.238.54.127  Mask:255.255.255.224
+          inet6 addr: fe80::f21f:afff:fed6:17dd/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:83248115 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:50674679 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:10627919322 (9.8 GiB)  TX bytes:13311903923 (12.3 GiB)
+          Interrupt:16 
+em1:0     Link encap:Ethernet  HWaddr F0:1F:AF:D6:17:DD  
+          inet addr:121.52.229.126  Bcast:121.52.229.127  Mask:255.255.255.224
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          Interrupt:16 
+em1:1     Link encap:Ethernet  HWaddr F0:1F:AF:D6:17:DD  
+          inet addr:120.199.8.215  Bcast:120.199.8.223  Mask:255.255.255.240
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          Interrupt:16 
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:16436  Metric:1
+          RX packets:2228411 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:2228411 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:667383706 (636.4 MiB)  TX bytes:667383706 (636.4 MiB)
+（em1表示网卡对应的三个IP；lo表示本地环回IP）
+
+
+5\查看Gateway
+
+[root@localhost ~]# netstat -rn 或 route -n
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
+120.199.8.208   0.0.0.0         255.255.255.240 U         0 0          0 em1
+115.238.54.96   0.0.0.0         255.255.255.224 U         0 0          0 em1
+121.52.229.96   0.0.0.0         255.255.255.224 U         0 0          0 em1
+169.254.0.0     0.0.0.0         255.255.0.0     U         0 0          0 em1
+0.0.0.0         115.238.54.97   0.0.0.0         UG        0 0          0 em1
+（以0.0.0.0开始的行的Gateway是默认网关）
+6\查看DNS
+
+[root@localhost ~]# cat /etc/resolv.conf
+nameserver 202.101.172.47
+nameserver 221.12.1.227
+
+
+7\修改配置
+
+在/etc/sysconfig/network-scripts目录下，用vi命令编辑ifcfg-em2：
+DEVICE=em2  设备名称
+HWADDR=C8:1F:66:B8:EB:9F 物理地址
+ONBOOT=yes  是否启动
+BOOTPROTO=static  静态IP   可以选择 dhcp
+BROADCAST=192.168.0.255 广播
+NETWORY=192.168.0.0 网段
+IPADDR=192.168.0.123 IP地址
+NETMASK=255.255.255.0 子网
+GATEWAY=192.168.0.1  网关！
+DNS=192.168.0.1  
+保存后，还需要用如下命令重启一下网络服务：
+# service network restart

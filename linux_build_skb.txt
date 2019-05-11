@@ -1,0 +1,10 @@
+So the deal would be to allocate only the data buffer for the NIC to
+populate its RX ring buffer. And use build_skb() at RX completion to
+attach a data buffer (now filled with an ethernet frame) to a new skb,
+initialize the skb_shared_info portion, and give the hot skb to network
+stack.
+
+build_skb() is the function to allocate an skb, caller providing the
+data buffer that should be attached to it. Drivers are expected to call 
+skb_reserve() right after build_skb() to let skb->data points to the
+Ethernet frame (usually skipping NET_SKB_PAD and NET_IP_ALIGN)

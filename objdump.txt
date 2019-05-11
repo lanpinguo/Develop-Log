@@ -1,0 +1,55 @@
+反汇编目标文件的特定机器码段：  
+[root@localhost test]# objdump -d mytest.o 
+mytest.o:     file format elf32-i386 
+Disassembly of section .text: 
+
+00000000 <_Z9printTestv>: 
+   0:   55                      push   %ebp 
+   1:   89 e5                   mov    %esp,%ebp 
+   3:   83 ec 10                sub    $0x10,%esp 
+   6:   c6 45 ff 61             movb   $0x61,0xffffffff(%ebp) 
+   a:   c9                      leave  
+  b:   c3                      ret    
+
+0000000c <_Z10printTest2v>: 
+   c:   55                      push   %ebp 
+   d:   89 e5                   mov    %esp,%ebp 
+   f:   83 ec 10                sub    $0x10,%esp 
+  12:   c7 45 fc 02 00 00 00    movl   $0x2,0xfffffffc(%ebp) 
+  19:   83 45 fc 02             addl   $0x2,0xfffffffc(%ebp) 
+  1d:   c9                      leave  
+  1e:   c3                      ret     
+这里，对text段的内容进行了反汇编。  
+
+反汇编特定段，并将汇编代码对应的文件名称和行号对应上：  
+[root@localhost test]# objdump -d -l mytest.o
+mytest.o:     file format elf32-i386 
+Disassembly of section .text: 
+
+00000000 <_Z9printTestv>: 
+_Z9printTestv(): 
+/root/test/04_libraryTest/mytest.cpp:1 
+   0:   55                      push   %ebp 
+   1:   89 e5                   mov    %esp,%ebp 
+   3:   83 ec 10                sub    $0x10,%esp 
+/root/test/04_libraryTest/mytest.cpp:4 
+   6:   c6 45 ff 61             movb   $0x61,0xffffffff(%ebp) 
+/root/test/04_libraryTest/mytest.cpp:5 
+   a:   c9                      leave  
+   b:   c3                      ret    
+
+0000000c <_Z10printTest2v>: 
+_Z10printTest2v(): 
+/root/test/04_libraryTest/mytest.cpp:6 
+   c:   55                      push   %ebp 
+   d:   89 e5                   mov    %esp,%ebp 
+   f:   83 ec 10                sub    $0x10,%esp 
+/root/test/04_libraryTest/mytest.cpp:8 
+  12:   c7 45 fc 02 00 00 00    movl   $0x2,0xfffffffc(%ebp) 
+/root/test/04_libraryTest/mytest.cpp:9 
+  19:   83 45 fc 02             addl   $0x2,0xfffffffc(%ebp) 
+/root/test/04_libraryTest/mytest.cpp:10 
+  1d:   c9                      leave  
+  1e:   c3                      ret     
+这里，项"-d"从objfile中反汇编那些特定指令机器码的section，而使用"-l"指定用文件名和行号标注相应的目标代码，仅仅和-d、-D或者-r一起使用，使用-ld和使用-d的区别不是很大，在源码级调试的时候有用，要求编译时使用了-g之类的调试编译选项。 
+ 

@@ -1,0 +1,34 @@
+让Ubuntu中的Virtualbox使用u盘，3 step：
+
+1...sudo usermod -G vboxusers -a john，其中john是你要使用vbox的当前用户名
+
+2...（relogin）注销后重新登入这个用户
+
+3...（add USB device）打开vbox点设置，点左侧的usb，右边看那个绿色加号，就能看到你的usb设备了，添加一下。
+
+曾遇到一个问题，由于vbox有点落后，还不支持usb3.0。所以不要把u盘插3.0接口上，否则无法识别。就这么个简单问题，我琢磨好久还查了好多资料，后来我恍然大悟是这原因换了一个u口搞定。。。
+
+那不用Ubuntu系统的朋友怎么办？ :) 可以首先找找你们的系统设置有没有类似的功能～我这里再转载“Linux公社”的文章～
+5
+
+添加当前用户为vboxusers一员
+
+终端输入：cat /etc/group |grep vboxusers
+
+将会显示类似的字样：
+
+[vboxusers:x:124]
+
+然后输入： /usr/sbin/usermod -G vboxusers -a horizon（这里horizon替换成你的当前用户名）
+
+再次输入： cat /etc/group |grep vboxusers
+
+这回就显示如下：
+
+[vboxusers:x:124:horizon]
+
+这样就把当前用户添加到vboxusers组了。
+
+之后VBox操作同上。
+
+最后，注意，在有的教程中提到要修改/etc/fstab文件，就是要在最后加一行配置。

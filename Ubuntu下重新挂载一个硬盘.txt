@@ -1,0 +1,58 @@
+Ubuntu下重新挂载一个硬盘：方法如下：
+ 
+1 、在Vmware中关闭Ubuntu虚拟机，在设置中，添加新的硬件设备，选择Hard Disk。（这里如果不关闭Ubuntu系统就不能增加新的硬件设备） 之后点击下一步，选择硬盘类型，可以选择IDE，或是SCSI，这里选择SCSI,下一步，选择虚拟新硬盘的位置，将之命名为Ubuntu2.vmdk，下一步，设定硬盘大小，我这里设定为2G，并选择Allocate all disk space now,不选这项，刚开始，硬盘比较小，但是随着硬盘读写访问，虚拟硬盘文件会越来越大。选择该项后，虚拟硬盘就固定为所选的2G空间，不会再增大了。之后，点击 Finish，开始创建新硬盘。
+  
+ 
+2 、启动Ubuntu，root用户登录。
+ 
+在终端输入：fdisk -l ，可以看到
+ 
+----------------------------------------------------------------------------
+ 
+Disk /dev/sda: 10.7 GB, 10737418240 bytes
+ 255 heads, 63 sectors/track, 1305 cylinders
+ Units = cylinders of 16065 * 512 = 8225280 bytes
+ Disk identifier: 0x000af383
+ Device Boot      Start         End      Blocks   Id System
+ /dev/sda1   *           1        1244     9992398+ 83 Linux
+ Disk /dev/sdb: 5368 MB, 5368709120 bytes
+ 255 heads, 63 sectors/track, 652 cylinders
+ Units = cylinders of 16065 * 512 = 8225280 bytes
+ Disk identifier: 0x00000000
+ 
+这里可以看到/dev/sdb 就是新添加的硬盘，需要给新的硬盘分区。
+ 
+在终端输入：fdisk /dev/sdb
+ 
+之后键入：m，可以看到帮助信息，
+ 
+键入：n，添加新分区
+ 
+键入：p，选择添加主分区
+ 
+键入：l，选择主分区编号为1，这样创建后的主分区为sdb1
+ 
+之后，fdisk会让你选择该分区的开始值和结束值，直接回车
+ 
+最后键入：w，保存所有并退出，完成新硬盘的分区。
+重启虚拟机。 
+ 
+3 格式化磁盘
+ 
+在终端输入：mkfs -t ext3 /dev/sdb1
+ 
+用ext3格式对/dev/sdb1 进行格式化
+ 
+4 挂载该分区：
+ 
+手动挂载：
+ 
+在终端输入：mkdir /media ,创建新的硬盘的挂载点
+ 
+在终端键入：mount /dev/sdb1 /media
+ 
+如果想开机自动挂载
+ 
+修改/etc/fstab文件，添加如下行：
+ 
+/dev/sdb1       /media      ext3    defaults,        0       1

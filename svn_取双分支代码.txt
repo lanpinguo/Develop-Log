@@ -1,0 +1,11 @@
+假的在SDN目录下，获取不同分支上的源码参考命令：
+
+1、ros和kernel取自SDN新拉出来的分支br_SDN_dev_20160222：
+svn checkout https://172.16.1.4/svn/esw/branches/br_SDN_dev_20160222/ros ros
+
+svn checkout https://172.16.1.4/svn/esw/branches/br_SDN_dev_20160222/kernel/product_ritp/linux-2.6.29.6-mpc8308 kernel/product_ritp/linux-2.6.29.6-mpc8308 
+
+2、producct_ritp取自711G当前的分支br_5.3_ptn_dev_20151112：
+svn checkout https://sw6-scm.soft6.raisecom.com/svn/esw/branches/br_5.3_ptn_dev_20151112/product_ritp product_ritp
+
+svn checkout https://172.16.1.4/svn/esw/branches/br_5.3_ptn_dev_20151112/kernel/product_ritp/linux-2.6.29.6-mpc8308 kernel/product_ritp/linux-2.6.29.6-mpc8308 

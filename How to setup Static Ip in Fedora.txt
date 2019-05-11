@@ -1,0 +1,14 @@
+
+bash-4.1# nano /etc/sysconfig/network-scripts/ifcfg-eth0 
+DEVICE=eth0
+NM_CONTROLLED=no
+ONBOOT=yes
+BOOTPROTO=static
+TYPE=Ethernet
+IPV6INIT=no
+USERCTL=yes
+IPADDR=10.8.58.104
+NETMASK=255.255.255.0
+GATEWAY=10.8.58.1
+
+

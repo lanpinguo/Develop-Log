@@ -1,0 +1,3 @@
+
+
+mavgen.py -o mavlinkv10.py message_definitions/v1.0/common.xml

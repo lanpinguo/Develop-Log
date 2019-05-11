@@ -1,0 +1,5 @@
+
+安装lightdm的方法：
+apt-get install lightdm lightdm-gtk-greeter
+
+

@@ -1,0 +1,15 @@
+ notepad++添加自定义语言
+
+步骤：
+
+1.下载用户自定义语言XML文件  notepad++用户自定义语言XML文件下载
+
+    这里以jQuery为例，下载地址为：http://www.jamesallardice.com/downloads/notepadpp/jquery.zip
+
+2.解压缩得到jquery.xml 和 userDefineLang_jQuery.xml两个文件。（注：若打开直接为userDefineLang_xxx.xml文件，则查看源码复制下来存储为xml文件即可）
+
+3.将jquery.xml移动到\Notepad++\plugins\APIs目录下。
+
+4.打开notepad++，视图->自定义语言对话框，导入，选择userDefineLang_jQuery.xml，打开，即可看到自定义语言下拉菜单中多了jQuery。
+
+至此，添加自定义语言成功。

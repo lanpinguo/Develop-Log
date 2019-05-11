@@ -1,0 +1,46 @@
+../source-builder/sb-set-builder --prefix=/work/tools/rtems/4.12 4.12/rtems-arm
+
+sudo apt-get update 
+sudo apt-get build-dep binutils gcc g++ gdb unzip git 
+sudo apt-get install python2.7-dev 
+
+
+exportline="export PATH=/work/tools/rtems/4.12/bin:\$PATH"
+
+
+
+
+
+#cd ..
+
+#mkdir stm32f4Discovery
+
+#cd stm32f4Discovery
+
+#../rtems/configure --target=arm-rtems4.12 --disable-posix --disable-itron --disable-cxx --disable-networking  --enable-rtemsbsp="stm32f4" --prefix=/work/RTEMS/stm32f4Discovery
+
+#make
+
+#make install
+
+（7）编译stlink 的工具，生成st-flash等工具
+
+（8）arm-rtems-objcopy -O binary hello.exe hello.bin可以生成bin文件，
+
+st-flash write hello.bin 0x8000000即可下载到开发板。
+
+（9）连接串口为：串口3 TTL电平，需要USB转TTL（3.3V TTL）等工具看一下输出效果。
+
+[ps]
+
+Open407V-D With Extension Board Uart 3 pin def :
+ Tx : PC10
+ Rx : PC11
+
+RTEMS Hello.exe :
+ Using UART 3, Pin Define :
+ Tx : PD8
+ Rx : PD9
+
+ RTEMS Source Builder For Debian / Ubuntu :
+ https://ftp.rtems.org/pub/rtems/people/chrisj/source-builder/source-builder.html#_ubuntu

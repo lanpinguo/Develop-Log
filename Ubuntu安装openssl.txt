@@ -1,0 +1,6 @@
+Ubuntu安装openssl
+
+虚拟机上的Ubuntu已经安装过openssl但是仍然不能进行openssl编程
+上网查找资料得到是由于未安装openssl-devel包，执行以下两条命令更新后就可以了
+sudo apt-get install openssl 
+sudo apt-get install libssl-dev

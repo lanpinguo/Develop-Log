@@ -1,0 +1,15 @@
+　　今天心血来潮，想折腾一下Orange Pi的GPIO口，去群里问了一下，对GPIO要对/sys/gpio_sw/进行操作，不料，翻遍了也没找到这个目录，gpio的字样怎么也找不到，本来以为是系统问题，把官方系统全部试了一遍都没找到gpio_sw，经过不懈努力，再外国友人的帮助下，弄好了，吐槽下官方的QQ群，问个问题都没人理，还答非所问，真是呵呵了，因此，我决定好好学习英语，以便阅读外国文献，与外国友人交流。
+
+解决方法:以root权限执行:
+
+modprobe gpio-sunxi
+
+这样就gpio_sw就出现了，不信ls /sys/class/试试。
+
+再次感谢外国友人，感激不尽。
+
+再次证明，自己动手，丰衣足食。
+
+终于能用GPIO了，接下来更多有趣的东西就可以开始做了，敬请期待。
+
+http://www.orangepi.org/orangepibbsen/forum.php?mod=viewthread&tid=148

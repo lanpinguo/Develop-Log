@@ -1,0 +1,10 @@
+
+
+mavproxy.py --master="/dev/ttyS1"  --baudrate  57600  --out 192.168.1.3:14550   
+
+ mavproxy.py --master="/dev/ttyS1"  --baudrate  57600  --out 192.168.1.3:14550 --out 192.168.1.6:14550
+
+ 
+ gst-launch-1.0 v4l2src ! video/x-raw,framerate=30/1 ! videoconvert ! x264enc ! rtph264pay mtu=512 ! udpsink host=192.168.1.3 port=5600 
+ 
+ 

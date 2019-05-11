@@ -1,0 +1,3 @@
+解决UBUNTU下找不到iwconfig命令的方法
+
+sudo apt-get install wireless-tools 

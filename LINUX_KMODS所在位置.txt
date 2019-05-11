@@ -1,0 +1,25 @@
+----------------------------------------
+查找 'LINUX_KMODS' 在 'E:\SDN\ofdpa-EA3-2.3.0.0-odp\systems\cpu\Makefile':
+E:\SDN\ofdpa-EA3-2.3.0.0-odp\systems\cpu\Makefile(74): $(cpiolist_file): $(cpio_list) $(notdir $(LINUX_KMODS))
+E:\SDN\ofdpa-EA3-2.3.0.0-odp\systems\cpu\Makefile(76):  $(DBG) echo -e $(foreach KMOD,$(LINUX_KMODS),"\nfile /lib/modules/$(notdir $(KMOD)) $(notdir $(KMOD)) 0755 0 0") >> $@
+E:\SDN\ofdpa-EA3-2.3.0.0-odp\systems\cpu\Makefile(79): $(rootfs_name).gz: $(wildcard $(rootfs_src_dir)/*) $(local_rootfs_files) $(cpiolist_file) $(notdir $(LINUX_KMODS))
+E:\SDN\ofdpa-EA3-2.3.0.0-odp\systems\cpu\Makefile(83): $(rootfs_name).lzma: $(wildcard $(rootfs_src_dir)/*) $(local_rootfs_files) $(cpiolist_file) $(notdir $(LINUX_KMODS))
+E:\SDN\ofdpa-EA3-2.3.0.0-odp\systems\cpu\Makefile(99): $(notdir $(LINUX_KMODS)): $(KERNEL_SRC)/$$(filter %$$@,$(LINUX_KMODS))
+E:\SDN\ofdpa-EA3-2.3.0.0-odp\systems\cpu\Makefile(100): # $(DBG) cp -f $(foreach KMOD,$(LINUX_KMODS),$(KERNEL_SRC)/$(KMOD)) $(out_system)
+E:\SDN\ofdpa-EA3-2.3.0.0-odp\systems\cpu\Makefile(101): # $(DBG) $(STRIP) --strip-debug $(foreach KMOD,$(LINUX_KMODS),$(out_system)/$$(basename $(KMOD)))
+找到 'LINUX_KMODS' 8 次。
+----------------------------------------
+查找 'LINUX_KMODS' 在 'E:\SDN\ofdpa-EA3-2.3.0.0-odp\systems\cpu\common\linux\rootfs\rc.start':
+E:\SDN\ofdpa-EA3-2.3.0.0-odp\systems\cpu\common\linux\rootfs\rc.start(98):         for WORD in ${LINUX_KMODS} ; do
+找到 'LINUX_KMODS' 1 次。
+----------------------------------------
+查找 'LINUX_KMODS' 在 'E:\SDN\ofdpa-EA3-2.3.0.0-odp\systems\cpu\wrx\linux\build\cpu.cfg':
+E:\SDN\ofdpa-EA3-2.3.0.0-odp\systems\cpu\wrx\linux\build\cpu.cfg(24): export LINUX_KMODS = libraries/alelib/alelib.ko libraries/fdt/libfdt/fdt_interface.ko libraries/netlib/netlib.ko libraries/syslib/syslib.ko linux-userspace/kmod/fdtconf/fdtconf.ko libraries/fmnlib/fmnlib.ko linux-userspace/kmod/nae/nae.ko linux-userspace/kmod/soc_interface/soc_interface.ko
+找到 'LINUX_KMODS' 1 次。
+----------------------------------------
+查找 'LINUX_KMODS' 在 'E:\SDN\ofdpa-EA3-2.3.0.0-odp\systems\cpu\wrx\linux\system\rootfs\profile':
+E:\SDN\ofdpa-EA3-2.3.0.0-odp\systems\cpu\wrx\linux\system\rootfs\profile(13): LINUX_KMODS="fdt_interface.ko syslib.ko fdtconf.ko alelib.ko netlib.ko fmnlib.ko soc_interface.ko nae.ko"
+E:\SDN\ofdpa-EA3-2.3.0.0-odp\systems\cpu\wrx\linux\system\rootfs\profile(15): export PATH PS1 LD_LIBRARY_PATH LINUX_KMODS
+找到 'LINUX_KMODS' 2 次。
+搜索完成, 找到 'LINUX_KMODS' 12 次。(4 个文件)。
+

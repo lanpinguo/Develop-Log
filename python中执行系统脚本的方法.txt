@@ -1,0 +1,20 @@
+
+方法1：
+Python有个os.system也可以执行
+os.system(". xxx.sh")
+os.system(". xxx.php")
+
+方法2：
+subprocess.Popen('. xxx.sh', stdout = subprocess.PIPE, shell = True).stdout.read()
+最后的read()就是文件内容读取，返回字符串，如果想返回list就换成readlines()。
+
+方法3：
+其实用status, output = commands.getstatusoutput('. xxx.sh')也不错，反正我更多时候会用这个。
+
+
+例子：
+from subprocess import *
+at = Popen('/work/autotest.sh', stdout = PIPE, shell = True)
+status = at.wait() # wait for child process to terminate
+output = at.stdout.read()
+

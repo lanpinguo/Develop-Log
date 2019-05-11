@@ -1,0 +1,55 @@
+VxWorks 5.5 always runs in supervisor mode on processors in the PowerPC family.
+
+26-bit Addressing
+
+VxWorks uses bl or bla instructions by default for both exception/interrupt handling, and for dynamically downloaded module relocations. By using bl or bla, the PowerPC architecture is only capable of branching within the limits imposed by a signed 26-bit offset. This limits the available branch range to +/- 32 MB.
+Branching Across Large Address Ranges
+
+Branches across larger address ranges must be made to an absolute 32-bit address with the help of the LR register. Each absolute 32-bit jump is accomplished with a sequence of at least three instructions (more, if register state must be preserved) that is rarely needed and is expensive in terms of execution speed and code size. Such large branches are typically seen only in very large downloaded modules and very large (greater than 32 MB) system images. One way of getting around this restriction for downloadable applications is to use the -mlongcall compiler option. However, this option may introduce an unacceptable amount of performance penalty and extra code size for some applications. It is for this reason that the VxWorks kernel is not compiled using -mlongcall. Another way to get around this limitation is to increase the size of the WDB memory pool for host tools. By default, the WDB pool size is set to one-sixteenth of the amount of free memory. Memory allocations for host-based tools (such as WindSh and CrossWind) are done out of the WDB pool ?rst, and then out of the general system memory pool. Requests larger than the available amount of WDB pool memory are done directly out of the system memory pool. If an application is anticipated to be located outside of the WDB pool, thus potentially crossing the 32 MB threshold, the size of the WDB memory pool can be increased to ensure the application ?ts into the required space.
+
+
+PowerPC指令为32位长，指令内仅有16位用于加载常量值，由于地址最多可达到64位，所以我们可以采用每次一段的方式载入地址，汇编程序中的@符号指示汇编程序给出一个符号值的特殊处理形式：@highest：表示一个常量的第48-63位；@higher：表示一个常量的第32-48位；@h：16-31位；@l：0-15位。
+    下面是我们的一个稍大点的PowerPC汇编程序总结下上面的指令集，实现的功能就是载入两个值并相加，最后退出，以结果为状态代码输出。代码如下：
+[cpp] view plain copy
+
+ 
+#sum.s，第一个PowerPC汇编程序  
+.data  
+.align 3  
+#此处装载两个值  
+first_value:  
+.quad 1  
+second_value:  
+   .quad 2  
+#写”.opd”(official procedure descriptor)  
+.section “.opd”,”aw”  
+.align 3  
+#._start的程序描述符，即为程序名  
+.global _start  
+_start:  
+   .quad .start, .TOC.@tocbase,0  
+#._text为程序代码段  
+.text  
+._start:  
+   #装载地址高位  
+lis r7,first_value@highest  
+ori r7,r7,first_value@higher  
+#shift these up to the high-order bits  
+rldier r7,r7,32,31  
+#装载地址低位  
+oris r7,r7,first_value@h  
+ori r7,r7,first_value@l  
+#将第一个值载入寄存器4  
+ld r4,0(r7)  
+lis r7,second_value@highest  
+ori r7,r7,second_value@higher  
+rldicr r7,r7,32,31  
+oris r7,r7,second_value@h  
+ori r7,r7,second_value@l  
+ld r5,0(r7)  
+#二者相加并存到寄存器6  
+add r6,r4,r5  
+#程序退出  
+li 0,1 #寄存器0为系统调用  
+mr r3,r6 #将结果移到寄存器3中  
+sc #对内核进行系统调用  

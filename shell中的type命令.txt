@@ -1,0 +1,8 @@
+type [-aftpP] name [name,...]
+-a 打印name的所有可能情况，比如type -a ls,会打印ls is aliased to 'ls --color=auto'和ls is /bin/ls
+-f 不会去查找function
+-t 打印alias,keyword,function,built-in,file这5种类型
+-p 如果 type -t name输出file，那么会打印name所在路径
+-P 不管type -t name是不是输出file，都会去搜索name所在路径，比如type -P ls，尽管type -t ls打印的是alias(因为alias的优先级高于file)，但是仍然会搜索出ls所在的路径/bin/ls
+ 
+如果type不加任何选项，直接加1个或者多个name，那么会依次打印这些name的类型。只有所有name的类型都能成功打印，type才返回成功，否则，只要任何一个name类型无法打印，那么就返回失败。

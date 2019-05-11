@@ -1,0 +1,8 @@
+1、目前CUDA和OpenCL是最主流的两个GPU编程库。
+LWJGL (http://www.lwjgl.org/)
+JOCL (http://www.jocl.org/)
+JCUDA (http://www.jcuda.de/)
+Aparapi (http://code.google.com/p/aparapi/)
+JavaCL (http://code.google.com/p/javacl/）
+2、并行计算
+将GPU用于图形渲染以外领域的计算成为GPGPU（General Purpose computing on graphics processing units，基于GPU的通用计算）。

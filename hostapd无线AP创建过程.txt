@@ -1,0 +1,69 @@
+无线AP创建过程：
+
+1、在终端下分别使用命令yum install hostapd、yum install dnsmasq安装hostapd及dnsmasq软件组件包。其中hostapd 是 Host Access Point 守护进程，提供对基于 Linux 的无线接入点的强 WPA2 加密和身份验证。配置 hostapd 非常简单，它支持 WPA2-Personal 和 Enterprise，提供了对 WPA2-Personal 的独特修改，可让管理它变得更复杂或更简单,随后我们可以通过/etc/hostapd/hostapd.conf配置文件详细的配置hostapd的各种参数，让其将无线网卡模拟成为无线AP。而Dnsmasq 提供 DNS 缓存和 DHCP 服务功能。作为域名解析服务器(DNS)，dnsmasq可以通过缓存 DNS 请求来提高对访问过的网址的连接速度。作为DHCP 服务器，dnsmasq 可以为局域网电脑提供内网ip地址和路由。DNS和DHCP两个功能可以同时或分别单独实现。dnsmasq轻量且易配置，适用于个人用户或少于50台主机的网络，我们将通过它来为我们接入后的客户端设备提供DHCP以及DNS服务。这样客户端就可以通过无线模拟AP顺利访问网络。
+
+2、在系统中使用vi命令编辑hostapd配置文件/etc/hostapd/hostapd.conf（该在安装hostapd软件组件包时自动创建完成），内容如下：
+
+    ctrl_interface=/var/run/hostapd  
+    ctrl_interface_group=wheel  
+    # Some usable default settings...  
+    macaddr_acl=0  
+    auth_algs=1  
+    ignore_broadcast_ssid=0  
+    # Uncomment these for base WPA & WPA2 support with a pre-shared key  
+    wpa=2  
+    wpa_key_mgmt=WPA-PSK  
+    wpa_pairwise=TKIP  
+    rsn_pairwise=CCMP  
+    # DO NOT FORGET TO SET A WPA PASSPHRASE!!  
+    wpa_passphrase=****** 
+    # Most modern wireless drivers in the kernel need driver=nl80211   
+    #ieee80211n=1  
+    # Customize these for your local configuration...  
+    interface=wlan0  
+    hw_mode=g  
+    channel=7  
+    ssid=HOSTAP 
+    logger_stdout=-1 
+    logger_stdout_level=2 
+    max_num_sta=5 
+
+在该配置文件中SSID其实指的就是无线AP的访问名，用户可以随意定义自己喜欢的名字。而wpa_passphrase等号后的字符其实就是无线AP的连接密码，用户同样需要根据自己的需求进行修改。
+
+3、在系统中使用vi命令编辑dnsmasq配置文件/etc/dnsmasq.conf,对如下行进行修改，内容如下：
+
+    interface=wlan0 
+    listen-address=192.168.0.1 
+    #no-dhcp-interface= 
+    dhcp-range=192.168.0.50,192.168.0.150,12h 
+    dhcp-option=3,192.168.0.1 
+    dhcp-option=6,8.8.8.8 
+
+其中dhcp=ranage参数为dhcp地址范围，即租借时间12小时,dhcp-option=3,192.168.0.1为客户端配置网关，该地址其实就是模拟为无线AP无线网卡的IP地址。
+
+dhcp-option=6,8.8.8.8为客户端配置dns，用户应该自己修改为外网的dns地址。
+
+4、修改网络设置，打开Linux主机网络数据转发功能，命令模式如下：
+
+    echo 1 >/proc/sys/net/ipv4/ip_forward 
+
+5、设置无线接入点IP地址，命令模式如下：
+
+    ifconfig wlan0 192.168.0.1 netmask 255.255.255.0 
+
+6、使用命令systemctl启动hostapd及dnsmasq网络服务，命令模式如下：
+
+    systemctl start hostapd.service 
+    systemctl start dnsmasq.service 
+
+7、如果该linux系统开启了防火墙需要使用iptables开启数据转发功能，命令模式如下：
+
+    iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -o em1 -j MASQUERADE 
+    iptables -A FORWARD -s 192.168.0.0/24 -o em1 -j ACCEPT 
+    iptables -A FORWARD -d 192.168.0.0/24 -m conntrack --ctstate ESTABLISHED, RELATED -i em1 -j ACCEPT 
+
+通过以上配置，在FEDORA18初次安装后作为无线AP使用是没有问题的。
+
+
+sudo  hostapd /etc/hostapd/hostapd.conf >/home/share/hostapd/hostapd.log 
+

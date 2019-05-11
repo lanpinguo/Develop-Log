@@ -1,0 +1,3 @@
+小米5 Android studio开发出现问题 usb调试安装不了应用 
+解决方法：
+Gradle 回退到2.2.3   或者  关闭miui优化（位于USB开发者选项下）

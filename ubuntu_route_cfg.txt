@@ -1,0 +1,26 @@
+
+
+route del -net 0.0.0.0 gw 92.168.153.1
+
+route add default gw 192.168.1.1
+
+ route add -net 192.168.2.1 netmask 255.255.255.0 eth1
+ 
+ 
+root@Orangepi:~# route add -net 192.168.2.0 netmask 255.255.255.0 eth1 
+root@Orangepi:~# 
+root@Orangepi:~# route
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+default         192.168.2.1     0.0.0.0         UG    0      0        0 eth0
+192.168.2.0     *               255.255.255.0   U     0      0        0 eth1
+192.168.2.0     *               255.255.255.0   U     0      0        0 eth0
+192.168.2.0     *               255.255.255.0   U     0      0        0 eth1 
+ root@Orangepi:~# route del -net 0.0.0.0 
+root@Orangepi:~# route
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+192.168.2.0     *               255.255.255.0   U     0      0        0 eth1
+192.168.2.0     *               255.255.255.0   U     0      0        0 eth0
+192.168.2.0     *               255.255.255.0   U     0      0        0 eth1
+root@Orangepi:~# route add default gw 192.168.2.1 eth1

@@ -1,0 +1,260 @@
+
+root@Orangepi:~# find / -name "*xdm*"
+/run/xdm.pid
+/run/systemd/generator.late/graphical.target.wants/xdm.service
+/run/systemd/generator.late/multi-user.target.wants/xdm.service
+/run/systemd/generator.late/xdm.service
+find: ‘/proc/5306’: No such file or directory
+/usr/lib/X11/xdm
+/usr/lib/aarch64-linux-gnu/pkgconfig/xdmcp.pc
+/usr/share/X11/xdm
+/usr/share/doc/xdm
+/usr/share/doc/libxdmcp-dev
+/usr/share/doc/libxdmcp-dev/xdmcp.txt.gz
+/usr/share/doc/libxdmcp6
+/usr/share/man/man1/xdm.1.gz
+/usr/share/man/man5/xdm.options.5.gz
+/usr/bin/xdm
+/sys/fs/cgroup/systemd/system.slice/xdm.service
+/etc/pam.d/xdm
+/etc/rc6.d/K01xdm
+/etc/X11/xdm
+/etc/X11/xdm/xdm.options
+/etc/X11/xdm/xdm-config
+/etc/logrotate.d/xdm
+/etc/rc5.d/S01xdm
+/etc/rc0.d/K01xdm
+/etc/insserv.conf.d/xdm
+/etc/rc1.d/K01xdm
+/etc/init.d/xdm
+/etc/rc3.d/S01xdm
+/etc/rc4.d/S01xdm
+/etc/rc2.d/S01xdm
+/var/lib/dpkg/info/xdm.md5sums
+/var/lib/dpkg/info/libxdmcp6:arm64.triggers
+/var/lib/dpkg/info/libxdmcp6:arm64.md5sums
+/var/lib/dpkg/info/libxdmcp6:arm64.list
+/var/lib/dpkg/info/xdm.prerm
+/var/lib/dpkg/info/xdm.templates
+/var/lib/dpkg/info/libxdmcp-dev:arm64.list
+/var/lib/dpkg/info/xdm.preinst
+/var/lib/dpkg/info/libxdmcp-dev:arm64.md5sums
+/var/lib/dpkg/info/xdm.list
+/var/lib/dpkg/info/libxdmcp6:arm64.shlibs
+/var/lib/dpkg/info/xdm.postinst
+/var/lib/dpkg/info/xdm.config
+/var/lib/dpkg/info/xdm.conffiles
+/var/lib/dpkg/info/xdm.postrm
+/var/lib/xdm
+/var/log/xdm.log
+/var/log/xdm.log.3.gz
+/var/log/xdm.log.4.gz
+/var/log/xdm.log.1
+/var/log/xdm.log.2.gz
+
+Skip to main content
+Become a Patron!
+ Linux Journal
+SUBSCRIBE
+TOPICS+
+NEWS
+VIDEOS
+MAGAZINE
+Search
+Search
+
+Search
+Enter the terms you wish to search for.
+Customizing the XDM Login Screen
+Software
+by Brian Lane on November 30, 1999
+“What's an XDM screen? Is this more cryptic Linux geek speak?” Well, yes, but I'm going to make it easy to understand, so you too can speak more like a Linux geek. If you are running the X Window System and have your system set up to boot straight into X and display the box asking for your login name and password, you are already running XDM. If you are running X using the startx command from a shell prompt, you aren't running XDM now—but you will soon be.
+
+XDM has features other than the ones relating to the xlogin box. These other features are useful only if you are running X on multiple screens or machines. If you are interested, read the xdm man page. In this article, I will focus on basic cosmetic changes like the background image, programs to be displayed while waiting for a login, colors and fonts used in the login box and the size and position of the login box.
+
+I will assume you have X set up and running correctly. If you don't have X working, please consult the documentation that came with your Linux distribution.
+
+If you already have XDM up and running, you can skip ahead to the section on customizing XDM.
+
+Setting Up XDM
+Setting up XDM requires you to change the run level of your system. The run level controls which mode the system is running in when it is rebooted. It can run in single user mode, multiuser mode without networking, multiuser mode with networking and multiuser mode with XDM running. My system is Red Hat 5.1 and it uses run level 3 for normal multiuser operation and run level 5 for XDM operation (multiuser, plus starting X at boot time). Edit your /etc/inittab file as the root user to change the run level of the system. First, make sure the XDM run level exists in /etc/inittab. It should look something like this and is usually located near the end of the file:
+
+# Run XDM in run level 5
+x:5:respawn:/usr/bin/X11/xdm -nodaemon
+This is the entry from Red Hat 5.1. Slackware, Debian, SuSE and other Linux distributions with X should be similar. The run level number is 5 in this case, but may be different in your distribution.
+
+You can test the XDM run level by typing init 5. If the login box appears and everything looks okay, you can change the default initlevel for bootup or experiment with the XDM changes without rebooting your system. If you don't want XDM to start at boot time, skip ahead to the next section.
+
+Make a backup copy of the /etc/inittab file before you change anything. Rename it to something like inittab.bak.1, then look for the initdefault line, which is usually near the start of the /etc/inittab file. Since you are not yet running XDM, yours probably looks something like this:
+
+id:3:initdefault:
+To make your system start XDM at boot time, you change the 3 in this line to equal the number in the XDM run level line. In my case, I changed the 3 to a 5. Reboot your system, and a gray screen with a box in the middle asking for a user name and password will appear. You can log in and make sure everything is running okay, but that isn't necessary to complete this tutorial.
+
+Customizing XDM
+Now that XDM is up and running, we can start making changes. We will be switching between a text-mode login and the XDM screen. To get to the text mode console, press <H>ctrl<H>-<H>alt<H>-F1; to get back to the XDM screen, press <H>ctrl<H>-<H>alt<H>-F7. With some distributions, you may have to use <H>ctrl<H>-<H>alt<H>-F6 for the XDM screen.
+
+Change to text mode and log in as root. Change directories to /usr/lib/X11/xdm and look at the files present in this directory. These files control the behavior of your system when XDM is started and a user logs in using XDM. The files we are concerned with are:
+
+Xsetup (or Xsetup_0), which sets up the XDM screen
+
+Xresources, which controls the behavior of the xlogin widget
+
+Changing the Background Color
+Let's start by changing the background color to something other than gray. You can use any program which can display an image or color on the background, which is sometimes called the root window. One program included with the X distribution is xsetroot. Edit the Xsetup file and comment out any programs that may already be setting the background image, like xbanner, xv or xsetroot. Add the following line:
+
+/usr/X11R6/bin/xsetroot -solid steelblue
+Color names like steelblue are defined in the /usr/lib/X11/rgb.txt file. This maps color names to the actual Red/Green/Blue color settings, making things more readable. If you use a color name that has spaces in it, you need to enclose them in quotes, e.g., "navy blue".
+
+Save the Xsetup file and switch back to the XDM display by using <H>ctrl<H>-<H>alt<H>-F7 (or F6, depending on which virtual console the X server is using for its display). Then restart XDM by pressing <H>ctrl<H>-<H>alt<H>-<H>backspace<H>. Note: do not use the <H>del<H> key. It will reboot the whole system instead of just restarting XDM.
+
+You should now have a nice, solid steel-blue background. You can experiment with different colors until you find one that you like.
+
+Changing the Background Pattern
+A bitmap can be used to tile (copied over and over to cover the whole display) a simple two-color image onto the background instead of a solid color. There should be a collection of bitmaps in /usr/include/X11/bitmaps. You can also create your own using the bitmap program included with X windows. Try changing the xsetroot line to this:
+
+/usr/X11R6/bin/xsetroot -bitmap\
+/usr/include/X11/bitmaps/xsnow
+Restart XDM as before, and you should now have a nice winter scene. You can change the foreground and background color with the bitmap by adding the -fg and -bg options and specifying a color. Try changing it to this:
+
+/usr/X11R6/bin/xsetroot -bitmap\
+/usr/include/X11/bitmaps/xsnow -fg blue -bg yellow
+Not the most wonderful colors for snow, but you get the idea. The colors recognized by the -fg and -bg options are the same as the ones in the rgb.txt file discussed above.
+You can also tile color bitmaps stored in the xpm format. The xpmroot program is used for this. Change the xsetroot line to something like this:
+
+/usr/X11R6/bin/xpmroot\
+/usr/include/X11/pixmaps/file.xpm
+Displaying a Background Image
+Now that we can display colors and tiled bitmaps on the background, it is time to display a picture on the background. To do this, I use a shareware graphics program called xv. You can get it from the xv home page at http://www.trilon.com/xv/, or it may be included with your Linux distribution. Remember, this is shareware, and you should support the author by sending him $25 if you find his program useful.
+
+I have chosen to use xv, but any program capable of displaying an image on the background can be used. For xv, you tell it to display the image centered on the background. You also want it to exit immediately after displaying the image; otherwise, XDM will hang until the xv program is exited manually.
+
+/usr/X11R6/bin/xv -root -rmode 5 -quit\
+/root/.gromit01.jpg
+I use this to put a picture in the center of the display. To view your changes, save the Xsetup file and press <H>ctrl<H>_<H>alt<H>-F7 to switch back to the XDM screen. Press <H>ctrl<H>-<H>alt<H>-<H>backspace<H> to restart the X server. You should now see your image in the center of the screen, covered by the login box. xv supports several other placement options using the -rmode command. You can see a list of these options by typing xv -rmode -1.
+
+Displaying Random Images
+Listing 1
+
+With the help of a simple Perl script, you can display a random image on the background each time XDM is run. Listing 1 is a simplified version of a script written by Scott Scriven, toykeeper@cheerful.com.
+
+Type in this program or download it from ftp.linuxjournal.com/pub/lj/listings/issue68/3325.tgz. and save it as /usr/local/bin/bkgd. Make sure execute permissions are set by typing:
+
+chmod ugo+x /usr/local/bin/bkgd
+You may also have to change the path to xv and find to match your local setup. Including the absolute paths in the script ensures it will work correctly, even when the $PATH environment variable isn't set.
+
+To load a random background, change the xv line in Xsetup to usr/local/bin/bkgd instead. Create a /usr/lib/X11/backgrounds directory and fill it with your favorite images. A couple of good places to look for background images are http://www.digitalblasphemy.com/ and http://ipix.yahoo.com/.
+
+Listing 2 is a working Xsetup file with the intermediate steps commented out with “#” characters.
+
+Listing 2
+
+Customizing the Login Box
+Now we want to customize the xlogin box using the /usr/lib/X11/xdm/Xresources file. This file is also used for configuring other XDM widgets like the chooser, but we aren't going to deal with these other options here—see the XDM man page to learn about them.
+
+We can move the xlogin box, resize it, change its color, its fonts and what it says. I have moved mine into the lower-right corner and made it as small as I can, so that it doesn't cover up the background image.
+
+The XDM xlogin widget uses X resources to specify these settings. They are all stored in the Xresources file and are read by XDM each time it restarts. A list of the available options, taken from the XDM man page, is shown in “Xresources Options”. I will go through each option and explain its use.
+
+I have ignored several more advanced xlogin resources, some of which may appear in the Xresources file. It is safe to leave them alone—the defaults set when you installed X should work fine. The XDM man page contains full descriptions of each option, if you want to experiment with them.
+
+Move and Resize the xlogin Box
+The .width, .height, .x and .y settings can be used to set the size and screen position of the xlogin box, or you can use .geometry to specify all of these at once. Let's move the login box to the lower-right corner and make it 300 by 250 pixels. The screen coordinates to be used start with 0,0 in the upper-left corner, and the coordinates of the lower-right corner will depend on your screen resolution. But X has another way to specify coordinates: -0,-0 is the lower-right corner of the display, no matter what the screen size. Add this line to the Xresources file, near the other xlogin* definitions:
+
+xlogin*geometry: 300x250-0-0
+Save the file and restart the x server as you did after changing the background image. Your login box should now fit snugly into the lower-right corner of the display, revealing more of your background image.
+
+Now we can change the colors. There are five resources relating to color in the above table. First, change the default foreground and background colors for the box using the xlogin*foreground and .background settings. Let's make it black on blue:
+
+xlogin*foreground: black
+xlogin*background: steelblue
+Save and restart the X server to make sure your changes have taken effect. The greeting and login prompt did not change color, because you haven't changed them yet. You must specify each individual color you want to change. The .greetColor setting is the greeting that is displayed at the top of the box. .promptColor is the login: and password: prompt color, as well as the text you enter for your user name. .failColor is used for when the user name or password entered is invalid.
+
+Try out these settings:
+
+xlogin*foreground:  black
+xlogin*background:  steelblue
+xlogin*greetColor:  white
+xlogin*promptColor: grey
+xlogin*failColor:   red
+Not a terribly inspiring color scheme, but better than black on white. Play around with it until you find the colors you like.
+
+Changing the xlogin Fonts
+The resources that control the four fonts we want to change are:
+
+xlogin*font: used for displaying the typed-in user name
+
+xlogin*greetFont: used to display the greeting
+
+xlogin*promptFont: used to display the prompts username: and password:
+
+xlogin*failFont: used for displaying that the login failed
+
+Fonts under X are difficult to deal with. They have an abundance of options and modifiers, most of which are never used. The xfontsel program can make font selection much easier. Just browse through the fonts, selecting the font style, size and attributes you want. Then click on the select button and paste the font string into the Xresources file using your middle mouse button, or both mouse buttons at once if you have a two-button mouse. Add these lines to your Xresources file:
+
+xlogin*font:\
+ -*-courier-bold-r-*-*-18-*-*-*-*-*-*-*
+xlogin*greetFont:\
+ -*-helvetica-bold-r-*-*-24-*-*-*-*-*-*-*
+xlogin*promptFont:\
+ -*-lucidatypewriter-bold-r-*-*-18-*-*-*-*-*-*-*
+xlogin*failFont:\
+ -*-times-bold-i-*-*-24-*-*-*-*-*-*-*
+Experiment with the different fonts and sizes until you find something you like.
+Changing the xlogin Prompts
+You can also specify the text that is displayed for each of the four prompts associated with the xlogin widget. .greeting can be set to CLIENTHOST and will display the full host name of the system it is running on. The .namePrompt value is displayed to ask for the user name, .passwdPrompt asks for the password, and .fail is displayed when an unsuccessful login occurs. For example:
+
+xlogin*greeting:         Welcome!
+xlogin*namePrompt:       Name:\040
+xlogin*passwdPrompt:     Password:
+xlogin*fail:             !WRONG!
+Add a Clock to Your XDM Screen
+X distributions usually include the xclock program which can display a nifty looking analog clock. Add it to your XDM screen by inserting this line in your Xsetup file:
+
+xclock -hl white
+-hd white -bg black -fg white\ -geometry 100x100+0+0 &
+This will display an analog clock of moderate size in the upper-left corner of the screen. The clock may stay running, even after a user has logged in.
+
+Well, that's about it for the basic customization of XDM. There are many things to play with, and hopefully I have given you a good framework with which to begin experimenting. No two users have the same tastes, so it may take some time before you finally get the look and feel you want.
+
+Xresources Options
+
+Brian Lane and his wife Denise live in Olalla, Washington with their four computers. He spends his days developing embedded software and his nights writing Linux code. He can be contacted at nexus@tatoosh.com.
+
+You May Like
+three abstract figures holding a sphere
+For Open-Source Software, the Developers Are All of Us
+Derek Zimmer
+
+Lotfi ben Othmane, Martin Gilje Jaatun and Edgar Weippl's Empirical Research for Software Security (CRC Press)
+James Gray
+
+Heirloom Software: the Past as Adventure
+Eric S. Raymond
+
+SoftMaker FreeOffice
+James Gray
+ Subscribe to Linux Journal's Digital Edition. Join a community with a deep appreciation for open source philosophies, digital freedoms, and privacy.
+Connect With Us 
+Linux Journal, currently celebrating its 24th year of publication, is the original magazine of the global Open Source community.
+
+© 2018 Linux Journal, LLC. All rights reserved.
+FOOTER SUBMENU
+PRIVACY POLICY
+TERMS OF SERVICE
+ADVERTISE
+FOOTER MENU COLUMN 1
+SUBSCRIBE
+RENEW
+BACKISSUES
+CUSTOMER SERVICE
+FOOTER MENU COLUMN 2
+MASTHEAD
+FAQ
+AUTHORS
+LETTERS TO EDITOR
+FOOTER MENU COLUMN 3
+RSS FEEDS
+NEWSLETTERS
+MERCHANDISE
+CONTACT US
+Powered by Private Internet Access

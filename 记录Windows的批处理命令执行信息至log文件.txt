@@ -1,0 +1,4 @@
+运行批处理的时候后面加个> log.txt 2> .error.txt
+如
+c:\>.\test.cmd > log.txt 2> error.txt搜索
+log.txt中记录的是正常的日志，error.txt中记录的是出错的日志

@@ -1,0 +1,50 @@
+Git 建立 Remote Branch 的相关指令操作
+
+From:   http://blog.longwin.com.tw/2013/11/git-create-remote-branch-2013/
+
+
+Git 远端 Branch 的建立、操作、使用、刪除方式.
+Git 建立 远端 Branch
+
+    git clone git@github.com:user/project.git
+    cd project
+    git checkout -b new_branch # 建立 local branch
+    git push -u origin new_branch # 建立远端 branch (將 new_branch 建立到远端)
+    git fetch
+    vim index.html # 修改
+    git commit -m 'test' -a # commit
+    git push
+    註: new_branch 要換成你要的 branch name, 以上所有 new_branch 都要對應著修改成同樣名稱.
+
+Git 使用 远端 Branch
+
+    git clone git@github.com:user/project.git
+    cd project
+    git branch -r # 看远端有什麼 branch
+    git checkout origin/new_branch -b new_branch # 建立 local new_branch 並與远端連接
+    vim index.html # 修改
+    git commit -m 'test' -a # commit
+    git push
+    註: new_branch 要換成你要的 branch name, 以上所有 new_branch 都要對應著修改成同樣名稱.
+
+Git 刪除 远端 Branch
+
+    git push origin :target_branch # 刪除远端的 branch
+
+Git Branch 的 Merge
+
+    git branch new_branch # 建立 branch
+    git checkout new_branch # 切到 new_branch, git checkout -b new_branch 可以同時建立 + 切換
+    vim index.html # 修改
+    git commit -m 'test' -a # commit
+    git checkout master # 切回 master
+    git merge new_branch # 將 new_branch merge 到 master
+    git branch -d new_branch # 若砍不掉就用 -D
+
+更新所有 Repository branch
+
+    git remote update
+
+
+
+

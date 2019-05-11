@@ -1,0 +1,3 @@
+https://www.ibm.com/developerworks/cn/linux/l-gstreamer/
+
+https://gstreamer.freedesktop.org/documentation/tutorials/basic/hello-world.html

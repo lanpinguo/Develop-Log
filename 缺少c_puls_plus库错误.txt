@@ -1,0 +1,15 @@
+今天在Ubuntu下编译Android源代码时出现了这个问题：“error while loading shared libraries: libstdc++.so.6”。
+
+解决方法很简单，在这里记录一下。直接进行如下的安装就可以了：
+
+[cpp] view plain copy 在CODE上查看代码片派生到我的代码片
+sudo apt-get install libstdc++6  
+sudo apt-get install lib32stdc++6  
+
+error while loading shared libraries: libz.so.1: cannot open shared object file: 
+No such file or directory
+解决办法来源于: http://askubuntu.com/questions/147400/problems-with-eclipse-and-android-sdk
+输入:
+sudo apt-get install lib32z1 lib32ncurses5 lib32bz2-1.0
+
+sudo apt-get install bsdtar

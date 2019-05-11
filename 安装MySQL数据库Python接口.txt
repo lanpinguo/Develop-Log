@@ -1,0 +1,17 @@
+
+安装MySQL数据库Python接口
+
+1、安装mysql数据库
+sudo apt-get install mysql-server
+sudo apt-get install libmysqlclient-dev
+
+
+2、安装python DB API接口
+安装MySQLdb，请访问 http://sourceforge.net/projects/mysql-python ，(Linux平台可以访问：https://pypi.python.org/pypi/MySQL-python)从这里可选择适合您的平台的安装包，分为预编译的二进制文件和源代码安装包。
+
+如果您选择二进制文件发行版本的话，安装过程基本安装提示即可完成。如果从源代码进行安装的话，则需要切换到MySQLdb发行版本的顶级目录，并键入下列命令:
+$ gunzip MySQL-python-1.2.2.tar.gz
+$ tar -xvf MySQL-python-1.2.2.tar
+$ cd MySQL-python-1.2.2
+
+$ python setup.py install

@@ -1,0 +1,38 @@
+Installing default JRE/JDK
+sudo apt-get update
+sudo apt-get install default-jre
+sudo apt-get install default-jdk
+Installing Oracle JDK
+sudo apt-get install python-software-properties
+sudo add-apt-repository ppa:webupd8team/java
+sudo apt-get update
+Oracle JDK 6(旧版本)
+sudo apt-get install oracle-java6-installer
+Oracle JDK 7(较新的稳定版本)
+sudo apt-get install oracle-java7-installer
+Oracle JDK 8(最新预览版本)
+sudo apt-get install oracle-java8-installer
+Managing Java
+sudo update-alternatives --config java 有 2 个候选项可用于替换 java (提供 /usr/bin/java)。
+选择 路径 优先级 状态
+* 0 /usr/lib/jvm/java-7-oracle/jre/bin/java 1072 自动模式
+1 /usr/lib/jvm/java-7-openjdk-amd64/jre/bin/java 1071 手动模式
+2 /usr/lib/jvm/java-7-oracle/jre/bin/java 1072 手动模式
+要维持当前值[*]请按回车键，或者键入选择的编号：
+（我是按了回车，没改）
+sudo update-alternatives --config javac
+（同上）
+Setting the "JAVA_HOME" environment variable 通过这个命令可以看到java安装路径：
+sudo update-alternatives --config java 根据设置时所选项来确定path，我是用默认的第一个，所以path为：
+"/usr/lib/jvm/java-7-oracle"
+sudo vim /etc/environment
+在文件最后添加上：
+JAVA_HOME="/usr/lib/jvm/java-7-oracle"
+保存退出(:wq)，在终端输入：
+
+source /etc/environment
+然后输入：
+echo $JAVA_HOME
+如果输出和我们设置是一样的，说明我们安装成功了，这时你还可以看下java的版本：
+
+java -version

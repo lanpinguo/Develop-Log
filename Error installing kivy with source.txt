@@ -1,0 +1,8 @@
+
+
+
+In file included from kivy/graphics/opengl.c:567:0:
+kivy/include/gl_redirect.h:64:13: fatal error: GL/gl.h: No such file or directory
+ #   include <GL/gl.h>
+ 
+sudo apt install  libglew-dev

@@ -1,0 +1,13 @@
+
+
+I've just figured it out. I solve it out by uninstalling the cython module and then reinstalling a different version of it. As the official documentation says, there is not any kind of guarantee if the newer versions work fine while compilation. So, first uninstall cython:
+
+pip uninstall cython
+Install the version 0.23:
+
+pip install cython==0.23
+And then again install Kivy, and make sure there's no error while compilation:
+
+pip install kivy
+Hope, this will work fine.
+

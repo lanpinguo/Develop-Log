@@ -1,0 +1,15 @@
+ orCAD capture Footprint 封装路径设置
+ 
+ 用orCAD capture 做原理图时需要设置Footprint封装，而这个封装的默认路径是 C:\Cadence\SPB_16.5\share\pcb\pcb_lib\symbols
+
+当需要添加一些自定义封装时，在show footprint(预览封装)时，提示：" ERROR(ORCAP-1733) allegro footprint was not found in the search path"，通过设置psmpath,环境变量，仍然还是提示找不到，这个环境变量只对allegro pcb editer软件有效。对orCAD capture无效，且在orCAD capture所有菜单都找过了，没有设置的地方，如果通过拷贝到封装默认路径下，也太繁琐了。后来经过摸索找到设置路径的方法：
+
+打开：
+E:\Users\lanpinguo\AppData\Roaming\SPB_Data\cdssetup\OrCAD_Capture/16.6.0/Capture.ini
+找到： [Allegro Footprints]
+
+加入自定义封装路径：Dir1=D:\Develop\PCB\CADENCE\RFID\pcb\package 
+
+可以设置多个Dir2= ...
+
+                        Dir3=...

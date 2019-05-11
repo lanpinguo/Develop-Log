@@ -1,0 +1,80 @@
+Install and configure NFS server on Ubuntu for serving files
+
+1\
+apt-get install nfs-kernel-server
+
+2\
+Setup NFS Share for Media
+One of the primary purposes I configure NFS server on Ubuntu home server is to share my media to all my OpenELEC Raspberry Pi HTPCs. As I said before, for sharing within a network the performance of NFS is better than SAMBA. If you a media folder on your central Ubuntu server, then add the following line to line to /etc/exports to setup NFS share for it.
+
+#Export media to all IP address under 192.168.1.X
+/home/user/media   192.168.1.0/24(rw,async,insecure,no_subtree_check,nohide)
+
+This will make your media folder located under /home/user available to every device in your local home network. The options within parenthesis are specifically chosen to improve performance. We are sharing “non-critical” media files and we are making them available only to devices in your home network (192.168.1.X). So we can afford to go lower on security to improve speed and performance.
+
+rw – allows read/write if you want to be able to delete or rename files from XBMC or other devices. On XBMC you write permission to download subtitles.
+async – Increases read/write performance. Only to be used for non-critical files.
+insecure – Does not mean the files are insecure but rather this setting allow clients (eg. Mac OS X) to use non-reserved ports connect to a NFS server.
+no_subtree_check – Improves speed and reliability by eliminating permission checks on parent directories.
+nohide – This option allows the client device to see multiple file systems but only works on one host. Since this is rare, you may choose to omit this option as it can potentially cause problems in some cases.
+
+Again we are sharing “non-critical” media files and we are making them available only to devices in your home network (192.168.1.X). So we can afford to go lower on security to improve speed and performance.
+
+
+3\
+STARTING, STOPPING, AND RESTARTING NFS SERVER
+Once you have setup NFS server, you can start NFS share using the following command:
+
+sudo exportfs -ra
+Any time you make changes to /etc/exports I recommend that you restart your NFS server using the following command:
+
+sudo service nfs-kernel-server restart
+
+4\
+check on client:
+
+Ubuntu NFS
+You need to install nfs-command package as follows (open terminal and type the following command):
+$ sudo apt-get update
+$ sudo apt-get install nfs-common
+
+Task: See The List Of All Shared Directories
+Type the following command:
+$ showmount -e server-Ip-address
+$ showmount -e 192.168.1.1
+
+Task: Mount Shared Directory
+Now mount /viveks directory as follows>:
+$ sudo mkdir /nfs
+$ sudo mount -o soft,intr,rsize=8192,wsize=8192 192.168.1.1:/viveks /nfs
+$ df -h
+
+Or,
+sudo mount 192.168.2.201:/work test -t nfs
+
+5\
+How do I Access My Files Using NFS?
+Just go to mount point i.e. /nfs directory with the cd command:
+cd /nfs
+ls
+gedit file.c
+
+6\
+How Do I Mount NFS Automatically After Reboot?
+Edit /etc/fstab, enter:
+$ sudo vi /etc/fstab
+
+OR use gui text editor such as gedit:
+$ sudo gedit /etc/fstab
+
+Append the following line:
+
+192.168.1.1:/viveks  /nfs  nfs   soft,intr,rsize=8192,wsize=8192
+Save and close the file.
+
+7\
+How Do I Remove Mounted NFS Directory (unmount NFS)?
+Type the following command:
+$ cd
+$ sudo umount /nfs
+$ df -H

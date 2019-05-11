@@ -1,0 +1,215 @@
+SSH 反向隧道 内网穿透，AutoSSH自动重连
+
+本机例子：
+root@Orangepi:~# apt install autossh
+
+root@Orangepi:~# autossh -p 22 -M 6777 -NR '*:6766:127.0.0.1:22' ubuntu@13.230.2.155 
+
+服务进程配置：
+[Unit]
+Description=Auto SSH Tunnel
+After=network-online.target
+[Service]
+User=orangepi
+Type=simple
+ExecStart=/usr/bin/autossh -p 22 -M 6777 -NR '*:6766:127.0.0.1:22' ubuntu@13.230.2.155 -i /home/orangepi/$
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=always
+[Install]
+WantedBy=multi-user.target
+WantedBy=graphical.target
+
+验证：
+lanpinguo@ubuntu:~$ ssh -p 6766 orangepi@13.230.2.155
+
+
+
+
+
+
+SSH 反向隧道 内网穿透，AutoSSH自动重连
+1. SSH反向隧道
+通常家用的宽带没有公网IP，运营商现在都分配的是内网IP。这样，公网上的机器就无法直接访问到内网的机器。
+
+SSH具有建立反向隧道的能力，进行内网穿透，前提是我们有一台有公网IP的机器，假设机器情况如下：
+
+机器	网络	IP	端口
+A	公网	114.114.114.114	80
+B	内网	192.168.10.1	7777
+1.修改公网机器A的SSH配置文件/etc/ssh/sshd_config
+
+GatewayPorts yes
+1
+这样可以把监听的端口绑定到任意IP 0.0.0.0上，否则只有本机127.0.0.1可以访问。
+
+2.在内网B的机器上执行命令，建立反向隧道
+
+ssh -NfR 80:127.0.0.1:7777 root@114.114.114.114
+1
+然后输入密码，通道即建立成功。 
+-N：只建立连接，不打开shell 
+-f：建立成功后在后台运行 
+-R：指定端口映射
+
+此时，会在A的机器上开一个80端口监听，所有访问公网机器A的80端口的请求都会转发到内网B的7777端口上。 
+在公网A机器上查看端口：
+
+[root@upshi ~]# lsof -i:80
+COMMAND  PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+sshd    1578 root    8u  IPv4  19403      0t0  TCP *:cbt (LISTEN)
+
+如果不想每次都输入密码，可以配置一下SSH免密登录。
+
+2. AutoSSH 自动重连
+使用SSH的方式不够稳定，使用AutoSSH可以自动在连接断开时自动重连，再把AutoSSH加入系统服务自动启动，则可以做到稳定的连接。
+
+1.安装AutoSSH
+
+sudo apt-get install autossh
+1
+2.执行AutoSSH命令
+
+autossh -M 5555 -NR 80:127.0.0.1:7777 root@114.114.114.114
+
+-M：在5555端口上监听连接的变化，只要断开就重连 
+少了-f 参数，因为AutoSSH本来就在后台运行
+--------------------- 
+作者：upshi 
+来源：CSDN 
+原文：https://blog.csdn.net/upshi/article/details/78630285 
+版权声明：本文为博主原创文章，转载请附上博文链接！
+
+
+
+另一个例子：
+对应的情况
+这篇文章主要介绍了如何利用SSH 反向隧道穿透NAT，并演示了如何维持一条稳定的SSH 隧道。
+
+假设有机器A 和B，A 有公网IP，B 位于NAT 之后并无可用的端口转发，现在想由A 主动向B 发起SSH 连接。由于B 在NAT 后端，无可用公网IP + 端口 这样一个组合，所以A 无法穿透NAT，这篇文章应对的就是这种情况。
+
+首先有如下约定，因为很重要所以放在前面：
+
+机器代号	机器位置	地址	账户	ssh/sshd 端口	是否需要运行sshd
+A	位于公网	a.site	usera	22	是
+B	位于NAT之后	127.0.0.1	userb	22	是
+C	位于NAT之后	127.0.0.1	userc	22	否
+这里默认你的系统init 程序为systemd，如果你使用其他的init 程序，如果没有特殊理由还是换到一个现代化的GNU/Linux 系统吧……
+
+SSH 反向隧道
+这种手段实质上是由B 向A 主动地建立一个SSH 隧道，将A 的6766 端口转发到B 的22 端口上，只要这条隧道不关闭，这个转发就是有效的。有了这个端口转发，只需要访问A 的6766 端口反向连接B 即可。
+
+首先在B 上建立一个SSH 隧道，将A 的6766 端口转发到B 的22 端口上：
+
+B:
+
+ $ ssh -p 22 -qngfNTR 6766:127.0.0.1:22 usera@a.site
+然后在A 上利用6766 端口反向SSH 到B：
+
+A:
+
+$ ssh -p 6766 userb@127.0.0.1
+要做的事情其实就是这么简单。
+
+隧道的维持
+稳定性维持
+然而不幸的是SSH 连接是会超时关闭的，如果连接关闭，隧道无法维持，那么A 就无法利用反向隧道穿透B 所在的NAT 了，为此我们需要一种方案来提供一条稳定的SSH 反向隧道。
+
+一个最简单的方法就是autossh，这个软件会在超时之后自动重新建立SSH 隧道，这样就解决了隧道的稳定性问题，如果你使用Arch Linux，你可以这样获得它：
+
+$ sudo pacman -S autossh
+下面在B 上做之前类似的事情，不同的是该隧道会由autossh 来维持：
+B:
+
+$ autossh -p 22 -M 6777 -NR 6766:127.0.0.1:22 usera@a.site
+-M 参数指定的端口用来监听隧道的状态，与端口转发无关。
+
+之后你可以在A 上通过6766 端口访问B 了：
+
+A:
+
+$ ssh -p 6766 userb@127.0.0.1
+隧道的自动建立
+然而这又有了另外一个问题，如果B 重启隧道就会消失。那么需要有一种手段在B 每次启动时使用autossh 来建立SSH 隧道。很自然的一个想法就是做成服务，之后会给出在systemd 下的一种解决方案。
+
+“打洞”
+之所以标题这么起，是因为自己觉得这件事情有点类似于UDP 打洞，即通过一台在公网的机器，让两台分别位于各自NAT 之后的机器可以建立SSH 连接。
+
+下面演示如何使用SSH 反向隧道，让C 连接到B。
+
+首先在A 上编辑sshd 的配置文件/etc/ssh/sshd_config，将GatewayPorts 开关打开：
+
+GatewayPorts yes
+然后重启sshd：
+A:
+
+$ sudo systemctl restart sshd
+然后在B 上对之前用到的autossh 指令略加修改：
+B:
+
+$ autossh -p 22 -M 6777 -NR '*:6766:127.0.0.1:22' usera@a.site
+之后在C 上利用A 的6766 端口SSH 连接到B：
+C:
+
+$ ssh -p 6766 userb@a.site
+至此你已经轻而易举的穿透了两层NAT。
+
+最终的解决方案
+整合一下前面提到的，最终的解决方案如下：
+
+首先打开A 上sshd 的GatewayPorts 开关，并重启sshd（如有需要）。
+
+然后在B 上新建一个用户autossh，根据权限最小化思想，B 上的autossh 服务将以autossh 用户的身份运行，以尽大可能避免出现安全问题：
+B:
+
+$ sudo useradd -m autosshB 
+$ sudo passwd autossh
+紧接着在B 上为autossh 用户创建SSH 密钥，并上传到A：
+B:
+
+$ su - autossh
+$ ssh-keygen -t 'rsa' -C 'autossh@B'
+$ ssh-copy-id usera@a.site
+注意该密钥不要设置密码，也就是运行ssh-keygen 指令时尽管一路回车，不要输入额外的字符。
+
+然后在B 上创建以autossh 用户权限调用autossh 的service 文件。将下面文本写入到文件/lib/systemd/system/autossh.service，并设置权限为644：
+
+[Unit]
+Description=Auto SSH Tunnel
+After=network-online.target
+[Service]
+User=autossh
+Type=simple
+ExecStart=/usr/bin/autossh -p 22 -M 6777 -NR '*:6766:127.0.0.1:22' usera@a.site -i /home/autossh/.ssh/id_rsa
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=always
+[Install]
+WantedBy=multi-user.target
+WantedBy=graphical.target
+在B 上设置该服务自动启动：
+B:
+
+$ sudo systemctl enable autossh
+如果你愿意，在这之后可以立刻启动它：
+B:
+
+$ sudo systemctl start autossh
+然后你可以在A 上使用这条反向隧道穿透B 所在的NAT SSH 连接到B：
+A:
+
+$ ssh -p 6766 userb@127.0.0.1
+或者是在C 上直接穿透两层NAT SSH 连接到B：
+C:
+
+$ ssh -p 6766 userb@a.site
+如果你对SSH 足够熟悉，你可以利用这条隧道做更多的事情，例如你可以在反向连接时指定动态端口转发：
+C:
+
+$ ssh -p 6766 -qngfNTD 7677 userb@a.site
+假设C 是你家中的电脑，A 是你的VPS，B 是你公司的电脑。如果你这样做了，那么为浏览器设置端口为7677 的sock4 本地（127.0.0.1）代理后，你就可以在家里的浏览器上看到公司内网的网页。
+--------------------- 
+作者：黑礼服丶弑魂 
+来源：CSDN 
+原文：https://blog.csdn.net/lidongshengajz/article/details/73482908 
+版权声明：本文为博主原创文章，转载请附上博文链接！

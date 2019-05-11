@@ -1,0 +1,39 @@
+#include <stdio.h>
+#include <termios.h>
+#include <unistd.h>
+#include "Base64.c"  //Base64编码程序
+int getch(void);main()
+{        
+	char str1[20],str2[60];
+    char ch;
+    int i=0;
+    printf("Please enter your password: "); 
+	while((ch=getch())!=13 ) //按回车键退出 
+	{          
+		str1[i++]=ch;
+		putchar('*');
+    }        
+	str1[i]='\0'; 
+	printf("\n Your input is: %s\n",str1);
+	strcpy(str2,base64_encode(base64_encode(str1)));
+	printf("Encoding string is: %s\n",str2);
+}
+//参考http://blog.csdn.net/liuchao35758600/article/details/6419499
+int getch(void)
+{        
+	struct termios tm, tm_old;
+    int fd = STDIN_FILENO, c;
+        
+	if(tcgetattr(fd, &tm) < 0)
+		return -1;         
+	tm_old = tm; 
+	cfmakeraw(&tm);
+    if(tcsetattr(fd, TCSANOW, &tm) < 0) 
+		return -1;        
+	c = fgetc(stdin); 
+	if(tcsetattr(fd, TCSANOW, &tm_old) < 0) 
+		return -1;        
+	if(c == 3) 
+		exit(1);  //按Ctrl+C结束退出  
+	return c;
+}

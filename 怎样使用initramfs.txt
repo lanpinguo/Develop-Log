@@ -1,0 +1,162 @@
+这个是翻译来的，原文地址：
+ 
+http://www.landley.net/writing/rootfs-howto.html
+ 
+怎样使用initramfs
+
+工作过程简述
+ 
+在2.6kernel启动时，它把rootfs作为它的第一个文件系统挂载（注意：这里的rootfs是真名！！！不是root filesystem的缩写）。rootfs是一个特殊的tmpfs，这个不能被删除或者是unmounted。很多使用2.6内核的系统通常都是挂载rootfs后什么都不做，然后启动另一个文件系统作为root filesystem。但是，这个不能掩盖rootfs存在的事实，你可以“cat /proc/mounts” 来查看，第一个挂载的肯定是rootfs。
+ 
+rootfs被挂载后，kernel立马就解压了那个用gzip压缩的CPIO归档文件到rootfs。每个2.6的内核都会执行这一步，但是默认那个压缩档是空的，所以也就没有往rootfs内添加任何东西。接着kernel会尝试在rootfs去找寻/init，一旦找到init并执行，kernel也就完成了启动工作，然后便是刚刚执行的init程序接管了接下来的工作。如果kernel没法调用"/init"程序，可能就会回过头去，按照便准的做法去解析参数“root=”，试图找到另一个filesystem然后挂载它。
+ 
+这里的使用initramfs是指，提供一个/init程序给rootfs使用，我们可以通过两种途径实现：使用编译进内核的cpio.gz档案，或者是一个独立的cpio.gz档案。以前的initrd就是编译一个独立的档案，很多使用initramfs的方式也是给它提供一个独立的档案。
+ 
+ 
+ 
+开工啦！
+ 
+为了不看起来那么乏味，我们尝试通过一个看的着的例子来展示这个过程。
+ 
+唔，我们还是把“hello world”作为第一个要放到initramfs中去的程序。事实上，rootfs和其它的root filesystem并没有什么区别，如果你喜欢，你可以放/etc和/usr和/tmp和。。。然后还可以mount /proc 和/sysfs过去。但是这里我们只需要放/init过去。程序的最后我们使用sleeping而不是exiting，这主要是考虑如果PID 1的程序退出，kernel会panic，这会干扰我们的视线。
+ 
+#include 
+
+int main(int argc, char *argv[])
+{
+  printf("Hello world\n");
+  sleep(999999999);
+}
+ 
+然后呢，静态编译，然后我们就不用考虑拷贝需要的库过去了~
+ 
+gcc -static hello.c -o hello
+ 
+如果在命令行执行这个小程序，它会打印hello world，让后停在那里。你可以用ctrl-x让它退出。如果是initramfs执行这个程序，我们会看到在boot messages的最后，有个“hello world”被打印。
+ 
+注意：如果是要放到你的开发板上去执行，记得使用你的交叉编译工具。打包的过程是和平台无关的，但是二进制文件需要用目标系统的compiler。
+ 
+那么，我们该怎样把这个程序给kernel用内？好吧，有四种基本方法：第一种是把cpio.gz作为一个独立的包，然后告诉bootloader它在哪里；或者你可以用下面三种方法之一，把initramfs直接编译进kernel里去。
+ 
+ 
+ 
+把cipo.gz作为独立的档案
+ 
+很多人喜欢把它编译进内核里面去，如果你乐意，你也可以这么做。但是我们现在要用另一种方式。我们可以使能内核的initrd支持，然后用cpio.gz来代替ramdisk（initrd）。聪明的内核会为我们自动检测文件的类型，然后把我们的压缩包解压放进rootfs；它不是创建一个ram disk，这不会影响initramfs内存效率高这一优势。
+ 
+因为external initramfs是在built-in initramfs之后执行的，所以如果两个档案内包含有同名的内容，独立档案会覆盖掉built-in填进去去的东西。这意味着，你不用修改kernel，就可以update或者是ucstomize你的rootfs而不用换掉你的内核。
+ 
+另外一个好消息是，这样做你可以不用顾虑license的问题！你可以在rootfs里面运行non-GPL的程序，或者是给你的驱动提供non-GPL的firmware...额，编译进内核的话，算是内核的修改吧？制作自己的initramfs，只是算是使用，你不用公布你的源代码哦亲！
+ 
+那么，怎么制作cpio.gz档案呢？一种方法是你用cpio和gzip命令自己来压缩。当然，你也可以用kernel build来做这个，如果你觉得不是那么麻烦的话。原意自己做的，只需要敲下面这些代码进去...
+ 
+mkdir sub
+cp hello sub/init
+cd sub
+find . | cpio -o -H newc | gzip > ../initramfs_data.cpio.gz
+cd ..
+rm -rf sub
+ 
+按照传统的使用initrd的方法，把上面生成的initramfs_data.cpio.gz放到该放的地方去（别问我要放哪里，我也还不知道），它就会在boot结束的地方为你打印一朵漂亮的“hello world”，然后等待一段时间并重启。
+ 
+试试吧！
+ 
+如果它没有工作，照例的你该查查initial ramdisk支持是不是有被选中，然后看看你的init 程序是不是静态链接的，再看看它是不是又执行权限，或者是名字是不是对的。你可以用下面的命令来解压任何的initramfs档案到当前文件夹：
+ 
+zcat initramfs_data.cpio.gz | cpio -i -d -H newc --no-absolute-filenames
+ 
+ 
+ 
+把initramfs编译到内核里面去
+ 
+使用initramfs最简单的方式，莫过于用已经做好的cpio.gz把kernel里面那个空的给换掉。这是2.6 kernel天生支持的，所以，你不用做什么特殊的设置。
+ 
+kernel的config option里面有一项CONFIG_INITRAMFS_SOURCE（I.E. General setup--->Initramfs source file(s) in menuconfig）。这个选项指向放着内核打包initramfs需要的所有文件。默认情况下，这个选项是留空的，所以内核编译出来之后initramfs也就是空的，也就是前面提到的rootfs什么都不做的情形。
+ 
+CONFIG_INITRAMFS_SOURCE 可以是一个绝对路径，也可以是一个从kernel’s top build dir（你敲入build或者是make的地方）开始的相对路径。而指向的目标可以有以下三种：一个已经做好的cpio.gz，或者一个已经为制作cpio.gz准备好所有内容的文件夹，或者是一个text的配置文件。第三种方式是最灵活的，我们先依次来介绍这三种方法。
+ 
+1）使用一个已经做好的cpio.gz档案
+ 
+If you already have your own initramfs_data.cpio.gz file (because you created it yourself, or saved the cpio.gz file produced by a previous kernel build), you can point CONFIG_INITRAMFS_SOURCE at it and the kernel build will autodetect the file type and link it into the resulting kernel image.
+ 
+You can also leave CONFIG_INITRAMFS_SOURCE empty, and instead copy your cpio.gz file to usr/initramfs_data.cpio.gz in your kernel's build directory. The kernel's makefile won't generate a new archive if it doesn't need to.
+ 
+Either way, if you build a kernel like this you can boot it without supplying an external initrd image, and it'll still finish its boot by running your init program out of rootfs. This is packaging method #2, if you'd like to try it now.
+ 
+2）指定给内核一个文件或者文件夹
+ 
+If CONFIG_INITRAMFS_SOURCE points to a directory, the kernel will archive it up for you. This is a very easy way to create an initramfs archive, and is method #3.
+ 
+Interestingly, the kernel build doesn't use the standard cpio command to create initramfs archives. You don't even need to have any cpio tools installed on your build system. Instead the kernel build (in usr/Makefile) generates a text file describing the directory with the script "gen_initramfs_list.sh", and then feeds that descript to a program called "gen_init_cpio" (built from C source in the kernel's usr directory), which create the cpio archive. This looks something like the following:
+ 
+scripts/gen_initramfs_list.sh $CONFIG_INITRAMFS_SOURCE > usr/initramfs_list
+usr/gen_init_cpio usr/initramfs_list > usr/initramfs_data.cpio
+gzip usr/initramfs_data.cpio
+ 
+To package up our hello world program, you could simply copy it into its own directory, name it "init", point CONFIG_INITRAMFS_SOURCE at that directory, and rebuild the kernel. The resulting kernel should end its boot by printing "hello world". And if you need to tweak the contents of that directory, rebuilding the kernel will re-package the contents of that directory if anything has changed.
+ 
+The downside of this method is that it if your initramfs has device nodes, or cares about file ownership and permissions, you need to be able to create those things in a directory for it to copy. This is hard to do if you haven't got root access, or are using a cross-compile environment like cygwin. That's where the fourth and final method comes in.
+ 
+3）使用configuration文件initramfs_list来告诉内核initramfs在哪里
+ 
+This is the most flexible method. The kernel's gen_initramfs_list.sh script creates a text description file listing the contents of initramfs, and gen_init_cpio uses this file to produce an archive. This file is a standard text file, easily editable, containing one line per file. Each line starts with a keyword indicating what type of entry it describes.
+ 
+The config file to create our "hello world" initramfs only needs a single line:
+ 
+file /init usr/hello 500 0 0
+ 
+This takes the file "hello" and packages it so it shows up as /init in rootfs, with permissions 500, with uid and gid 0. It expects to find the source file "hello" in a "usr" subdirectory under the kernel's build directory. (If you're building the kernel in a different directory than the source directory, this path would be relative to the build directory, not the source directory.)
+ 
+To try it yourself, copy "hello" into usr in the kernel's build directory, copy the above configuration line to its own file, use "make menuconfig" to point CONFIG_INITRAMFS_SOURCE to that file, run the kernel build, and test boot the new kernel. Alternately, you can put the "hello" file in its own directory and use "scripts/gen_initramfs_list.sh dirname" to create a configuration file (where dirname is the path to your directory, from the kernel's build directory). For large projects, you may want to generate a starting configuration with the script, and then customize it with any text editor.
+ 
+This configuration file can also specify device nodes (with the "nod" keyword), directories ("dir"), symbolic links ("slink"), named FIFO pipes ("pipe"), and unix domain sockets ("sock"). Full documentation on this file's format is available by running "usr/gen_init_cpio" (with no arguments) after a kernel build.
+ 
+A more complicated example containing device nodes and symlinks could look like this:
+ 
+  dir /dev 755 0 0
+  nod /dev/console 644 0 0 c 5 1
+  nod /dev/loop0 644 0 0 b 7 0
+  dir /bin 755 1000 1000
+  slink /bin/sh busybox 777 0 0
+  file /bin/busybox initramfs/busybox 755 0 0
+  dir /proc 755 0 0
+  dir /sys 755 0 0
+  dir /mnt 755 0 0
+  file /init initramfs/init.sh 755 0 0
+ 
+One significant advantage of the configuration file method is that any regular user can create one, specifying ownership and permissions and the creation of device nodes in initramfs, without any special permissions on the build system. Creating a cpio archive using the cpio command line tool, or pointing the kernel build at a directory, requires a directory that contains everything initramfs will contain. The configuration file method merely requires a few source files to get data from, and a description file.
+ 
+This also comes in handy cross-compiling from other environments such as cygwin, where the local filesystem may not even be capable of reproducing everything initramfs should have in it.
+ 
+ 
+ 
+总结一下
+ 
+这四种给rootfs提供内容的方式都有一个共同点：在kernel启动时，一系列的文件被解压到rootfs，如果kernel能在其中找到可执行的文件“/init”，kernel就会运行它；这意味着，kernel不会再去理会“root=”是指向哪里的。
+ 
+此外，一旦initramfs里面的init 进程运行起来，kernel就会认为启动已经完成。接下来，init将掌控整个宇宙！它拥有霹雳无敌的专门为它预留的Process ID #1，整个系统接下来的所有都将由它来创造！还有，它的地位将是不可剥夺的，嗯哼，PID 1 退出的话，系统会panic的。
+ 
+接下来我会介绍其他一些，在rootfs中，init程序可以做的事。
+ 
+--------------------------------------------------------------------------------
+
+Footnote 1: The kernel doesn't allow rootfs to be unmounted for the same reason the same reason it won't let the first process (PID 1, generally running init) be killed. The fact the lists of mounts and processes are never empty simplifies the kernel's implementation.
+ 
+Footnote 2: The cpio format is another way of combining files together, like tar and zip. It's an older and simpler storage format that dates back to the original unix, and it's the storage format used inside RPM packages. It's not as widely used as tar or zip because the command line syntax of the cpio command is unnecessarily complicated (type "man 1 cpio" at a Linux or Cygwin command line if you have a strong stomach). Luckily, we don't need to use this command.
+ 
+Footnote 3: The kernel will always panic if PID 1 exits; this is unrelated to initramfs. All of the signals that might kill init are blocked, even "kill -9" which will reliably kill any other process. But init can still call the exit() syscall itself, and the kernel panics if this happens in PID 1. Avoiding it here is mostly a cosmetic issue: we don't want the panic scrolling our "Hello World!" message off the top of the screen.
+ 
+Footnote 4: Statically linking programs against glibc produces enormous, bloated binaries. Yes, this is expected to be over 400k for a hello world proram. You can try using the "strip" command on the resulting binary, but it won't help much. This sort of bloat is why uClibc exists.
+ 
+Footnote 5: Older 2.6 kernels had a bug where they would append to duplicate files rather than overwriting. Test your kernel version before depending on this behavior.
+ 
+Footnote 6:User Mode Linux or QEMU can be very helpful testing out initramfs, but are beyond the scope of this article.
+ 
+Footnote 7: Well, sort of. The default one is probably meant to be empty, but due to a small bug (gen_initramfs_list.sh spits out an example file when run with no arguments) the version in the 2.6.16 kernel actually contains a "/dev/console" node and a "/root" directory, which aren't used for anything. It gzips down to about 135 bytes, and might as well actually be empty. On Intel you can run "readelf -S vmlinux" and look for section ".init.ramfs" to see the cpio.gz archive linked into a 2.6 kernel. Elf section names might vary a bit on other platforms.
+ 
+ 
+ 
+Some useful stuff is here：http://www.landley.net/writing/
+
+——————
+无论在哪里做什么，只要坚持服务、创新、创造价值，其他的东西自然都会来的。

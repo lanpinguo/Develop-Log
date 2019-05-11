@@ -1,0 +1,40 @@
+1.  ffmpeg for x86
+    http://gitorious.org/~olvaffe/ffmpeg/ffmpeg-android
+    没有实现android media interface，标准流程是通过surface输出解码后的YUV视频数据，audioTrack输出解码后的音频PCM数据。简单说就是不能用该代码树上的代码来完成多媒体的播放，但是，个人认为ffmpeg本身就不是播放器，所以用ffmpeg来完成reader、demuxer和decoder的功能就足矣，所以该项目还是很有用处的。
+
+2.  mplayer for x86
+    http://www.android-x86.org  (由几位华人工程师维护，访问需要翻墙软件)
+[plain] view plain copy
+print?
+
+    repo init -u git://git.android-x86.org/manifest.git -b froyo-x86  
+    repo sync  
+
+
+    在android-x86开源项目中froyo分支已经将mplayer移植到x86上，完成了跟android多媒体框架的对接，是android(x86)下真正的播放器，默认没有打开mplayer编译的支持，需要自己修改配置来完成mplayer的添加，代码在external/mplayer下。
+    MPlayer.cpp实现了跟android meida interface的对接，接口函数有setDataSource、 prepare、prepareAsync、start、pause、 seek、 stop、 reset等。mplayer_lib.c是对mplayer API的封装,供MPlayer.cpp使用。在x86平台下，使能了MMX，SSE等汇编指令的优化，解码效率很高。遗憾的是NVIDIA硬件解码H264、MPEG4的驱动和so库android平台下还不支持(linux操作系统下是支持的)。
+
+3.  VLC
+    正在进行往android平台的移植：git://git.videolan.org/vlc/vlc-android.git
+
+4.  GStreamer for android
+    因为支持标准的openMAX接口，被多个芯片公司采用的优秀的多媒体框架(Marvell的PXA系列，TI的OMAP系列等等)，同时也对ffmpeg做了openMAX封装，结构如下图：
+
+
+TI DMAI GStreamer:
+http://processors.wiki.ti.com/index.php/DMAI_GStreamer_Plug-In
+
+GStreamer android
+http://gitorious.org/gstreamer/android 
+ 
+GStreamer FFmpeg plug-in
+http://gstreamer.freedesktop.org/modules/gst-ffmpeg.html 
+
+国外一个最有名的GStreamer for Android项目
+https://github.com/prajnashi
+
+5.  Opencore
+架构纷繁复杂，逐渐会被Android弃用。
+
+6.  Stagefright
+Google实现的一个轻量级MMF，功能会逐步完善起来，也许它能成为未来的一个发展方向。

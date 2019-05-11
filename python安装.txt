@@ -1,0 +1,4 @@
+1.
+sudo apt-get -f install
+sudo apt-get install python
+sudo apt-get install python-pip python-dev build-essential

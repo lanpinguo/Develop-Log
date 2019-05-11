@@ -1,0 +1,28 @@
+今天要做一个网络日志的迁移程序，搬文件的话，想来想去还是用FTP吧。FTP用于通过TCP网络从一台主机向另外一台主机传送文件。这篇文章解说了怎样在Ubuntu 14.04上安装FTP服务器。流行的FTP服务器端软件有：PureFTP，VsFTPD,ProFTPD。这里我采用轻量并且坑少的VsFTPd。
+在Ubuntu 14.04 上安装 FTP 服务
+第一步>>更新库
+linuxidc@linuxidc:~$ sudo apt-get update
+第二步>>采用如下命令安装VSFTPD的包
+linuxidc@linuxidc:~$ sudo apt-get install vsftpd
+第三步>>安装完成后打开 /etc/vsftpd.conf 文件，按如下所述修改。
+取消如下行的注释（行号为29和33）
+write_enable=YES
+local_umask=022
+>> 取消如下行的注释（行号120）来阻止除了用户文件夹意外的文件夹。
+chroot_local_user=YES
+在文件最后增加如下一行：
+allow_writeable_chroot=YES
+>>添加如下行开启消极模式
+pasv_enable=Yes
+pasv_min_port=40000
+pasv_max_port=40100
+第四步>>用如下命令重启vsftpd服务
+linuxidc@linuxidc:~$ sudo service vsftpd restart
+第五步>>现在ftp服务器正在监听21端口。用如下命令创建用户。用 /usr/sbin/nologin 脚本来阻止ftp用户访问bash脚本,/work/tftp为新用户的根目录。
+linuxidc@linuxidc:~$ sudo useradd -m john -s /usr/sbin/nologin -d /work/tftp
+linuxidc@linuxidc:~$ sudo passwd john
+第六步>>开启nologin脚本的开机访问。打开 /etc/shells 并把如下行添加进去。
+/usr/sbin/nologin
+现在试着用刚创建的用户通过21端口连接ftp服务器。客户端采用 winscp 或 filezilla  。验证用户是不是真的不能访问home文件夹之外的文件夹。
+
+需要特别说明一下的是，在21端口上使用ftp是非常危险的。强烈建议使用SFTP。请看下面的SFTP的配置。

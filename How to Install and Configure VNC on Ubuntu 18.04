@@ -1,0 +1,190 @@
+How to Install and Configure VNC on Ubuntu 18.04
+
+This guide covers the steps necessary for installing and configuring VNC server on an Ubuntu 18.04 system. We will also show you how to securely connect to the VNC server through an SSH tunnel.
+
+Virtual Network Computing (VNC) is a graphical desktop sharing system that allows you to use your keyboard and mouse to remotely control another computer.
+
+Prerequisites
+Before continuing with the tutorial, make sure you are logged in as a user with sudo privileges.
+
+Installing Desktop Environment
+Most servers don’t have a desktop environment installed, so we’ll start by installing a lightweight desktop environment.
+
+There are several desktop environments (DE) available in Ubuntu repositories. In this tutorial we’ll be installing Xfce. It is fast, stable and lightweight desktop environment, which makes it ideal for usage on a remote server.
+
+First update your system with:
+
+sudo apt update
+sudo apt upgrade
+Copy
+Then, type the following command to install Xfce on your server:
+
+sudo apt install xfce4 xfce4-goodies xorg dbus-x11 x11-xserver-utils
+Copy
+Depending on your system, downloading and installing the Xfce packages may take some time.
+
+Installing VNC Server
+There are also several different VNC servers available in Ubuntu repositories such as TightVNC, TigerVNC and x11vnc. Each VNC server has different strengths and weaknesses in terms of speed and security.
+
+We’ll be installing TigerVNC, which is actively maintained high-performance VNC server.
+
+Type the following command to install TigerVNC on your Ubuntu server:
+
+sudo apt install tigervnc-standalone-server tigervnc-common
+or 
+sudo apt-get install vnc4server
+Copy
+Now that the VNC server is installed the next step is to run the vncserver command which will create the initial configuration and set up the password. Do not use sudo when running the following command:
+
+vncserver
+Copy
+You will be prompted to enter and confirm the password and whether to set it as a view-only password. If you choose to set up a view-only password the user will not be able to interact with the VNC instance with the mouse and the keyboard.
+
+You will require a password to access your desktops.
+
+Password:
+Verify:
+Would you like to enter a view-only password (y/n)? n
+/usr/bin/xauth:  file /home/linuxize/.Xauthority does not exist
+
+New 'server2.linuxize.com:1 (linuxize)' desktop at :1 on machine server2.linuxize.com
+
+Starting applications specified in /etc/X11/Xvnc-session
+Log file is /home/linuxize/.vnc/server2.linuxize.com:1.log
+
+Use xtigervncviewer -SecurityTypes VncAuth -passwd /home/linuxize/.vnc/passwd :1 to connect to the VNC server.
+
+The first time the vncserver command is run, it will create and store the password file in the ~/.vnc directory which will be created if not present.
+
+Note the :1 after the hostname in the output above. This indicates the display port number on which the vnc server is running. In our case, the server is running on TCP port 5901 (5900+1). If you create a second instance with vncserver it will run on the next free port i.e :2 that means that the server is running on port 5902 (5900+2).
+
+
+What is important to remember is that when working with VNC servers, :X is a display port that refers to 5900+X.
+
+Before continuing with the next step, first stop the VNC instance using the vncserver command with a -kill option and the server number as an argument. In our case the server is running in port 5901 (:1), so we’ll stop it with:
+
+vncserver -kill :1
+
+Killing Xtigervnc process ID 7264... success!
+
+Configuring VNC Server
+Now that we have both Xfce and TigerVNC installed on our server we need to configure TigerVNC to use Xfce. To do so create the following file:
+
+~/.vnc/xstartup
+nano ~/.vnc/xstartup
+
+#!/bin/sh
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+exec startxfce4 
+
+Save and close the file. The commands above will be automatically executed whenever you start or restart the TigerVNC server.
+
+The ~/.vnc/xstartup file also needs to have execute permissions. Run the following command to make sure permissions are correct:
+
+chmod u+x ~/.vnc/xstartup
+
+If you need to pass addition options to the VNC server you can create a file named config and add one option per line. Here is an example:
+
+~/.vnc/config
+geometry=1920x1084
+dpi=96
+
+
+
+
+Creating a Systemd unit file
+We’ll create a systemd unit file which will enable us to easily start, stop, and restart the VNC service as needed, same as any other systemd service.
+
+Open your text editor and copy and paste the following configuration into it. Make sure to change the username in line 7 to match your username.
+
+sudo nano /etc/systemd/system/vncserver@.service
+
+/etc/systemd/system/vncserver@.service
+[Unit]
+Description=Remote desktop service (VNC)
+After=syslog.target network.target
+
+[Service]
+Type=simple
+User=linuxize
+PAMName=login
+PIDFile=/home/%u/.vnc/%H%i.pid
+ExecStartPre=/bin/sh -c '/usr/bin/vncserver -kill :%i > /dev/null 2>&1 || :'
+ExecStart=/usr/bin/vncserver :%i -geometry 1440x900 -alwaysshared -fg
+ExecStop=/usr/bin/vncserver -kill :%i
+
+[Install]
+WantedBy=multi-user.target
+Copy
+Save and close the file.
+
+Notify systemd that we created a new unit file with:
+
+sudo systemctl daemon-reload
+Copy
+The next step is to enable the unit file with the following command:
+
+sudo systemctl enable vncserver@1.service
+Copy
+The number 1 after the @ sign defines the display port on which the VNC service will run. This means that the VNC server will listen on port 5901, as we discussed in the previous section.
+
+Start the VNC service by executing:
+
+sudo systemctl start vncserver@1.service
+Copy
+Verify that the service is successfully started with:
+
+sudo systemctl status vncserver@1.service
+Copy
+● vncserver@1.service - Remote desktop service (VNC)
+   Loaded: loaded (/etc/systemd/system/vncserver@.service; indirect; vendor preset: enabled)
+   Active: active (running) since Thu 2018-08-16 19:05:54 UTC; 4s ago
+  Process: 9893 ExecStartPre=/bin/sh -c /usr/bin/vncserver -kill :1 > /dev/null 2>&1 || : (code=exited, status=0/SUCCESS)
+ Main PID: 9900 (vncserver)
+    Tasks: 0 (limit: 507)
+   CGroup: /system.slice/system-vncserver.slice/vncserver@1.service
+           ‣ 9900 /usr/bin/perl /usr/bin/vncserver :1 -geometry 1440x900 -alwaysshared -fg
+Copy
+Connecting to VNC server
+VNC is not an encrypted protocol and can be subject to packet sniffing. The recommended approach is to create an SSH tunnel that will securely forwards traffic from your local machine on port 5901 to the server on the same port.
+
+Set Up SSH Tunneling on Linux and macOS
+If you run Linux, macOS or any other Unix-based operating system on your machine, you can easily create an SSH tunnel with the following command:
+
+ssh -L 5901:127.0.0.1:5901 -N -f -l username server_ip_address
+Copy
+You will be prompted to enter the user password.
+
+Do not forget to replace username and server_ip_address with your username and the IP address of your server.
+
+Set Up SSH Tunneling on Windows
+If you run Windows, you can set up SSH Tunneling using the PuTTY SSH client.
+
+Open Putty and enter your server IP Address in the Host name or IP address field.
+
+
+Under the Connection menu, box, expand SSH and select Tunnels. Enter the VNC server port (5901) in the Source Port field and enter server_ip_address:5901 in the Destination field and click on the Add button as shown in the image bellow:
+
+
+Go back to the Session page to save the settings so that you do not need to enter them each time. Now all you need to do is to select the saved session and login to the remote server by clicking on the Open button.
+
+Connecting using Vncviewer
+Now that you setup SSH tunneling it is time to open your Vncviewer and to connect to the VNC Server at localhost:5901.
+
+You can use any VNC viewer such as TigerVNC, TightVNC, RealVNC, UltraVNC Vinagre and VNC Viewer for Google Chrome.
+
+
+ 
+In this example we’ll be using TigerVNC. Open your VNC viewer, enter localhost:5901 and click on the Connect button.
+
+
+Enter your password when prompted and you should see the default Xfce desktop. It should look something like this:
+
+
+You can start interacting with the remote XFCE desktop from your local machine using your keyboard and mouse.
+
+Conclusion
+By now you should have a VNC server up and running and you can easily manage your Ubuntu 18.04 server from your local desktop machine using an easy to use graphic interface.
+
+To configure your VNC server to start a display for more than one user, create the initial configuration and set up the password using the vncserver command. You will also need to create a new service file using a different port.

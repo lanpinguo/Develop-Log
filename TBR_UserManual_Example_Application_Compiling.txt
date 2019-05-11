@@ -1,0 +1,57 @@
+= Example Application Compiling =
+
+
+There are example applications in [wiki:Developer/Git RTEMS GIT Repository].
+= Check out Examples from Git =
+
+
+{{{
+git clone git://git.rtems.org/examples-v2.git examples-v2
+}}}
+= Compile the Examples =
+
+
+Assume you complete the steps in [wiki:TBR/UserManual/Quick_Start Quick Start] which take SPARC as example, here are example steps for i386 and rtems-4.11.
+
+{{{
+cd rtems
+export PATH=/opt/rtems-4.11/bin:$PATH
+./bootstrap
+cd ..
+mkdir pc386
+cd pc386
+../rtems/configure --target=i386-rtems4.11 --enable-rtemsbsp=pc386 \
+  --enable-tests=samples --disable-posix \
+  --prefix=INSTALL_POINT
+make
+}}}
+
+After the steps above, RTEMS code including sample applications in test suites are compiled, the sample applications are ready to run in directory such as:
+${HOME}/WHERE_AM_I_BUILDING/pc386/i386-rtems4.11/c/pc386/testsuites/samples
+
+However, how to compile your own application? Here are the steps to compile examples in [wiki:Developer/Git RTEMS GIT Repository]. 
+
+First, install RTEMS files into the ''INSTALL_POINT'' specified to the ''--prefix'' option above. 
+
+{{{
+# If the INSTALL_POINT requires root access, you will have to perform this step.
+# NOTE: If the install as root fails due to not having RTEMS tools in your PATH,
+#       you will have to "export PATH=/opt/rtems-4.11/bin:$PATH" as well.
+su -
+
+cd rtems/../pc386/
+make install
+
+# If the INSTALL_POINT requires root access, you will have to perform this step.
+exit
+}}}
+
+Second, compile the examples.
+
+{{{
+cd examples-v2
+export RTEMS_MAKEFILE_PATH=INSTALL_POINT/i386-rtems4.11/pc386
+make
+}}}
+
+You complete it, the example applications are ready to run in directories, such as ${HOME}/WHERE_AM_I_BUILDING/examples/hello_world_c/o-optimize. You can use [https://devel.rtems.org/wiki/Developer/Simulators/QEMU QEMU] to run those example applications.

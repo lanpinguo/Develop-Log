@@ -1,0 +1,583 @@
+原文地址：Makefile 的函数-1作者：马哥
+Makefile Function
+
+make 提供了很多函数（包括内置函数和自定义的函数）。这些函数为我们处理变量、文本内容、文件名、命令提供了方便。我们在需要的地方调用函数来处理指定的文本（参数）。函数在调用的地方被替换成它的处理结果。
+
+函数的调用语法
+make 内置函数的调用语法类似于变量的引用。
+
+语法格式如下：
+
+    $(function arguments)
+    ${function arguments}
+
+1 语法格式中的 function 是函数名。
+2 语法格式中的 arguments 是函数的参数列表。
+3 参数和函数名之间使用若干空白（空格或者 Tab 字符，建议使用空格）分隔；如果存在多个参数，参数之间使用逗号（,）分隔。
+4 函数调用需要使用 $ 符号开头，并使用成对的圆括号（()）和大括号（{}）。参数中存在变量或者函数的引用时，它们的分隔符建议和函数使用的相同。
+5 函数的参数中不能出现逗号（,）和空格（ ），逗号是参数之间的分隔符，空格会作为参数的一部分。如果需要使用逗号和空格作为函数的参数，可以把它们赋值给变量，然后在函数的参数中引用。
+
+示例 1
+Makefile 文件的内容如下
+objects = $(patsubst %.c,%.o,$(wildcard *.c))
+
+print :
+    echo $(objects)
+
+在命令提示符下输入 “make -s”，执行结果如下：
+1.o 2.o test.o
+
+示例 2
+Makefile 文件的内容如下
+null =
+space = $(null) $(null)
+comma = ,
+string1 = a b c
+string2 = $(subst $(space), $(comma), $(string1))
+string3 = $(subst $(space),$(comma),$(string1))
+
+print :
+    echo string1=$(string1)
+    echo string2=$(string2)
+    echo string3=$(string3)
+
+在命令提示符下输入 “make -s”，执行结果如下：
+string1=a b c
+string2= ,a ,b ,c
+string3=a,b,c
+
+内置函数列表
+
+ Functions for String Substitution and Analysis
+ $(subst from,to,text)
+ $(patsubst pattern,replacement,text)
+ $(strip text)
+ $(findstring find,text)
+ $(filter pattern...,text)
+ $(filter-out pattern...,text)
+ $(sort text)
+ $(words text)
+ $(word n,text)
+ $(wordlist s,e,text)
+ $(firstword text)
+ $(lastword text)
+ 
+ Functions for File Names
+ $(dir names)
+ $(notdir names)
+ $(suffix names)
+ $(basename names)
+ $(addsuffix suffix,names)
+ $(addprefix prefix,names)
+ $(join list1,list2)
+ $(wildcard pattern...)
+ $(realpath names)
+ $(abspath names)
+ 
+ Functions for Conditionals
+ $(if condition,then-part[,else-part])
+ $(and conditon1[,condition2][,condition3]...)
+ $(or conditon1[,condition2][,condition3]...)
+ $(eq condition1,condition2)     注释1
+ $(not condition)     注释1
+ 
+ Functions That Control Make
+ $(error text)
+ $(warning text)
+ $(info text)
+ 
+ $(foreach variable,list,text)
+ $(value variable)
+ $(origin variable)
+ $(flavor variable)
+ $(call variable,param[,param]...)
+ $(shell command)
+ $(eval param)
+
+注释 1：make V3.82 版本暂不支持。
+
+make 的文本处理函数
+make 的文本处理函数（Functions for String Substitution and Analysis）是处理字符串的，实现替换、搜索、排序、取子字符串等操作。
+
+subst 函数（字符串替换函数）
+
+语法格式如下：
+
+    $(subst from,to,text)
+
+1 subst 函数把字符串 text 中所有的 from 字符串替换为 to 字符串。
+
+示例 3
+Makefile 文件的内容如下
+string = hello    world
+
+print :
+    printf "$(string)n"
+    printf "$(subst world,cosmos,$(string))n"
+
+在命令提示符下输入 “make -s”，执行结果如下：
+hello    world
+hello    cosmos
+
+patsubst 函数（模式字符串替换函数）
+
+语法格式如下：
+
+    $(patsubst pattern,replacement,text)
+
+1 patsubst 函数将字符串 text 中符合模式 pattern 的单词替换为 replacement。
+2 pattern 中可以使用模式匹配符 % 来代表一个单词中的若干字符。如果 replacement 中也包含 %，那么 replacement 中的 % 是 pattern 中的 % 所代表的字符串。
+3 在 pattern 和 replacement 中，只有第一个 % 被作为模式匹配符处理，之后的作为普通字符 % 处理。如果第一个 % 是字符本身，则需要使用反斜杠（）进行转义处理。
+4 字符串 text 中的单词之间的多个空格在处理时被合并为一个空格。
+
+示例 4
+Makefile 文件的内容如下
+sources = 1.c 2.c test.c
+objects = $(patsubst %.c,%.o,$(sources))
+
+file1 = %1.% #.bak    45.%
+file2 = $(patsubst %%.%,%.bak,$(file1))
+print :
+    echo sources=$(sources)
+    echo objects=$(objects)
+    echo file1=$(file1)
+    echo file2=$(file2)
+
+在命令提示符下输入 “make -s”，执行结果如下：
+sources=1.c 2.c test.c
+objects=1.o 2.o test.o
+file1=%1.% #.bak 45.%
+file2=1.bak #.bak 45.bak
+
+变量的替换引用是 patsubst 函数的简化实现。
+
+    $(variable:pattern=replacement)
+    $(variable:suffix=replacement)
+
+等同于
+
+    $(patsubst pattern,replacement,$(variable))
+    $(patsubst %suffix,%replacement,$(variable))
+
+strip 函数（去空格函数）
+
+语法格式如下：
+
+    $(strip text)
+
+1 strip 函数去掉字符串 text 的前置和后置空白，并将 text 中多个连续的空白字符合并为一个空白字符。
+2 strip 函数经常用在条件判断语句的表达式中。
+
+示例 5
+Makefile 文件的内容如下
+string = hello    world
+
+ifeq ($(string),hello world)
+output_str1 = equal
+else
+output_str1 = not equal
+endif
+
+ifeq ($(strip $(string)),hello world)
+output_str2 = equal
+else
+output_str2 = not equal
+endif
+
+print :
+    printf "$(string)n"
+    printf "$(strip $(string))n"
+    echo $(output_str1)
+    echo $(output_str2)
+
+在命令提示符下输入 “make -s”，执行结果如下：
+hello    world
+hello world
+not equal
+equal
+
+findstring 函数（字符串查找函数）
+
+语法格式如下：
+
+    $(findstring find,text)
+
+1 findstring 函数在字符串 text 中查找 find 字符串。
+2 如果在 text 中存在 find，则返回 find，否则返回空。
+
+示例 6
+Makefile 文件的内容如下
+string = hello    world
+
+ifeq '$(findstring world,$(string))' ''
+output_str1 = search fail
+else
+output_str1 = search success
+endif
+
+ifeq '$(findstring World,$(string))' ''
+output_str2 = search fail
+else
+output_str2 = search success
+endif
+
+print :
+    echo $(output_str1)
+    echo $(output_str2)
+
+在命令提示符下输入 “make -s”，执行结果如下：
+search success
+search fail
+
+filter 函数（字符串过滤函数）
+
+语法格式如下：
+
+    $(filter pattern...,text)
+
+1 filter 函数过滤掉字符串 text 中所有不符合模式 pattern 的单词，保留所有符合模式的单词。
+2 模式列表可以使用多个模式。多个模式之间使用空格分隔。
+
+filter-out 函数（字符串反过滤函数）
+
+语法格式如下：
+
+    $(filter-out pattern...,text)
+
+1 filter-out 函数和 filter 函数的功能相反，它过滤掉字符串 text 中所有符合模式 pattern 的单词，保留所有不符合此模式的单词。
+2 模式列表可以使用多个模式。多个模式之间使用空格分隔。
+
+示例 7
+Makefile 文件的内容如下
+lists = 1.c phone.c Camera.o computer.obj 0.mak phone.c
+
+print :
+    echo filter=$(filter %.c %.mak,$(lists))
+    echo filter_out=$(filter-out %.c %.mak,$(lists))
+
+在命令提示符下输入 “make -s”，执行结果如下：
+filter=1.c phone.c 0.mak phone.c
+filter_out=Camera.o computer.obj
+
+sort 函数（排序函数）
+
+语法格式如下：
+
+    $(sort text)
+
+1 sort 函数将字符串 text 中的单词按照 ASCII 序进行升序排序，并去掉重复的单词。
+
+示例 8
+Makefile 文件的内容如下
+lists = 1 phone Camera computer 0 phone
+
+print :
+    echo sort=$(sort $(lists))
+
+在命令提示符下输入 “make -s”，执行结果如下：
+sort=0 1 Camera computer phone
+
+words 函数（统计单词个数函数）
+
+语法格式如下：
+
+    $(words text)
+
+1 words 函数统计字符串 text 中单词的个数。
+
+示例 9
+Makefile 文件的内容如下
+lists = 1 phone Camera computer 0 phone
+
+print :
+    echo words=$(words $(lists))
+
+在命令提示符下输入 “make -s”，执行结果如下：
+words=6
+ 
+word 函数（取单词函数）
+
+语法格式如下：
+
+    $(word n,text)
+
+1 word 函数取字符串 text 中第 n 个单词。
+2 n 的值需满足条件 0 < n <= $(words text) ，否则返回空值或者出错。
+3 n 值为 0 时，make 将提示错误（"word" function first parameter must be greater than 0）。
+
+示例 10
+Makefile 文件的内容如下
+lists = 1 phone Camera computer 0 phone
+
+print :
+    echo word=$(word $(words $(lists)),$(lists))
+    echo word=$(word 7,$(lists))
+
+在命令提示符下输入 “make -s”，执行结果如下：
+word=phone
+word=
+
+wordlist 函数（取单词串函数）
+
+语法格式如下：
+
+    $(wordlist s,e,text)
+
+1 wordlist 函数从字符串 text 中取出从 s 开始到 e 结束之间的单词串。
+2 s 的值需满足条件 0 < s <= $(words text) ，否则返回空值或者出错。
+3 e 的值需满足条件 0 < e，否则出错。
+4 如果 e > $(words text)，则返回从 s 开始到 $(words text) 结束之间的单词串。
+5 如果 s > e，则返回空值。
+
+示例 11
+Makefile 文件的内容如下
+lists = 1 phone Camera computer 0 phone
+
+print :
+    echo word_list=$(wordlist 1,3,$(lists))
+    echo word_list=$(wordlist 2,7,$(lists))
+    echo word_list=$(wordlist 7,2,$(lists))
+
+在命令提示符下输入 “make -s”，执行结果如下：
+word_list=1 phone Camera
+word_list=phone Camera computer 0 phone
+word_list=
+
+firstword 函数（取首单词函数）
+
+语法格式如下：
+
+    $(firstword text)
+
+1 firstword 函数取字符串 text 中的第一个单词。
+2 $(firstword text) 等同于 $(word 1,text)。
+3 $(firstword text) 等同于 $(wordlist 1,1,text)。
+
+lastword 函数（取末单词函数）
+
+语法格式如下：
+
+    $(lastword text)
+
+1 lastword 函数取字符串 text 中的最后一个单词。
+2 $(lastword text) 等同于 $(word $(words text),text)。
+3 $(lastword text) 等同于 $(wordlist $(words text),$(words text),text)。
+
+示例 12
+Makefile 文件的内容如下
+lists = 1 phone Camera computer 0 phone
+
+print :
+    echo first_word=$(firstword $(lists))
+    echo first_word=$(word 1,$(lists))
+    echo first_word=$(wordlist 1,1,$(lists))
+    echo last_word=$(lastword $(lists))
+    echo last_word=$(word $(words $(lists)),$(lists))
+    echo last_word=$(wordlist $(words $(lists)),$(words $(lists)),$(lists))
+
+在命令提示符下输入 “make -s”，执行结果如下：
+first_word=1
+first_word=1
+first_word=1
+last_word=phone
+last_word=phone
+last_word=phone
+
+make 的文件名处理函数
+make 的文件名处理函数（Functions for File Names）主要用来对使用空格分隔的文件名进行转换，得到文件名的目录部分、非目录部分、后缀部分、前缀部分等。
+
+dir 函数（取目录函数）
+
+语法格式如下：
+
+    $(dir names)
+
+1 dir 函数从文件名列表 names 中取出各个文件名的目录部分。
+2 文件名的目录部分是指文件名中的最后一个斜线（/）之前的部分（包含斜线）。
+3 如果文件名没有斜线，则认为此文件为当前目录（./）下的文件。
+
+notdir 函数（取文件名函数）
+
+语法格式如下：
+
+    $(notdir names)
+
+1 notdir 函数从文件名列表 names 中取出各个文件名的非目录部分。
+2 文件名的非目录部分是指文件名中的最后一个斜线（/）之后的部分。
+3 如果文件名以斜线结尾，则返回空字符串。
+
+示例 13
+Makefile 文件的内容如下
+files = /home/guest/Pictures/1.png Makefile /home/guest /home/guest/Videos/ test.c
+
+print :
+    echo dir=$(dir $(files))
+    echo notdir=$(notdir $(files))
+
+在命令提示符下输入 “make -s”，执行结果如下：
+dirs=/home/guest/Pictures/ ./ /home/ /home/guest/Videos/ ./
+non_dirs=1.png Makefile guest test.c
+
+suffix 函数（取后缀函数）
+
+语法格式如下：
+
+    $(suffix names)
+
+1 suffix 函数从文件名列表 names 中取出各个文件名的后缀部分。
+2 文件名的后缀部分是文件名中最后一个点号（.）之后的部分（包含点号）。
+3 如果文件名中不包含一个点号，则返回空字符串。
+
+basename 函数（取前缀函数）
+
+语法格式如下：
+
+    $(basename names)
+
+1 basename 函数从文件名列表 names 中取出各个文件名的前缀部分。
+2 文件名的前缀部分指的是文件名中最后一个点号之前的部分。
+3 如果文件名以点号开头，则返回空字符串。
+
+示例 14
+Makefile 文件的内容如下
+files = /home/guest/Pictures/1.png Makefile /home/guest /home/guest/Videos/ test.c
+
+basenames = $(basename $(files))
+
+print :
+    echo suffixs=$(suffix $(files))
+    echo basenames=$(basename $(files))
+
+在命令提示符下输入 “make -s”，执行结果如下：
+suffixs=.png .c
+basenames=/home/guest/Pictures/1 Makefile /home/guest /home/guest/Videos/ test
+
+addsuffix 函数（增加后缀函数）
+
+语法格式如下：
+
+    $(addsuffix suffix,names)
+
+1 addsuffix 函数为文件名序列 names 中的每一个文件名添加后缀 suffix（在文件名之后添加）。
+
+addprefix 函数（增加前缀函数）
+
+语法格式如下：
+
+    $(addprefix prefix,names)
+
+1 addprefix 函数为文件名序列 names 中的每一个文件名添加前缀 prefix（在文件名之前添加）。
+
+示例 15
+Makefile 文件的内容如下
+print :
+    echo $(addsuffix .c,1 2 3 4)
+    echo $(addprefix /home/guest/,1.c 2.c 3 4)
+
+在命令提示符下输入 “make -s”，执行结果如下：
+1.c 2.c 3.c 4.c
+/home/guest/1.c /home/guest/2.c /home/guest/3 /home/guest/4
+
+join 函数（单词连接函数）
+
+语法格式如下：
+
+    $(join list1,list2)
+
+1 join 函数将字符串 list1 和字符串 list2 各单词进行连接。将 list2 的第一个单词追加到 list1 第一个单词后合并为一个单词，依次类推。
+2 如果字符串 list1 和字符串 list2 中单词的数目不一致时，两者中多余部分将被作为返回值。
+
+示例 16
+Makefile 文件的内容如下
+dirs = home/guest/Picture/ home/guest/Video/
+files = 1.png 2.wav 3.c
+
+print :
+    echo $(join $(dirs),$(files))
+
+在命令提示符下输入 “make -s”，执行结果如下：
+home/guest/Picture/1.png home/guest/Video/2.wav 3.c
+
+wildcard 函数（获取通配模式文件名函数）
+
+语法格式如下：
+
+    $(wildcard pattern...)
+
+1 wildcard 函数列出当前目录下所有符合通配符模式 pattern 的文件名。
+2 pattern 使用 shell 可识别的通配符，包括：?、*、[...]、[!...]、[^...]、[c1-c2]。
+3 pattern 不支持 shell 的通配符 {string1,string2...}。
+4 pattern 可以使用多个通配符模式。多个通配符模式之间使用空格分隔。
+5 wildcard 函数常用于判断一个文件或者目录是否存在。
+
+示例 17
+Makefile 文件的内容如下
+# 当前目录下存在文件 1.c 2.c test.c 3.c 1.h
+file1 = $(wildcard *.c)
+file2 = $(wildcard [12].?)
+file3 = $(wildcard [1-3].c)
+file4 = $(wildcard [!12].*)
+file5 = $(wildcard [^12].*)
+
+print :
+    echo file1=$(file1)
+    echo file2=$(file2)
+    echo file3=$(file3)
+    echo file4=$(file4)
+    echo file5=$(file5)
+
+在命令提示符下输入 “make -s”，执行结果如下：
+file1=1.c 2.c 3.c test.c
+file2=1.c 1.h 2.c
+file3=1.c 2.c 3.c
+file4=3.c
+file5=3.c
+
+示例 18
+Makefile 文件的内容如下
+# 当前目录下存在文件 1.c 2.c test.c 3.c 1.h
+file = 1.c
+
+ifeq '$(file)' '$(wildcard $(file))'
+output_str = $(file) is exist
+else
+output_str = $(file) is not exist
+endif
+
+print :
+    echo $(output_str)
+
+在命令提示符下输入 “make -s”，执行结果如下：
+1.c is exist
+
+realpath 函数（获取文件真实路径函数）
+
+语法格式如下：
+
+    $(realpath names)
+
+1 realpath 函数获取文件名序列 names 中存在的文件和目录的真实路径。
+2 realpath 函数会判断文件和目录是否存在，如果不存在，则返回空。
+
+abspath 函数（获取文件路径函数）
+
+语法格式如下：
+
+    $(abspath names)
+
+1 abspath 函数获取文件名序列 names 中文件和目录的绝对路径。
+2 abspath 函数不会检查文件或者目录是否存在，如果文件或者目录不存在则指定为当前目录。
+3 realpath 函数和 abspath 函数的区别在于前者只返回存在的文件或者目录的真实路径。
+
+示例 19
+Makefile 文件的内容如下
+# 当前目录下存在文件 1.c 2.c test.c 3.c 1.h，目录 make-3.82
+files = make-3.82 2.c 4.c
+
+print :
+    echo realpath=$(realpath $(files))
+    echo abspath=$(abspath $(files))
+
+在命令提示符下输入 “make -s”，执行结果如下：
+realpath=/home/malihou/make/make-3.82 /home/malihou/make/2.c
+abspath=/home/malihou/make/make-3.82 /home/malihou/make/2.c /home/malihou/make/4.c

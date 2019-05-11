@@ -1,0 +1,25 @@
+ python 字符串与16进制互转 
+ 
+ >>> binascii.b2a_hex(u"你好啊".encode("utf8"))
+'e4bda0e5a5bde5958a'
+>>>
+>>>
+>>> binascii.b2a_hex(u"你好啊".encode("gbk"))
+'c4e3bac3b0a1'
+>>> binascii.a2b_hex("e4bda0e5a5bde5958a")
+'\xe4\xbd\xa0\xe5\xa5\xbd\xe5\x95\x8a'
+>>> binascii.a2b_hex("e4bda0e5a5bde5958a").decode("utf8")
+u'\u4f60\u597d\u554a'
+>>> print binascii.a2b_hex("e4bda0e5a5bde5958a").decode("utf8")
+你好啊
+>>> binascii.b2a_hex(u"你好啊121A号".encode("gbk"))
+'c4e3bac3b0a131323141bac5'
+>>> '48656c6c6f'.decode('hex')
+'Hello'
+>>> 'c4e3bac3b0a131323141bac5'.decode('hex')
+'\xc4\xe3\xba\xc3\xb0\xa1121A\xba\xc5'
+>>> print 'c4e3bac3b0a131323141bac5'.decode('hex')
+你好啊121A号
+>>> u"你好啊121A号".encode("gbk").encode('hex')
+'c4e3bac3b0a131323141bac5'
+>>>

@@ -1,0 +1,70 @@
+In this tutorial, I will show you how to set up your own PPTP VPN server on Debian, Ubuntu, CentOS. So you don’t have to buy VPN service anymore.
+
+
+Note: PPTP is no longer a secure VPN solution. I do not recommend using it. (April 20, 2017).
+1. Install pptpd
+Debian/Ubuntu
+sudo apt-get install pptpd -y
+CentOS
+Since the PPTP VPN daemon package is available in EPEL (Extra Package for Enterprise Linux) repository, we have to add the repository and then install pptpd.
+
+sudo yum install epel-release
+sudo yum install -y pptpd
+2. Adding DNS Servers
+Debian/Ubuntu
+sudo vi /etc/ppp/pptpd-options
+CentOS
+sudo vi /etc/ppp/options.pptpd
+Find the following line:
+
+#ms-dns 10.0.0.1
+#ms-dns 10.0.0.2
+Change them to
+
+ms-dns 8.8.8.8
+ms-dns 8.8.4.4
+8.8.8.8 and 8.8.4.4 is Google’s DNS server. If Google’s DNS server is blocked in your area, then you can use OpenDNS Server: 208.67.222.222 and 208.67.220.220
+
+3. Adding VPN User Accounts
+Open up /etc/ppp/chap-secrets file
+
+sudo vi /etc/ppp/chap-secrets
+Add user and password as follows. Use tab key to separate them.
+
+user1 pptpd user1-password *
+user2 pptpd user2-password *
+4. Allocating Private IP for VPN Server and Clients
+Edit /etc/pptpd.conf file.
+
+sudo vi /etc/pptpd.conf
+Add the following lines to at the enf of file.
+
+localip 10.0.0.1
+remoteip 10.0.0.100-200
+Save and close the file. localip is the IP for your VPN server. remoteip are for VPN clients.
+
+5. Enable IP Forwarding
+In order for the VPN server to route packets between VPN client and the outside world, we need to enable IP forwarding. Thus, the VPN server becomes a router.
+
+sudo vi /etc/sysctl.conf
+Add the following line.
+
+
+net.ipv4.ip_forward = 1
+Save and close the file. then apply the changes with the below command. The -p option will load sysctl settings from /etc/sysctl.conf file. This command will preserve our settings between system reboots.
+
+sudo sysctl -p
+6. Configure Firewall for IP Masquerading
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+The above command append (-A) a rule to the end of of POSTROUTING chain of nat table. It will link your virtual private network with the Internet. And also hide your network from the outside world. So the Internet can only see your VPN server’s IP, but can’t see your VPN client’s IP. Just like your home router hide your private home network.
+
+Your server’s ethernet card name may not be eth0. You can use ip address or ip link command to check that. In order to save this iptables rule permanently, you can put the above command in /etc/rc.local file, so the command will be executed on system boot by root automatically. By the way, you don’t have to add sudo to the commands in rc.local.
+
+On ubuntu, it may be a good idea to remove the -e part from the first line in rc.local file. If you have -e option, then when a command in rc.local fails to run, any command below will not be executed.
+
+7. Start PPTPD Daemon
+sudo systemctl start pptpd   or   sudo service pptpd start
+If you have Systemd on your server, then enable pptpd service on system boot:
+
+sudo systemctl enable pptpd
+Now set up your vpn client and you should be able to connect to your VPN server.

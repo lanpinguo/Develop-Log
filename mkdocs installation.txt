@@ -1,0 +1,47 @@
+
+
+Traceback (most recent call last):
+  File "/usr/local/bin/mkdocs", line 11, in <module>
+    sys.exit(cli())
+  File "/Library/Python/2.7/site-packages/click/core.py", line 716, in __call__
+    return self.main(*args, **kwargs)
+  File "/Library/Python/2.7/site-packages/click/core.py", line 696, in main
+    rv = self.invoke(ctx)
+  File "/Library/Python/2.7/site-packages/click/core.py", line 1060, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+  File "/Library/Python/2.7/site-packages/click/core.py", line 889, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+  File "/Library/Python/2.7/site-packages/click/core.py", line 534, in invoke
+    return callback(*args, **kwargs)
+  File "/Library/Python/2.7/site-packages/mkdocs/__main__.py", line 137, in build_command
+    ), clean_site_dir=clean)
+  File "/Library/Python/2.7/site-packages/mkdocs/commands/build.py", line 289, in build
+    build_pages(config)
+  File "/Library/Python/2.7/site-packages/mkdocs/commands/build.py", line 249, in build_pages
+    dump_json)
+  File "/Library/Python/2.7/site-packages/mkdocs/commands/build.py", line 169, in _build_page
+    site_navigation=site_navigation
+  File "/Library/Python/2.7/site-packages/mkdocs/commands/build.py", line 35, in convert_markdown
+    extension_configs=config['mdx_configs']
+  File "/Library/Python/2.7/site-packages/mkdocs/utils/__init__.py", line 337, in convert_markdown
+    extension_configs=extension_configs or {}
+  File "/Library/Python/2.7/site-packages/markdown/__init__.py", line 159, in __init__
+    configs=kwargs.get('extension_configs', {}))
+  File "/Library/Python/2.7/site-packages/markdown/__init__.py", line 185, in registerExtensions
+    ext = self.build_extension(ext, configs.get(ext, {}))
+  File "/Library/Python/2.7/site-packages/markdown/__init__.py", line 264, in build_extension
+    module = importlib.import_module(module_name_old_style)
+  File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/importlib/__init__.py", line 37, in import_module
+    __import__(name)
+ImportError: Failed loading extension 'mdx_math' from 'mdx_math', 'markdown.extensions.mdx_math' or 'mdx_mdx_math'
+
+
+sudo pip install python-markdown-math
+
+
+设置运行 mkdocs serve 时的链接地址. 这使得你可以使用其他端口, 也可以使用 0.0.0.0 地址使你可以用本地网络访问.
+
+所有的设置都可以通过命令行设置, 例如:
+
+mkdocs serve --dev-addr=0.0.0.0:8000  # Run on port 8000, accessible over the local network.
+

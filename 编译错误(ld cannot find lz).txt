@@ -1,0 +1,2 @@
+编译错误"/usr/bin/ld: cannot find -lz" 
+编译的时候出现"/usr/bin/ld: cannot find -lz"错误，需要安装zlib-dev这个包，在线安装命令为：apt-get install zlib1g-dev。

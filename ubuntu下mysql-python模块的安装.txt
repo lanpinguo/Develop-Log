@@ -1,0 +1,33 @@
+ubuntu下mysql-python模块的安装
+
+安装步骤：
+
+1、sudo apt-get install python-setuptools
+
+2、sudo apt-get install libmysqld-dev
+
+3、sudo apt-get install libmysqlclient-dev
+
+4、sudo apt-get install python-dev
+
+5、sudo easy_install mysql-python
+
+ 
+
+测试下：
+
+在python交互式窗口，import MySQLdb 试试，不报错的话，就证明安装好了。
+
+ 
+
+eclipse 检测出错：
+
+如果平常是在eclipse pydev 下进行python开发的话，那么直接在eclipse环境下使用MySQLdb还会存在问题的，一般会提示有语法错误，原因是模块插件未导入eclipse的问题。解决方法就是将其导入就ok了。
+
+首先查看下文件路径 print MySQLdb.__file__
+
+然后Window -> Preferences -> Pydev -> Interpreter-Python -> new Folder
+
+最后把第一步获取的路径加上去，点ok就可以了。 
+
+ 

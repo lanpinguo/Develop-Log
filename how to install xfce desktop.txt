@@ -1,0 +1,10 @@
+how to install xfce desktop
+
+1、
+sudo apt install xfce4
+
+2、
+logout current session
+
+3、
+login with xfce-session option

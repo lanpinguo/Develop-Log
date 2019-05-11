@@ -1,0 +1,6 @@
+Stream video using RTP and network elements:
+gst-launch-1.0 v4l2src ! videorate! videoscale ! videoconvert ! 'video/x-raw, width=(int)1920,height=(int)1080, framerate=(fraction)15/1' !  rtpvrawpay pt=96 ! udpsink host=127.0.0.1 port=5000 sync=false
+
+Use this command on the receiver :
+gst-launch-1.0 udpsrc caps=" application/x-rtp,media=(string)video, clock-rate=(int)90000, encoding-name=(string)RAW,sampling=(string)YCbCr-4:2:0, depth=(string)8, width=(string)1920,height=(string)1080, colorimetry=(string)SMPTE240M, ssrc=(guint)4294234526,payload=(int)96, clock-base=(guint)520513122, seqnum-base=(guint)28177" port=5000 ! rtpvrawdepay ! videoconvert ! xvimagesink 
+This command would be run on the transmitte

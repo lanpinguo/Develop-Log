@@ -1,0 +1,14 @@
+win7的ip：192.168.0.11
+ 
+        文件夹的共享名称:shared，注意此名称是在网络上看到的名称，和实际的文件夹名称没关系
+ 
+        用户名:linux  密码linuxpw
+ 
+ubuntu中挂载的位置/mnt/WinShared
+ 
+
+
+
+sudo  mount  //192.168.0.11/shared /mnt/WinShared -o username=linux,passwd=linuxpw
+ 
+这样,访问ubuntu的/mnt/WinShared文件夹就是访问win7共享的文件夹，如果Win7共享时开放了写权限，即增加linux的写权限或者全部访问用户的写权限，则ubuntu下可以在/mnt/WinShared写操作

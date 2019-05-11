@@ -1,0 +1,51 @@
+import sys, os   
+02.def main():  
+03.    """ A demo daemon main routine, write a datestamp to  
+04.        /tmp/daemon-log every 10 seconds. 
+05.    """  
+06.    import time  
+07.    f = open("/tmp/daemon-log", "w")   
+08.    while 1:   
+09.        f.write('%s/n' % time.ctime(time.time()))   
+10.        f.flush()   
+11.        time.sleep(10)   
+12.if __name__ == "__main__":  
+13.    # do the UNIX double-fork magic, see Stevens' "Advanced   
+14.    # Programming in the UNIX Environment" for details (ISBN 0201563177)  
+15.    try:   
+16.        pid = os.fork()   
+17.        if pid > 0:  
+18.            # exit first parent  
+19.            sys.exit(0)   
+20.    except OSError, e:   
+21.        print >>sys.stderr, "fork #1 failed: %d (%s)" % (e.errno, e.strerror)   
+22.        sys.exit(1)  
+23.    # decouple from parent environment  
+24.    os.chdir("/")   
+25.    os.setsid()   
+26.    os.umask(0)   
+27.    # do second fork  
+28.    try:   
+29.        pid = os.fork()   
+30.        if pid > 0:  
+31.            # exit from second parent, print eventual PID before  
+32.            print "Daemon PID %d" % pid   
+33.            sys.exit(0)   
+34.    except OSError, e:   
+35.        print >>sys.stderr, "fork #2 failed: %d (%s)" % (e.errno, e.strerror)   
+36.        sys.exit(1)   
+37.    # start the daemon main loop  
+38.    main()   
+ 
+
+ 
+
+以上代码中main()函数包括了一个永久循环过程：把时间戳写入一个文件。
+
+ 
+
+运行的时候，建立一个进程，Linux会分配个进程号。然后调用os.fork()创建子进程。若pid>0就是自己，自杀。子进程跳过if语句，通过os.setsid()成为linux中的独立于终端的进程（不响应sigint，sighup等）。
+
+ 
+
+第二次os.fork再创建一个子进程，自己自杀。原因是os.setsid()后成为父进程，虽然已经不被动响应信号，但访问终端文件时控制权还是会失去。这次创建的进程真的是孤魂野鬼的daemon，并且外界对它影响被控制在最小。

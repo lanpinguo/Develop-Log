@@ -1,0 +1,12 @@
+查看服务器的DNS
+
+方法一，查看配置文件，输入命令cat /etc/resolv.conf，从结构中可以看到DNS是180.76.76.76，备用DNS是114.114.114.114
+nameserver 180.76.76.76
+nameserver 114.114.114.114
+修改DNS服务器配置，vim编辑配置文件/etc/solve.conf即可；
+
+第一条为DNS首选地址
+紧接着的为备选DNS地址
+
+
+

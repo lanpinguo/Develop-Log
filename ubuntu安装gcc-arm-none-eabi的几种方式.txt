@@ -1,0 +1,32 @@
+ubuntu安装gcc-arm-none-eabi的几种方式
+目前许多嵌入式软件软件开发在Linux平台下进行，编译效率高很多，如今天所述的gcc-arm-none-eabi常适用于 
+Arm Cortex-M & Cortex-R processors (Cortex-M0/M0+/M3/M4/M7/M23/M33, Cortex-R4/R5/R7/R8/R52)系列平台。
+
+Ubuntu 16.04之后的软件源是自带gcc-arm-none-eabi的，只是自动安装后的版本不一定符合要求。常用的有三种安装方式：
+
+自动安装
+sudo apt-get install gcc-arm-none-eabi
+
+测试过在不添加其它ppa的情况下，ubuntu16.04和ubuntu18.04都可以自动安装，只是默认版本号高低不同。Ubuntu18.04下为gcc version 6.3.1 20170620；ubuntu 16.04下为gcc version 4.9.3 20141119。
+
+查询版本号指令 
+arm-none-eabi-gcc -v
+
+添加新的PPA进行安装
+参考官方网站，有详细的教程
+
+https://launchpad.net/~team-gcc-arm-embedded/+archive/ubuntu/ppa
+
+安装指定的版本
+版本下载官方网站 
+https://launchpad.net/gcc-arm-embedded/+download
+
+下载源码包后解压，如本机解压到目录/usr/lib/gcc
+
+添加环境变量 
+vi /etc/profile 
+在文件最后添加 
+export PATH=$PATH:/usr/lib/gcc/gcc-arm-none-eabi-4_9-2014q4/bin 
+使能环境变量 
+source /etc/profile 
+此命令只在当前终端有效，若需要在其它终端中使用，需要重启计算机。

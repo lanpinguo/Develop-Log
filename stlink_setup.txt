@@ -1,0 +1,28 @@
+
+1\
+sudo apt-get install libusb-dev && sudo apt-get install libusb-1.0-0-dev
+
+2\
+Run from the root of the source directory:
+
+```
+$ make release
+$ make debug
+```
+
+3\
+You could install to a user folder e.g `$HOME`:
+
+```
+$ cd build/Release; make install DESTDIR=$HOME
+```
+
+Or system wide:
+
+```
+$ cd build/Release; sudo make install
+```
+4\
+### Fixing cannot open shared object file
+
+When installing system-wide (`sudo make install`) the dynamic library cache needs to be updated with the command `ldconfig`.

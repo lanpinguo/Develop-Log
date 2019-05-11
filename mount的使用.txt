@@ -1,0 +1,27 @@
+
+
+挂载windows的共享目录
+用户名和密码均为share
+mount -t cifs -o  username=share,password=share //172.16.1.28/object/hushouqiang cloud
+
+
+挂载samba文件系统
+mount -t cifs -o username=lanpinguo,password=pinguo //192.168.153.129/workspace rsp
+
+
+挂载NFS文件系统
+/work/tftp *(rw,sync,no_subtree_check)
+
+重启rpcbind
+sudo /etc/init.d/rpcbind restart 
+重启nfs
+sudo /etc/init.d/nfs-kernel-server restart 
+
+测试：
+mount -t nfs 127.0.0.1:/work/tftp cloud
+
+在嵌入式设备上如果遇到下面的错误：
+rpcbind: server localhost not responding, timed out
+
+这样的超时情况，则需要在输入命令后加-o nolock，即为
+mount -t nfs -o nolock 192.168.1.105:/work/tftp rsp

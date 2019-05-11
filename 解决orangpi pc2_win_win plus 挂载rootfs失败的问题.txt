@@ -1,0 +1,71 @@
+解决orangpi pc2_win_win plus 挂载rootfs失败的问题
+
+现象：
+[   11.120389] Freeing unused kernel memory: 524K (ffffffc0009d3000 - ffffffc000a56000)
+Kernel params: console=tty0 console=ttyS0,115200n8 no_console_suspend earlycon=uart,mmio32,0x01c28000 mac_addr= root=/dev/mmcblk0p2 ro rootwait
+Waiting for root system /dev/mmcblk0p2, countdown : 5
+Rootfs: /dev/mmcblk0p2
+[   11.196833] EXT4-fs (mmcblk0p2): couldn't mount as ext3 due to feature incompatibilities
+[   11.211846] EXT4-fs (mmcblk0p2): couldn't mount as ext2 due to feature incompatibilities
+[   11.246431] JBD2: Unrecognised features on journal
+[   11.257072] EXT4-fs (mmcblk0p2): error loading journal
+[   11.320138] UDF-fs: warning (device mmcblk0p2): udf_fill_super: No partition found (2)
+mount: mounting /dev/mmcblk0p2 on /mnt/root failed: Invalid argument
+umount: can't unmount /mnt/root: Invalid argument
+[   11.662906] [DISP] disp_device_attached_and_enable,line:159:attched ok, mgr0<-->device1, type=4, mode=10
+Waiting for root system /dev/mmcblk0p2, countdown : 4
+Rootfs: /dev/mmcblk0p2
+[   16.299145] EXT4-fs (mmcblk0p2): couldn't mount as ext3 due to feature incompatibilities
+[   16.314316] EXT4-fs (mmcblk0p2): couldn't mount as ext2 due to feature incompatibilities
+[   16.337816] JBD2: Unrecognised features on journal
+[   16.348449] EXT4-fs (mmcblk0p2): error loading journal
+[   16.408561] UDF-fs: warning (device mmcblk0p2): udf_fill_super: No partition found (2)
+mount: mounting /dev/mmcblk0p2 on /mnt/root failed: Invalid argument
+umount: can't unmount /mnt/root: Invalid argument
+Waiting for root system /dev/mmcblk0p2, countdown : 3
+Rootfs: /dev/mmcblk0p2
+[   21.387365] EXT4-fs (mmcblk0p2): couldn't mount as ext3 due to feature incompatibilities
+[   21.402515] EXT4-fs (mmcblk0p2): couldn't mount as ext2 due to feature incompatibilities
+[   21.426085] JBD2: Unrecognised features on journal
+[   21.436881] EXT4-fs (mmcblk0p2): error loading journal
+[   21.498652] UDF-fs: warning (device mmcblk0p2): udf_fill_super: No partition found (2)
+mount: mounting /dev/mmcblk0p2 on /mnt/root failed: Invalid argument
+umount: can't unmount /mnt/root: Invalid argument
+Waiting for root system /dev/mmcblk0p2, countdown : 2
+Rootfs: /dev/mmcblk0p2
+[   26.477553] EXT4-fs (mmcblk0p2): couldn't mount as ext3 due to feature incompatibilities
+[   26.492925] EXT4-fs (mmcblk0p2): couldn't mount as ext2 due to feature incompatibilities
+[   26.516735] JBD2: Unrecognised features on journal
+[   26.527698] EXT4-fs (mmcblk0p2): error loading journal
+[   26.586798] UDF-fs: warning (device mmcblk0p2): udf_fill_super: No partition found (2)
+mount: mounting /dev/mmcblk0p2 on /mnt/root failed: Invalid argument
+umount: can't unmount /mnt/root: Invalid argument
+Waiting for root system /dev/mmcblk0p2, countdown : 1
+Rootfs: /dev/mmcblk0p2
+[   31.565894] EXT4-fs (mmcblk0p2): couldn't mount as ext3 due to feature incompatibilities
+[   31.581561] EXT4-fs (mmcblk0p2): couldn't mount as ext2 due to feature incompatibilities
+[   31.605669] JBD2: Unrecognised features on journal
+[   31.616892] EXT4-fs (mmcblk0p2): error loading journal
+[   31.677603] UDF-fs: warning (device mmcblk0p2): udf_fill_super: No partition found (2)
+mount: mounting /dev/mmcblk0p2 on /mnt/root failed: Invalid argument
+umount: can't unmount /mnt/root: Invalid argument
+Rootfs: /dev/mmcblk0p2
+[   36.617567] EXT4-fs (mmcblk0p2): couldn't mount as ext3 due to feature incompatibilities
+[   36.633252] EXT4-fs (mmcblk0p2): couldn't mount as ext2 due to feature incompatibilities
+[   36.657258] JBD2: Unrecognised features on journal
+[   36.668464] EXT4-fs (mmcblk0p2): error loading journal
+[   36.726306] UDF-fs: warning (device mmcblk0p2): udf_fill_super: No partition found (2)
+mount: mounting /dev/mmcblk0p2 on /mnt/root failed: Invalid argument
+umount: can't unmount /mnt/root: Invalid argument
+Dropping to a shell.
+
+/ # 
+/ # 
+
+原因：
+出现该问题主要是由于host上新版的mkfs.ext4工具在制作镜像时部分默认的特性在orangePi的内核上不支持；
+
+解决方法：
+添加控制选项将不支持的特性关闭，命令如下:
+mkfs.ext4 -O ^64bit,^metadata_csum -F -b 4096 -E stride=2,stripe-width=1024 -L rootfs ${IMAGE}2
+

@@ -1,0 +1,23 @@
+I got this error while I was trying to add a PPA at school, on a Ubuntu 12.04 LTS Server.
+
+To fix this error, you have to install the software-properties-common:
+
+$ sudo apt-get install software-properties-common
+
+This is all. Now your command for adding PPAs works like a charm.
+
+If you want to find out how I have fixed this error by myself, without external / Google help, read further.
+
+I have search with apt-file for the add-apt-repository and found out in which package is the command located. Apt file searches for files, inside packages and tells you in what package the file you had searched is located.
+
+It is not installed by default, so you need to do this:
+
+$ sudo apt-get install apt-file && apt-file update
+
+This is how you use apt-file for fishing files inside packages:
+
+$ apt-file search add-apt-repository
+
+python-software-properties: /usr/bin/add-apt-repository
+
+python-software-properties: /usr/share/man/man1/add-apt-repository.1.gz

@@ -1,0 +1,16 @@
+$ sudo apt-get install git
+$ git clone http://people.csail.mit.edu/hubert/git/pyaudio.git
+$ sudo apt-get install  portaudio19-dev
+$ sudo apt-get python-dev
+$ sudo python pyaudio/setup.py install
+
+
+
+
+
+方法2:
+sudo apt-get install python-pyaudio
+
+
+另外，安装python3开发环境的命令如下：
+sudo apt-get install python3-dev

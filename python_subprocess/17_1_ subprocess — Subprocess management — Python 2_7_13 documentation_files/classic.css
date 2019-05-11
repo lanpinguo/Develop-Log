@@ -1,0 +1,175 @@
+@import url( basic.css );
+body {
+	margin: 0px; padding: 0px; color: rgb(0, 0, 0); font-family: sans-serif; font-size: 100%; background-color: rgb(17, 48, 61);
+}
+div.document {
+	background-color: rgb(28, 78, 99);
+}
+div.documentwrapper {
+	width: 100%; float: left;
+}
+div.bodywrapper {
+	margin: 0px 0px 0px 230px;
+}
+div.body {
+	padding: 0px 20px 30px; color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);
+}
+div.footer {
+	padding: 9px 0px; width: 100%; text-align: center; color: rgb(255, 255, 255); font-size: 75%;
+}
+div.footer a {
+	color: rgb(255, 255, 255); text-decoration: underline;
+}
+div.related {
+	color: rgb(255, 255, 255); line-height: 30px; background-color: rgb(19, 63, 82);
+}
+div.related a {
+	color: rgb(255, 255, 255);
+}
+div.sphinxsidebar {
+	
+}
+div.sphinxsidebar h3 {
+	margin: 0px; padding: 0px; color: rgb(255, 255, 255); font-family: "Trebuchet MS", sans-serif; font-size: 1.4em; font-weight: normal;
+}
+div.sphinxsidebar h3 a {
+	color: rgb(255, 255, 255);
+}
+div.sphinxsidebar h4 {
+	margin: 5px 0px 0px; padding: 0px; color: rgb(255, 255, 255); font-family: "Trebuchet MS", sans-serif; font-size: 1.3em; font-weight: normal;
+}
+div.sphinxsidebar p {
+	color: rgb(255, 255, 255);
+}
+div.sphinxsidebar p.topless {
+	margin: 5px 10px 10px;
+}
+div.sphinxsidebar ul {
+	margin: 10px; padding: 0px; color: rgb(255, 255, 255);
+}
+div.sphinxsidebar a {
+	color: rgb(152, 219, 204);
+}
+div.sphinxsidebar input {
+	border: 1px solid rgb(152, 219, 204); border-image: none; font-family: sans-serif; font-size: 1em;
+}
+div#sidebarbutton {
+	background-color: rgb(60, 110, 131);
+}
+a {
+	color: rgb(53, 95, 124); text-decoration: none;
+}
+a:visited {
+	color: rgb(53, 95, 124); text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
+}
+div.body h1 {
+	margin: 20px -20px 10px; padding: 3px 0px 3px 10px; color: rgb(32, 67, 92); font-family: "Trebuchet MS", sans-serif; font-weight: normal; border-bottom-color: rgb(204, 204, 204); border-bottom-width: 1px; border-bottom-style: solid; background-color: rgb(242, 242, 242);
+}
+div.body h2 {
+	margin: 20px -20px 10px; padding: 3px 0px 3px 10px; color: rgb(32, 67, 92); font-family: "Trebuchet MS", sans-serif; font-weight: normal; border-bottom-color: rgb(204, 204, 204); border-bottom-width: 1px; border-bottom-style: solid; background-color: rgb(242, 242, 242);
+}
+div.body h3 {
+	margin: 20px -20px 10px; padding: 3px 0px 3px 10px; color: rgb(32, 67, 92); font-family: "Trebuchet MS", sans-serif; font-weight: normal; border-bottom-color: rgb(204, 204, 204); border-bottom-width: 1px; border-bottom-style: solid; background-color: rgb(242, 242, 242);
+}
+div.body h4 {
+	margin: 20px -20px 10px; padding: 3px 0px 3px 10px; color: rgb(32, 67, 92); font-family: "Trebuchet MS", sans-serif; font-weight: normal; border-bottom-color: rgb(204, 204, 204); border-bottom-width: 1px; border-bottom-style: solid; background-color: rgb(242, 242, 242);
+}
+div.body h5 {
+	margin: 20px -20px 10px; padding: 3px 0px 3px 10px; color: rgb(32, 67, 92); font-family: "Trebuchet MS", sans-serif; font-weight: normal; border-bottom-color: rgb(204, 204, 204); border-bottom-width: 1px; border-bottom-style: solid; background-color: rgb(242, 242, 242);
+}
+div.body h6 {
+	margin: 20px -20px 10px; padding: 3px 0px 3px 10px; color: rgb(32, 67, 92); font-family: "Trebuchet MS", sans-serif; font-weight: normal; border-bottom-color: rgb(204, 204, 204); border-bottom-width: 1px; border-bottom-style: solid; background-color: rgb(242, 242, 242);
+}
+div.body h1 {
+	font-size: 200%; margin-top: 0px;
+}
+div.body h2 {
+	font-size: 160%;
+}
+div.body h3 {
+	font-size: 140%;
+}
+div.body h4 {
+	font-size: 120%;
+}
+div.body h5 {
+	font-size: 110%;
+}
+div.body h6 {
+	font-size: 100%;
+}
+a.headerlink {
+	padding: 0px 4px; color: rgb(198, 15, 15); font-size: 0.8em; text-decoration: none;
+}
+a.headerlink:hover {
+	color: white; background-color: rgb(198, 15, 15);
+}
+div.body p {
+	text-align: justify; line-height: 130%;
+}
+div.body dd {
+	text-align: justify; line-height: 130%;
+}
+div.body li {
+	text-align: justify; line-height: 130%;
+}
+div.admonition p.admonition-title + p {
+	display: inline;
+}
+div.admonition p {
+	margin-bottom: 5px;
+}
+div.admonition pre {
+	margin-bottom: 5px;
+}
+div.admonition ul {
+	margin-bottom: 5px;
+}
+div.admonition ol {
+	margin-bottom: 5px;
+}
+div.note {
+	border: 1px solid rgb(204, 204, 204); border-image: none; background-color: rgb(238, 238, 238);
+}
+div.seealso {
+	border: 1px solid rgb(255, 255, 102); border-image: none; background-color: rgb(255, 255, 204);
+}
+div.topic {
+	background-color: rgb(238, 238, 238);
+}
+div.warning {
+	border: 1px solid rgb(255, 102, 102); border-image: none; background-color: rgb(255, 228, 228);
+}
+p.admonition-title {
+	display: inline;
+}
+p.admonition-title::after {
+	content: ":";
+}
+pre {
+	border-width: 1px medium; border-style: solid none; border-color: rgb(170, 204, 153) currentColor; padding: 5px; border-image: none; color: rgb(51, 51, 51); line-height: 120%; background-color: rgb(238, 255, 204);
+}
+code {
+	padding: 0px 1px; font-size: 0.95em; background-color: rgb(236, 240, 243);
+}
+th {
+	background-color: rgb(238, 221, 238);
+}
+.warning code {
+	background: rgb(239, 194, 194);
+}
+.note code {
+	background: rgb(214, 214, 214);
+}
+.viewcode-back {
+	font-family: sans-serif;
+}
+div:target.viewcode-block {
+	border-top-color: rgb(170, 204, 153); border-bottom-color: rgb(170, 204, 153); border-top-width: 1px; border-bottom-width: 1px; border-top-style: solid; border-bottom-style: solid; background-color: rgb(244, 222, 191);
+}
+div.code-block-caption {
+	color: rgb(239, 239, 239); background-color: rgb(28, 78, 99);
+}

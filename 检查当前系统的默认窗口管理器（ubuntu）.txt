@@ -1,0 +1,6 @@
+
+
+root@ubuntu:/etc/X11# nano default-display-manager 
+  GNU nano 2.9.3                           default-display-manager                                     
+
+/usr/sbin/gdm3

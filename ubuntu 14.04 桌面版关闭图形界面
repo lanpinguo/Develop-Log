@@ -1,0 +1,25 @@
+ubuntu 14.04 桌面版关闭图形界面
+ 
+问题：
+ 
+如何将ubuntu14.04设置为文本模式启动?
+ 
+解决方案：
+ 
+修改改GRUB 的配置文件(不建议直接改 grub.conf)
+ 
+$sudo vim /etc/default/grub
+ 找到：GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"，应该是在第11行。 复制本行然后把quiet splash替换成text。 把本行注释掉（以免以后想改回来时不知道怎么改回来）。 如下：GRUB_CMDLINE_LINUX_DEFAULT="text" 保存后 执行sudo update-grub命令后 重启即可 $sudo update-grub;sudo reboot
+ 重启后就直接进入文字界面。
+ 
+ 
+ 
+1
+down vote
+Delete both .Xauthority and .ICEauthority from your user's home directory.
+
+If you see old or backup or appended versions of either of these (for example .ICEauthority-c, ICEauthority, or .Xauthority.old) delete those too.
+
+(Not having any of these files will not harm your system. They will be recreated at reboot/login.) After this, just reboot or logout & log back in and enjoy your computer again.
+
+Tested on my system (Xubuntu 14.04 x86, linux kernel 3.13.0-35-generic)

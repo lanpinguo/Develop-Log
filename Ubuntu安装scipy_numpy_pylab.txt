@@ -1,0 +1,11 @@
+1、安装依赖库：
+  sudo apt-get install Python python-dev libatlas-base-dev gcc gfortran g++
+2、安装：
+sudo apt-get install python-scipy
+sudo apt-get install python-numpy
+sudo apt-get install python-matplotlib
+3、测试：
+python
+import scipy
+import numpy
+import pylab

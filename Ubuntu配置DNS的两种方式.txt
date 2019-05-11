@@ -1,0 +1,33 @@
+目前我所知道的Ubuntu下面能够配置DNS的有两种方式（图形界面操作除外）：
+
+interfaces方式
+resolvconf方式
+interfaces方式
+修改/etc/network/interfaces配置DNS需要在该文件中加入
+
+dns-nameserver xx.xx.xx.xx
+dns-nameserver xxx.xxx.xx.xx
+dns-nameservers xxx.xxx.xxx.xxx xxx.xxx.xx.xxx
+1
+2
+3
+dns-nameserver: 指定一条DNS地址，如果需要指定多个DNS则需要使用添加多行。
+dns-nameservers: 指定多个DNS地址，用空格隔开。
+备注： 这种方式修改DNS后需要重启电脑方可生效（我没有找到其它使其生效的方式，重启网络并不能更新cat /etc/resolv.conf。
+
+resolvconf方式
+resolvconf方式修改DNS则是通过修改/etc/resolvconf/resolv.conf.d/head文件实现，当需要添加DNS记录时，在文件中加入下面内容：
+
+nameserver xxx.xxx.xx.xxx
+nameserver xx.xx.xx.xx
+1
+2
+nameserver: 指定DNS地址，当有多个DNS记录时每个DNS记录占一行。
+修改成功后，运行sudo resolvconf -u更新/etc/resolv.conf文件即可。这种方式不需要重启电脑。
+
+备注： 看到网上说可以修改/etc/resolvconf/resolv.conf.d/base文件同样能配置DNS，但经我测试，不能正确配置，不知道是什么原因。
+--------------------- 
+作者：japinli 
+来源：CSDN 
+原文：https://blog.csdn.net/japinli/article/details/54897264 
+版权声明：本文为博主原创文章，转载请附上博文链接！

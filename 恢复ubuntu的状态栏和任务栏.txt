@@ -1,0 +1,15 @@
+
+
+刚玩ubuntu时把状态栏和任务栏都搞不见了，就剩了桌面，后来create launcher随便打来了个快捷方式调出终端
+
+然后删除在终端下用rm -rf删除：
+
+把~/ 目录下的
+.gnome2/
+.config/
+.gconfd/
+.gconf/
+.gnome/
+全部删除
+
+重启就ok

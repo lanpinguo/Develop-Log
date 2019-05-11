@@ -1,0 +1,7 @@
+    查了查原因，内核放在不同的平台使用时原来是需要make sripts重新生成genksyms这个工具。
+
+      # make mrproper
+
+      # make oldconfig/menuconfig
+
+      # make prepare scripts

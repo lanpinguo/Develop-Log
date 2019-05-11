@@ -1,0 +1,28 @@
+
+1.
+我们可以使用Linux提供的usbmon来为我们获取和导出数据信息的操作赋予足够的权限。具体请参考Linux－udev。我们所要做的就是创建一个usbmon group，然后将我们的账号加入这个组，最后生成相应的udev规则。相关操作命令如下：
+
+
+addgroup usbmon
+gpasswd -a $USER usbmon
+echo 'SUBSYSTEM=="usbmon", GROUP="usbmon", MODE="640"' > /etc/udev/rules.d/99-usbmon.rules
+接下来，我们需要使用usbmon的内核模块。如果系统还未加载该模块，我们可以使用root权限并运行下列命令来进行加载。
+
+安装usbmod模块：
+modprobe usbmon
+
+例如：
+husq-4668@husq4668-OptiPlex:~$ sudo addgroup usbmon
+husq-4668@husq4668-OptiPlex:~$ sudo gpasswd -a $USER usbmon
+[sudo] password for husq-4668: 
+Adding user husq-4668 to group usbmon
+husq-4668@husq4668-OptiPlex:~$ sudo echo 'SUBSYSTEM=="usbmon", GROUP="usbmon", MODE="640"' > /etc/udev/rules.d/99-usbmon.rules
+husq-4668@husq4668-OptiPlex:~$ sudo modprobe usbmon
+
+2. lsusb查看usb设备在哪条总线上
+
+# Bus 003: 设备在第3条总线上
+Bus 003 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+
+3.
+打开Wireshark之后，我们可以看到如下图所示的接口列表。你应该能看到形如usbmonX的信息，其中X为数字。

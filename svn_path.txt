@@ -1,0 +1,40 @@
+1\
+https://sw6-scm.soft6.raisecom.com/svn/esw/branches/br_5.3_ptn_dev_20151112
+ 
+权限已开通，
+ 
+用户名：姓名全拼
+ 
+密码：raisecom
+ 
+请使用如下地址修改密码：
+ 
+https://172.16.1.4/cgi-bin/Apache22Passwd.cgi
+
+
+product_ritp:
+https://sw6-scm.soft6.raisecom.com/svn/esw/branches/br_5.3_ptn_dev_20151112/product_ritp
+
+/kernel/product_ritp/linux-2.6.29.6-mpc8308:
+https://sw6-scm.soft6.raisecom.com/svn/esw/branches/br_5.3_ptn_dev_20151112/kernel/product_ritp/linux-2.6.29.6-mpc8308
+
+new_branch_sdn
+https://172.16.1.4/svn/esw/branches/br_SDN_dev_20160222/kernel/product_ritp/linux-2.6.29.6-mpc8308
+
+patch:
+svn checkout https://sw6-scm.soft6.raisecom.com/svn/esw/branches/br_5.3_ptn_dev_20151112/ros/patch patch
+
+https://172.16.1.4/svn/esw/branches/br_SDN_dev_20160222/ros
+
+https://172.16.1.4/svn/esw/branches/br_SDN_dev_20160222/kernel/product_ritp/linux-2.6.29.6-mpc8308
+
+
+2\
+https://172.16.1.4/svn/esw/branches/br_5.3_ptn_dev_20151112 
+
+3\
+svn sw --relocate https://sw6-scm.soft6.raisecom.com/svn/esw/branches/br_5.3_ptn_dev_20151112/product_ritp https://172.16.1.4/svn/esw/branches/br_5.3_ptn_dev_20151112/product_ritp
+
+svn co --depth=immediates https://172.16.1.4/svn/esw/branches/br_5.3_ptn_dev_20151112/product_ritp
+
+svn sw --relocate https://172.16.1.4/svn/esw/branches/br_SDN_dev_20160222/kernel/product_ritp/linux-2.6.29.6-mpc8308 https://172.16.1.4/svn/esw/branches/br_5.3_ptn_dev_20151112/kernel/product_ritp/linux-2.6.29.6-mpc8308

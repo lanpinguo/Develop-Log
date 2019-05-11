@@ -1,0 +1,245 @@
+c/c++字节序转换
+博客分类：  网络编程
+   字节序（byte order）关系到多字节整数（short/int16、int/int32,int64）和浮点数的各字节在内存中的存放顺序。字节序分为两种：小端字节序（little endian）和大端字节序（big endian）。小端字节序：低字节存放在内存低地址，例如对两字节整数0x0100(十进制数256)，低字节00放在低地址（假设地址为0x0041f880），高字节01放在高地址0x0041f881。大端字节序：高字节在低地址，同样是0x0100，高字节01放在低地址（假设地址为0x0041f880），低字节00放高地址0x0041f881。可见对相同的两字节整数，在不同字节序的机器上其内存布局是不同的，反过来内存布局相同的，在不同字节序的机器上被解释为不同的整数值，除非这几个字节值相同。
+
+    字节序是由cpu处理器架构决定的，和操作系统无关，例如Intel cpu采用小端字节序，PowerPC采用大端字节序，有些cpu例如Alpha支持两种字节序，但在使用时要设置具体采用哪一种字节序，不可能同时用两种。本机字节序（host byte order）就是指当前机器的字节序，根据cpu处理器的架构和设置，本机字节序可为小端字节序或大端字节序。关于字节序问题，较全面的描述见https://en.wikipedia.org/wiki/Endianness。
+
+    在socket网络编程中通常会涉及到多字节整数、浮点数的传输，如果两台机器字节序不同，直接传多字节整数或浮点数会导致双方将这些多字节解释成不同的数字，所以要在网络协议中规定编解码方式，例如有的协议将整数编码成字符串来避免字节序问题，但只要协议中有多字节整数，都要规定采用什么字节序来表示协议中的多字节整数（除非能保证两台机器的字节序是相同的），也就出现了网路字节序，网络字节序其实就是大端字节序，协议当然也可采用小端字节序，只要双方统一就行。
+
+     如上所述，在设计网络二进制协议时，对多字节整数，要规定打包传输时的字节序：网络字节还是小端字节序。客户端和服务器代码在打包和解包时，对多字节整数，要进行主机字节序和协议规定的字节序的相互转化。
+
+ 
+
+   Java应用通常使用java.nio.ByteBuffer进行协议数据的打包和解包，其order(ByteOrder bo)方法可设置打包或解包使用的字节序；如果使用netty框架，可使用ByteBuf类的order方法。
+
+   C/C++应用通常使用C库中的如下函数来进行主机字节序和网络字节序的相互转换。
+
+// hton* 主机字节转网络字节序
+
+uint64_t htonll(uint64_t hostlonglong);
+
+uint32_t htonl(uint32_t hostlong);
+
+uint16_t htons(uint16_t hostshort);
+
+// ntoh* 网络字节序转主机字节序
+
+uint64_t ntohll(uint64_t hostlonglong);
+
+uint32_t ntohl(uint32_t netlong);
+
+uint16_t ntohs(uint16_t netshort);
+
+  linux系统在endian.h头文件中提供了更多的函数进行主机字节和大小端字节序的相互转换，如下：
+
+uint16_t htobe16(uint16_t host_16bits);
+
+uint16_t htole16(uint16_t host_16bits);
+
+uint16_t be16toh(uint16_t big_endian_16bits);
+
+uint16_t le16toh(uint16_t little_endian_16bits);
+
+ 
+
+uint32_t htobe32(uint32_t host_32bits);
+
+uint32_t htole32(uint32_t host_32bits);
+
+uint32_t be32toh(uint32_t big_endian_32bits);
+
+uint32_t le32toh(uint32_t little_endian_32bits);
+
+ 
+
+uint64_t htobe64(uint64_t host_64bits);
+
+uint64_t htole64(uint64_t host_64bits);
+
+uint64_t be64toh(uint64_t big_endian_64bits);
+
+uint64_t le64toh(uint64_t little_endian_64bits);
+
+ 
+
+   htobe*（例如htobe16）表示主机字节序到大端字节序（网络字节序）；htole*表示主机字节序到小端字节序；be*toh表示大端到主机；le*toh表示小端到主机。
+
+  上面的字节序转换函数有个缺点，就是方法太多不方便使用，需要根据多字节整数的类型（uint16_t/int16_t/uint32_t/int32_t/uint64_t/int64_t）来调用不同的转换函数，所以在c++应用中利用模板技术编写了4个统一的字节序转换函数，和整数的类型无关。如下：
+
+ /*
+
+ *  ByteOrderUtil.h
+
+ *
+
+ *  Created on: Nov 15, 20xx
+
+ *  Author: wanshi
+
+ */
+
+ 
+
+#ifndef BYTEORDERUTIL_H_
+
+#define BYTEORDERUTIL_H_
+
+ 
+
+#include <stdint.h>
+
+ 
+
+namespace ByteOrder {
+
+    const  uint16_t us_flag = 1;
+
+    // little_end_flag 表示主机字节序是否小端字节序
+
+    const  bool little_end_flag = *((uint8_t*)&us_flag) == 1;
+
+ 
+
+    //小端到主机
+
+ template<typename T> T le_to_host(T& from)
+
+    {
+
+   T to;
+
+   uint8_t byteLen = sizeof(T);
+
+ 
+
+         if(little_end_flag){
+
+     return from;
+
+         }
+
+         else{
+
+              char* to_char =  (char*)&to;
+
+              char* from_char = (char*)&from;
+
+     for(int i=0;i<byteLen;i++){
+
+                   to_char[i] = from_char[byteLen-i-1];
+
+       //此处也可用移位操作来实现
+
+              }
+
+     return to;
+
+   }
+
+ }
+
+  
+
+    //主机到小端
+
+ template<typename T> T host_to_le(T& from)
+
+    {
+
+    return le_to_host(from);
+
+ }
+
+ 
+
+ //大端到主机
+
+ template<typename T> T be_to_host(T& from)
+
+    {
+
+    T to;
+
+    uint8_t byteLen = sizeof(T);
+
+            if(!little_end_flag){
+
+       return from;
+
+            }
+
+            else{
+
+                    char* to_char =  (char*)&to;
+
+                    char* from_char = (char*)&from;
+
+                    for(int i=0;i<byteLen;i++){
+
+                         to_char[i] = from_char[byteLen-i-1];
+
+         //此处也可用移位操作来实现
+
+                    }
+
+       return to;
+
+    }
+
+ }
+
+ 
+
+    //主机到大端
+
+ template<typename T> T host_to_be(T& from)
+
+ {
+
+     return be_to_host(from);
+
+ }
+
+ 
+
+}
+
+ 
+
+#endif /* BYTEORDERUTIL_H_ */
+
+ 
+
+使用演示：
+
+#include "ByteOrderUtil.h"
+
+using namespace ByteOrder;
+
+ 
+
+int main(int argc,char** argv)
+
+{
+
+        uint16_t u16t = 0x1514;
+
+        //host到小端
+
+        uint16_t leu16t = host_to_le(u16t);
+
+        uint16_t hu16t = le_to_host(leu16t);
+
+ 
+
+         uint64_t u64t = 0x15141312;
+
+         //host到大端
+
+         uint64_t beu64t = host_to_be(u64t);
+
+         uint64_t hu64t = be_to_host(beu64t);
+
+   return 0;
+
+}

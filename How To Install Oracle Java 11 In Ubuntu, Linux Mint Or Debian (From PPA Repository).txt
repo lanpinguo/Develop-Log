@@ -1,0 +1,12 @@
+How To Install Oracle Java 11 In Ubuntu, Linux Mint Or Debian (From PPA Repository)
+
+From https://www.linuxuprising.com/2018/10/how-to-install-oracle-java-11-in-ubuntu.html
+
+
+1\
+sudo add-apt-repository ppa:linuxuprising/java
+sudo apt update
+sudo apt install oracle-java11-installer
+
+2\
+sudo apt install oracle-java11-set-default

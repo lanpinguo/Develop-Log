@@ -1,0 +1,173 @@
+ 6410的手册上说，可以从nandflash、onenand、SD卡启动，没有专用的烧录工具的情况下，只有SD卡启动是可以考虑 的。手册上看到，SD卡启动，实际上是先执行片内IROM中的一段程序，该程序从SD卡中读取代码，写到stepping stone 中，stepping stone是位于0x0c000000、size为8K的片内内存，代码写入stepping stone后，跳到 0x0c000000处继续执行程序。那么，要实现从SD卡启动，就必须弄清楚：  
+1、8K的代码保存在SD卡的什么位置。  
+2、代码以什么格式存储。  
+
+   把编译好的代码写入到最后芯片末尾偏移-9216字节处，插入SD卡座，把开关拨到SD0卡启动的位置，上电
+
+这里使用的uboot并非uboot官方发布的uboot代码，而是为三星定制的一个uboot版本
+
+s3c-u-boot-1.1.6，其代码作者就包括了三星的程序员与denx的员工。这个版本支持
+
+SD启动，不过默认是nand启动，使它支持uboot需要做以下事情：
+
+1、  虽然支持uboot启动，但是uboot代码里不叫SD启动方式，而是叫movinand启动
+
+方式，在incluede/configs/smdk6410.h中就有这个选项，所以在这个文件里关闭nand
+
+启动，打开movinand启动就可以了：
+
+//#define CONFIG_BOOT_NOR
+
+//#define CONFIG_BOOT_NAND       注释nand启动
+
+#define CONFIG_BOOT_MOVINAND   打开movinand启动
+
+//#define CONFIG_BOOT_ONENAND
+
+//#define CONFIG_BOOT_ONENAND_IROM
+
+#define     CONFIG_NAND
+
+//#define CONFIG_ONENAND
+
+#define CONFIG_MOVINAND         打开movinand选项，使uboot支持movinand的操作
+
+2、如果单纯是做上面的改动，还是不够的，在运行的时候会发现到了一定的时候
+
+uboot就死掉了，其实这是因为uboot中假设SMDK6410在使用SD方式的时候是从CH0启
+
+动的，但是手上的这个板子是通过CH1启动，那么在运行被复制到SRAM中的8K代码时
+
+候没办法在CH0检测到SD，更没办法将SD 里的代码复制到SDRAM中。修改办法是在
+
+incluede/
+
+movi.h中HSMMC_CHANNEL修改为1。
+
+3、然后如果将上述修改后编译出来的u-boot.bin通过IROM_Fusing_tools直接烧写到
+
+SD中也是没办法启动的，需要运行以下的命令进行处理：
+
+cat u-boot.bin >> temp
+
+cat u-boot.bin >> temp
+
+split -b 256k temp
+
+mv xaa u-boot_256k.bin
+
+split -b 8k u-boot.bin
+
+mv xaa u-boot_8k.bin
+
+cat u-boot_256k.bin >> u-boot_mmc.bin
+
+cat u-boot_8k.bin >> u-boot_mmc.bin
+
+经过这些处理，实际上是将u-boot.bin内容重复一次后（为了保证达到256K，如果这
+
+个bin更小，那么可能需要重复3次、4次，直到超过 256K 为止），将前256K制成u-
+
+boot_256k.bin，再将前8K制成u-boot_8k.bin，最后将u-boot_256k.bin +u-
+
+boot_8k.bin合并成一个256K+8K大小的文件u-boot_mmc.bin，这个文件前256K就是u-
+
+boot_256k.bin 而后8K就是u-boot_8k.bin。把这个u-boot_mmc.bin通过
+
+IROM_Fusing_tools烧写到SD卡就可以成功启动系统了。
+
+为什么要做这样的处理这个bin文件呢？下面通过分析IROM_Fusing_tools、uboot的
+
+源码来揭示其中的由来。
+
+从网上可以下载到IROM_Fusing_tools的源码，在按下这个软件的start控件后，先是
+
+读取这个SD卡的第一个扇区，也就是这个磁盘的MBR 扇区，判断是不是FAT32格式的
+
+磁盘（这也是为什么用来做启动的SD必须格式化为FAT32格式），接着获取总的扇区
+
+数目TOTAl_SECOTR，并将所要烧写的bin文件烧写到磁盘的这个扇区：TOTAL_SECTOR –
+
+2 - SIZE_OF_IMAGE/512。其中TOTAl_SECTOR是这个磁盘总的扇区数目；
+
+SIZE_OF_IMAGE/512是这个bin文件将要占据的扇区数（这里是以512为扇区大小的，
+
+因此对于扇区更大的SD卡也就没办法使用了，而现在的大容量SD都可能使用了2K甚至
+
+4K的扇区，除非修改这个程序，并同步地在uboot中修改程序）；至于2则是保留的2
+
+个扇区，至于为什么要保留这2个扇区，需要分析uboot的源码情况，下面将做进一步
+
+的阐述。
+
+在SD启动方式下，S3C6410内部的IROM程序BL0首先运行，并将SD中的最后18个扇区开
+
+始的16个扇区内容复制到片内的8K SRAM，也就是SteppingStone，接着跳转到这块
+
+SRAM的开始地址开始运行，这8K的代码实际上就是上面u-boot_mmc.bin这个文件的最
+
+后8K，也是u-boot.bin的最开始8K代码，这段代码也叫BL1。从BL0跳转到BL1的时候
+
+uboot也就接管了CPU。
+
+Uboot的入口在start.S这个文件，cpu/s3c64x0/start.S中有这样一段代码：
+
+#ifdef CONFIG_BOOT_MOVINAND
+
+ldr   sp, _TEXT_PHY_BASE
+
+bl     movi_bl2_copy
+
+b     after_copy
+
+#endif
+
+这段代码是实现SD启动的关键。到了这里后就执行movi_bl2_copy，这个函数负责将
+
+SD内的uboot完整地复制到SDRAM，这时候完整的uboot也叫BL2，而这个函数实际上是
+
+调用了以下函数：
+
+CopyMovitoMem(HSMMC_CHANNEL, MOVI_BL2_POS, MOVI_BL2_BLKCNT, (uint *)
+
+BL2_BASE, MOVI_INIT_REQUIRED);
+
+HSMMC_CHANNEL这是SD/MMC通道号，手上板子使用的是CH1，而默认是CH0，所以需要
+
+对这个进行修改。
+
+MOVI_BL2_POS 是需要拷贝的数据位于SD的起始扇区，其计算办法是这样的，先得到
+
+这个SD的总扇区数TOTAL，再减去256K的BL2和8K的BL1所占的扇区数，最后减去0.5K
+
+的eFuse和0.5K的保留区所占的扇区数，而这里还定义SD的扇区为512B。从这里可以
+
+看到和IROM_Fusing_tools对SD卡的处理是完全对应的。这里还有一个问题，总扇区
+
+数TOTAL是如何得到的？从程序来看是从(TCM_BASE - 0x4)这个地址读取到的，至于
+
+TOTAL是如何被放到这里的就只能从BL0的代码找答案了。
+
+MOVI_BL2_BLKCNT是需要复制的扇区数目，这里就是定义为256K，这也是为什么必须
+
+把u-boot.bin转换成256K的文件。
+
+BL2_BASE是目的地址，也就是SDRAM中的地址。这里定义为0x57E00000，就是128M 的
+
+SDRAM的最后2M，因为到这里为止MMU尚未打开，因此这里使用的是物理地址。
+
+MOVI_INIT_REQUIRED这个参数的意义是什么暂时没有任何资料说明。
+
+而CopyMovitoMem这个函数的定义是这样的：
+
+#define CopyMovitoMem(a,b,c,d,e)     (((int(*)(int, uint, ushort, uint *,
+
+int))(*((uint *)(TCM_BASE + 0x8))))(a,b,c,d,e))
+
+这个定义实际上是调用了位于TCM_BASE + 0x8这个地址的函数指针，其中TCM_BASE的
+
+值为0x0C004000，至于这个地址放的是什么，也没资料说明。
+
+当复制完BL2后便会跳转到BL2的start_armboot这个C语言函数中运行了，此后的运行
+
+过程就不需要再分析了

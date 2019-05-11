@@ -1,0 +1,4 @@
+终端输入安装Tkinter:
+sudo apt-get install python-tk  
+
+

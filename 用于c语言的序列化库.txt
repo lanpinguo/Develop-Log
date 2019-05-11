@@ -1,0 +1,11 @@
+
+用于c语言的序列化库
+
+1、
+iteserver/binn
+
+2、
+dryman/opic
+
+
+

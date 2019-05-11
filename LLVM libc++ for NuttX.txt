@@ -1,0 +1,19 @@
+LLVM libc++ for NuttX
+I was looking for a C++11 lib to integrated on NuttX for a customer's project because uClibc++ doesn't have the C++11 features they need. Then David suggested me to take a look on LLVM's libcxx.
+
+Finally I integrated libcxx on NuttX in the same way uClibc++ was integrated.
+
+Case you have a STM32F4Discovery board and want to test, just follow these steps:
+
+$ git clone https://bitbucket.org/acassis/libcxx
+Cloning into 'libcxx'...
+
+
+$ cd libcxx/
+libcxx$ ./install.sh ../nuttx
+Installing LLVM/libcxx in the NuttX source tree
+Installation suceeded
+
+libcxx$ cd ../nuttx/
+nuttx$ tools/configure.sh stm32f4discovery/testlibcxx
+nuttx$ make

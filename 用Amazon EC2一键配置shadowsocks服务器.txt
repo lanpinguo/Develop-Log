@@ -1,0 +1,61 @@
+用Amazon EC2一键配置shadowsocks服务器
+
+简介
+本文主要讲解如何利用Amazon EC2搭建shadowsocks服务器。
+
+本文假设读者会使用基本的virtual server 操作，和网络相关的设置。
+
+什么是shadowsocks?
+shadowsocks类似于GoAgent,各种VPN服务。区别在于，shadowsocks需要自己拥有服务器，或者到shadowsocks.net上找到公用的服务器。
+
+Why shadowsocks?
+免费
+
+shadowsocks虽然需要自己有服务器，但是我们可以使用公有服务器，或者利用免费的Amazon EC2.
+稳定
+
+相比于GoAgent，shadowsocks更为稳定。
+速度快
+
+相比于各类VPN（主要指低价的），速度更快。
+多平台
+
+支持各种Linux、Mac OS X、Windows、iOS、Andorid.
+Why Amazon EC2? Why not DigitalOcean, Linode?
+如果你已经有VPS了，当然可以在上面搭建。本文主要写给想试试Amazon EC2的人。
+
+主要步骤
+配置shadowsocks的过程分为如下几步，网络上已有教程的就不再赘述了。
+
+注册AWS账号，需要信用卡。
+Launch EC2 instance.
+连接EC2 Instance.
+使用下文所示的一键安装脚本。
+配置服务器端。
+配置本机（1～5均不涉及本机）。
+几个要点
+Launch EC2 instance时，需要注意：
+
+一定要在security group里打开SSH TCP port 22。不然无法通过SSH连接服务器。
+EC2独有的security group对开放的端口有严格的限制，笔者偷懒打开了所有TCP端口（可能只需要打开特定端口）
+EC2 提供AMI系统。该系统由Amazon定制，基于Redhat，配置好了一些基础服务。如使用该系统，可使用后面的一键安装脚本。
+不同于其他VPS，连接需要有.pem文件，也就是配置的最后一步下载的文件。
+
+ssh -i /path/to/yourvps.pem ec2-user@public.ip
+如果是Ubuntu系统，登入用户名应该为ubuntu，而非ec2-uesr.
+如果登入出现问题，在上述命令后加-v，可看到debug信息。
+连接前，先chmod 400 Your.pem
+
+该一键配置脚本来自http://teddysun.com/342.html.
+
+wget --no-check-certificate https://raw2.github.com/teddysun/shadowsocks_install/master/shadowsocks.sh
+chmod +x shadowsocks.sh
+./shadowsocks.sh 2>&1 | tee shadowsocks.log
+该脚本抓取的IP是private IP, 这是错误的。要改成Public IP.
+
+如果出现故障，试试把/etc/shadowsocks.json里改为"server"="0.0.0.0". 小心不要掉,.
+
+本机配置因操作系统不同无法详述。出现故障时，可检查系统代理有没有正确设置，有没有sudo,有没有忘记sslocal -c 里的-c. (1~4不涉及本机）
+
+总结
+小心各种配置细节。

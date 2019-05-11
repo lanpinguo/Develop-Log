@@ -1,0 +1,4 @@
+
+How to download and install prebuilt OpenJDK packages
+
+sudo apt-get install openjdk-8-jre

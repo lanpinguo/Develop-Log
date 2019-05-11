@@ -1,0 +1,7 @@
+Sign up 
+No signature of method: com.android.build.gradle.AppPlugin.getNdkFolder()
+
+解决方法：
+use plugins.getPlugin('com.android.application').sdkHandler.ndkFolder or android.ndkDirectory instead.
+
+自己使用android.ndkDirectory替换成功；

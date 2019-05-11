@@ -1,0 +1,93 @@
+如何使用QEMU来编译打包armhf/arm64的snap包
+http://blog.csdn.net/UbuntuTouch/article/details/53482262?locationNum=13&fps=1
+在今天的文章中，我们来介绍一下如何利用QEMU来编译打包我们的Ubuntu Core armhf/arm64格式的Snap应用．这里的armhf/arm64格式的snap包可以被安装到我们的ARM板子上，比如树莓派或高通的Snapdragon 410C板子上．
+
+
+１）安装qemu-user-static
+
+我们在Ubuntu 16.04的桌面系统上打入如下的命令：
+
+[html] view plain copy 在CODE上查看代码片派生到我的代码片
+$ sudo apt install qemu-user-static  
+
+
+２）制作armhf/amd64 rootfs
+
+在我们的terminal中打入如下的命令：
+
+- 32 bit的armhf rootfs
+[html] view plain copy
+$ mkdir -p ~/rootfs/usr/bin  
+$ cp -a /usr/bin/qemu-arm-static ~/rootfs/usr/bin/  
+$ sudo debootstrap --arch=armhf --verbose xenial ~/rootfs/  
+- 64 bit的arm64 rootfs
+[html] view plain copy
+$ mkdir -p ~/rootfs/usr/bin  
+$ cp -a /usr/bin/qemu-aarch64-static ~/rootfs/usr/bin/  
+$ sudo debootstrap --arch=arm64 --verbose xenial ~/rootfs/  
+
+
+
+
+通过上面的指令，我们创建了一个以xenial (Ubuntu 16.04)为基础的 armhf/arm64 rootfs．
+
+
+３）进入chroot并编译我们的应用
+
+我们在termnial中打入如下的指令：
+
+[html] view plain copy 在CODE上查看代码片派生到我的代码片
+$ sudo chroot ~/rootfs/  
+
+注意这里的rootfs是我们在上面创建的以rootfs命名的文件目录．一旦进入到chroot，我们可以利用如下的命令来安装我们的snapcraft及我们所需要的基本的打包工具：
+
+[html] view plain copy
+# sudo apt update  
+# sudo apt-get upgrade  
+
+注意这里，我们已经是以root用户进入的，所有下面的命令可以省去sudo.
+
+然后：
+
+[html] view plain copy
+# sudo apt-get install software-properties-common  
+# sudo add-apt-repository universe  
+# sudo apt-get update  
+# sudo apt install snapcraft git-core build-essential   
+
+如果这个时候，我们查看我们的snapcraft的版本的话，它显示的将是：
+
+[html] view plain copy
+root@liuxg:/apps/vtop# snapcraft --version  
+2.8.4  
+
+显然这个版本不是我们最新的版本2.22.1，它不支持许多最新的snapcraft.yaml中的syntax:
+
+[html] view plain copy
+root@liuxg:/etc/apt# snapcraft --version  
+2.22.1  
+
+为了能够得到最新的snapcraft版本，我们修改/etc/apt/sources.list中的内容如下：
+
+[html] view plain copy
+root@liuxg:/etc/apt# cat sources.list  
+deb http://ports.ubuntu.com/ubuntu-ports xenial main universe  
+deb http://ports.ubuntu.com/ubuntu-ports xenial-updates main universe  
+
+这里，我们主要是加入了xenial-updates这一项．然后，我们再：
+
+[html] view plain copy
+# sudo apt update && sudo apt-get upgrade  
+
+通过这样的方法，我们就可以得到最新的snapcraft的版本2.22.1了．
+
+上面加入universe channel的目的是为了能够顺利地安装snapcraft．
+
+对于有些Qt应用，我们可能需要安装最新的Qt 5.6.1版本，那么我们可以通过如下的方法:
+
+[html] view plain copy 在CODE上查看代码片派生到我的代码片
+# sudo add-apt-repository ppa:ci-train-ppa-service/stable-phone-overlay  
+# sudo apt-get update  
+
+这样就可以得到相应的Qt最新的版本．
+

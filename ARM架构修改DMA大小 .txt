@@ -1,0 +1,50 @@
+
+
+问题描述：
+
+    在ZYNQ上加载一个视频编码芯片驱动失败，芯片接口为PCIE。
+
+    查看现象，是调用 pci_alloc_consistent  申请DMA空间失败。 
+
+    这个函数要被调用很多次，前几次成功，然后就失败了，第一反应就是DMA预留空间不足。
+
+
+问题解决思路：
+
+    1. 在网上看到有 CONSISTENT_DMA_SIZE 这个宏可以定义，但是在我的内核代码中没有发现，然后谷歌了一把，发现这个宏已经被修改。
+
+    2.在谷歌上看到，内核3.5版本以后，内核启动命令行，有一个cma的参数可以控制，于是在设备树种修改启动参数，发现还是没用。
+
+       
+[csharp] view plain copy
+print?
+
+    bootargs = "console=ttyPS0,115200 root=/dev/ram rw earlyprintk vmalloc=300M cma=64M";  
+
+
+    3.在检查内核启动时，看到这么一条：DMA: preallocated 256 KiB pool for atomic coherent allocations. 刚好我们的驱动也是申请了200多K的DMA后失败了。
+
+      于是在代码中查找这个打印，然后修改DMA分配的大小。
+
+[cpp] view plain copy
+print?
+
+    vi arch/arm/mm/dma-mapping.c +320  
+
+[cpp] view plain copy
+print?
+
+    #define DEFAULT_DMA_COHERENT_POOL_SIZE  SZ_64M  
+
+    4.驱动终于加载成功。
+
+    5. 倒退回去，把第2步的cma=64M去掉，发现还是失败。
+
+    6. 一次最终方案： 
+
+        a.在内核启动参数中添加cma=64M
+
+        b. 修改DMA大小。
+
+
+    PS:  具体的原理后续再查，项目比较赶，先放在这里，后续补充。 

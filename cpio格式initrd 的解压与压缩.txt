@@ -1,0 +1,65 @@
+initrd 的英文含义是 boot loader initialized RAM disk，就是由 boot loader 初始化的内存盘。在 linux内核启动前，boot loader 会将存储介质中的 initrd 文件加载到内存，内核启动时会在访问真正的根文件系统前先访问该内存中的 initrd 文件系统。在 boot loader 配置了 initrd 的情况下，内核启动被分成了两个阶段，第一阶段先执行 initrd 文件系统中的"init or linuxrc"，完成加载驱动模块等任务，第二阶段才会执行真正的根文件系统中的 /sbin/init, Linux2.6既支持cpio-initrd，也支持image-initrd，但是cpio-initrd有着更大的优势，在使用中我们应该优先 考虑使用cpio格式的initrd.
+
+Initrd 的主要用途
+linux 发行版必须适应各种不同的硬件架构，将所有的驱动编译进内核是不现实的，initrd 技术是解决该问题的关键技术。Linux 发行版在内核中只编译了基本的硬件驱动，在安装过程中通过检测系统硬件，生成包含安装系统硬件驱动的 initrd，是一种即可行又灵活的解决方案。
+
+
+1.解压 initrd
+
+# file initrd.`uname –r`.img （察看格式，不同的linux操作系统，这个文件格式也有不同，这个文件格式可能是cpio 也可能是ext2）
+
+如果是cpio格式 ：
+# mkdir /mnt/tmp
+# cd /mnt/tmp
+# cpio -idmv </tmp/initrd.`uname -r`.img
+
+2 压缩initrd
+2.1 mkinitrd
+#cd /lib/modules/`uname -r`
+#mkinitrd /tmp/initrd.`uname -r`.img   `uname -r`
+#cd /tmp
+#mv initrd.`uname –r`.img initrd.`uname –r`.img.gz(initrd使用gzip压缩，如果不改名字的话，后面无法解压缩)
+#gunzip initrd.`uname -r`.img.gz
+
+2.2 cpio
+#假设当前目录位于准备好的initrd文件系统的根目录下
+bash# find . | cpio -c -o > ../initrd.img
+bash# gzip ../initrd.img
+
+2.3  gen_init_cpio
+获取 gen_init_cpio，工具 ，gen_init_cpio是编译内核时得到的，
+在内核源代码的 usr 目录下，我们可以通过 以下步骤获取它，进入内核源代码 执行 ：
+# make menuconfig
+# make usr/
+这样即编译好gen_init_cpio，
+gen_initramfs_list.sh 在内核源代码的 script 目录下，
+将这两个 文件 copy 到 /tmp 目录下，/tmp/initrd 为 解压好的 initrd 目录，执行以下命令 制作initrd ：
+
+# gen_initramfs_list.sh initrd/ > filelist
+# gen_init_cpio filelist >initrd.img
+# gzip initrd.img
+# mv initrd.img initrd-'uname –r’.img
+只有用这个方式压缩的initrd ，在Linux系统重启的时候才能 一正确的文件格式 boot 起来，也可以用
+这种方式修改安装光盘的initrd文件 然后 进行系统安装。
+
+3. 如何在 initrd 中添加新的驱动，以 ahci.ko 为例
+3.1 gen_init_cpio
+# cp initrd-‘uname –r‘.img /tmp/initrd;cd /tmp/initrd
+#cpio –ivdum < initrd-‘uname –r’.img;
+# mv initrd-‘uname –r’.img ../
+#cd /tmp/initrd
+#vim init加上一行 insmod /lib/ahci.ko
+#cp ahci.ko lib/
+#cd  /tmp
+# gen_initramfs_list.sh initrd/ > filelist
+# gen_init_cpio filelist >initrd.img
+# gzip initrd.img
+# mv initrd.img initrd-‘uname –r’.img
+
+至此，新的initrd文件initrd-‘uname –r’.img中就包含了ahci的驱动程序了 ，这种方式是最简单有效的。
+
+3.2 mkinitrd
+(1) Add “alias scsi_hostadapter ahci” at /etc/modprobe.conf
+(2) copy ahci.ko to “/lib/module/$(kernel-version)”/kernel/drivers/scsi”
+(3) mkinitrd initrd.img ‘uname -r’
+至此，新的initrd文件initrd-‘uname –r’.img中就包含了ahci的驱动程序了 .

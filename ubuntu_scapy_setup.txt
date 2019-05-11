@@ -1,0 +1,34 @@
+命令行下有三种安装Scrapy的方式：
+•apt-get:千万不要用，因为你会下载到一个上古时期的Scrapy版本，产生一系列与你参考教程的代码不兼容的问题
+•easy_install:我没有安装成功
+•pip:Scrapy官网上推荐的下载方式，我们使用这种方法
+
+安装
+
+首先Python、lxml、OpenSSL这些工具Ubuntu是自带的，不用管它们。
+
+其次安装pip，在命令行中执行以下命令：
+
+sudo apt-get install python-pip
+
+
+1
+
+然后安装两个安装Scrapy需要的依赖库，在命令行中分别执行以下三条命令：
+
+sudo apt-get install python-dev
+sudo apt-get install libevent-dev
+sudo apt-get install libssl-dev  #在阿里云上配置的时候发现还要安这个 1
+2
+
+
+最后安装Scrapy，在命令行中执行以下命令：
+
+sudo pip install scrapy
+
+
+3
+
+然后我们的最新版Scrapy就安装好了，可以执行下列命令查看版本号：
+
+scrapy version

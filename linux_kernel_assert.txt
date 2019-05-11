@@ -1,0 +1,7 @@
+
+linux kernel assert method:
+
+BUG_ON(expression);
+
+example:
+({if((v) == 0x713371) {printk(KERN_DEBUG"PA16 IS HERE,%x",(c)); BUG_ON(1);} __iowmb(); writel_relaxed((v),(c)); })

@@ -1,0 +1,56 @@
+*************************************************************************
+
+BUILD COMMANDS FROM TARBALL:
+
+	./configure
+	make
+	make install
+
+*************************************************************************
+
+BUILD COMMANDS FROM SOURCE REPOSITORY CHECKOUT:
+
+	autoreconf -i -v -f
+	./configure
+	make
+	make install
+
+*************************************************************************
+
+BUILD A TARBALL FROM SOURCE REPOSITORY CHECKOUT:
+
+	autoreconf -i -v -f
+	./configure
+	make dist
+
+*************************************************************************
+
+
+问题：
+1\ 
+linux安装openvpn client，在configure时，报以下提示：
+
+checking for LZ4_compress in -llz4... no
+LZ4 library not found.
+checking lz4.h usability... no
+checking lz4.h presence... no
+checking for lz4.h... no
+LZ4 headers not found.
+LZ4 library or header not found, using version in src/compat/compat-lz4.*
+checking git checkout... no
+configure: error: lzo enabled but missing
+解决：
+
+[root@gezi soft]# wget http://www.oberhumer.com/opensource/lzo/download/lzo-2.10.tar.gz
+[root@gezi soft]# tar zvxf lzo-2.10.tar.gz 
+[root@gezi soft]# cd lzo-2.10
+[root@gezi lzo-2.10]# ./configure
+[root@gezi lzo-2.10]# make
+[root@gezi lzo-2.10]# make install
+
+2\
+configure: error: libpam required but missing
+
+
+需要安装： pam-devel
+sudo  apt install libpam-dev

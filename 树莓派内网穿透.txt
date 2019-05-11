@@ -1,0 +1,3 @@
+https://www.douban.com/note/363490887/
+
+有台Ubuntu服务器需要禁止一些IP来访问，本想使用/etc/hosts.allow和/etc/hosts.deny来做限制，后来还是使用utw防火墙搞定了。

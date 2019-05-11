@@ -1,0 +1,156 @@
+但是一个简单的问题就卡壳了很简单的一个问题
+
+|-- Makefile
+|-- include
+|   `-- hello.h
+`-- src
+    |-- hello.cpp
+    `-- main.cp
+
+首先是Makefile 文件和include文件夹还有src文件夹在同一个目录下
+
+头文件hello.h在include目录下
+
+源文件main.cpp和hello.cpp在src目录下
+
+////////////////////////////////
+
+hello.h:
+
+#ifndef _HELLO_H__
+
+#define _HELLO_H__
+
+void hello();
+
+#endif
+
+///////////////////////////
+
+hello.cpp:
+
+#include<iostream>
+
+#include"hello.h"
+
+using namespace std;
+
+void hello()
+
+{
+
+        cout<<"Hello world"<<endl;
+
+}
+
+/////////////////////////////
+
+main.cpp:
+
+#include<iostream>
+
+#include"hello.h"
+
+using namespace std;
+
+int main()
+
+{
+
+          hello();
+
+          return 0;
+
+}
+
+/////////////////////////////////
+
+Makfile:
+
+#VPATH=include:src
+vpath %.cpp src
+vpath %.h include
+test:main.o hello.o
+ g++ -o $@ main.o hello.o
+main.o:main.cpp hello.h
+ g++ -c $< -Iinclude
+hello.o:hello.cpp hello.h
+ g++ -c $< -Iinclude
+.PHONY:clean
+clean:
+ -rm test hello.o
+
+//////////////////////////////////
+
+因为Makefile、hello.h hello.cpp main.cpp没有在同一个路径，所以要考虑路径的问题
+
+同时，路径也有两种，一种是针对Makefile来说在执行make命令的时候，要寻找目标文件和依赖文件的路径
+
+另一个就是源文件所要包含的头文件等相关文件的路径。
+
+对于第一种来说，Makefile 提供了两种方式，一种是设置全局访问路径VAPTH:即在执行make命令时可以从该路径中查询目标和依赖make可识别一个特殊变量“VPATH”。通过变量“VPATH”可以指定依赖文件的搜索路径，
+在规则的依赖文件在当前目录不存在时，make会在此变量所指定的目录下去寻找这些依赖文件。
+一般我们都是用此变量来说明规则中的依赖文件的搜索路径。其实“VPATH”变量所指定的是
+首先说明一下makefile的执行步骤：
+
+1、读入所有的Makefile。
+2、读入被include的其它Makefile。
+3、初始化文件中的变量。
+4、推导隐晦规则，并分析所有规则。
+5、为所有的目标文件创建依赖关系链。
+6、根据依赖关系，决定哪些目标要重新生成。
+7、执行生成命令
+
+Makefile中所有文件的搜索路径，包括依赖文件和目标文件。
+变量“VPATH”的定义中，使用空格或者冒号（:）将多个目录分开。make 搜索的目录顺序
+按照变量“VPATH”定义中顺序进行（当前目录永远是第一搜索目录）。
+
+例如：
+
+VPATH = src:../headers
+
+它指定了两个搜索目录，“src”和“../headers”。对于规则“foo:foo.c”如果“foo.c”在“src”
+目录下，此时此规则等价于“foo:src:/foo.c”
+
+对于第二种来说：当需要为不类型的文件指定
+不同的搜索目录时需要这种方式
+
+vpath：关键字
+
+它所实现的功能和上一小节提到的“VPATH”变量很类似，但是
+它更为灵活。它可以为不同类型的文件（由文件名区分）指定不同的搜索目录。它的使用方法有三
+种
+
+1、vpath PATTERN DIRECTORIES
+为符合模式“PATTERN”的文件指定搜索目录“DIRECTORIES”。多个目录使用空格或者
+冒号（：）分开。类似上一小节的“VPATH”
+2、vpath PATTERN
+清除之前为符合模式“PATTERN”的文件设置的搜索路径
+
+3、vpath
+
+清除所有已被设置的文件搜索路径。
+
+对于vpath的详细说明待续。
+
+在执行make命令的时候，根据makefile执行步骤，首先读入所有的makefile文件，那么
+
+VPATH = include：src       //指定了makefile的搜索路径
+
+或者
+
+vpath %.h include    //指定.h类型文件的搜索路径是include
+
+vpath %.cpp src      //指定.cpp类型文件的搜索路径是src
+
+这仅仅是对于makefile来说搜索目标和依赖文件的路径，但是对于命令行来说是无效的，也就是说
+
+在执行g++或者gcc时不会自动从VPATH 或者vpath中自动搜索要包含的头文件等信息文件
+
+此时要用到了 -I 或者--incude +路径
+
+例如依赖是：
+
+main.o:main.cpp hello.h
+
+即g++  -c  $<  -Iinclude,这时候，g++会自动从include目录中搜索要包含的hello.h头文件

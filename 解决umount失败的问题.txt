@@ -1,0 +1,18 @@
+命令：fuser 
+
+-m 查看使用该挂载点下目录进程
+-k 关闭使用该挂载点下目录的进程
+-v 显示详细信息
+
+lanpinguo@ubuntu:~$ fuser -m /home/lanpinguo/workspace/
+/home/lanpinguo/workspace: 26634c
+lanpinguo@ubuntu:~$ fuser -m -v /home/lanpinguo/workspace/
+                     USER        PID ACCESS COMMAND
+/home/lanpinguo/workspace:
+                     root     kernel mount /home/lanpinguo/workspace
+                     lanpinguo  26634 F.c.. vi
+lanpinguo@ubuntu:~$ fuser -m -k /home/lanpinguo/workspace/
+/home/lanpinguo/workspace: 26634c
+[1]-  Killed                  vi configs  (wd: ~/workspace/3.4.9-RC8/iproc/buildroot)
+(wd now: ~)
+lanpinguo@ubuntu:~$ 

@@ -1,0 +1,142 @@
+select调用
+        select调用及宏FD_CLR、FD_ISSET、FD_SET、FD_ZERO用于同步I/O复用。
+        该调用和宏定义的声明格式如下：
+int selcet(
+int width,//number of bits to examine from 0
+fd_set *pReadFds,//read fds
+fd_set *pWriteFds,//write fds
+fd_set *pExceptFds,//exception fds(unsupported)
+struct timeval *pTimeOut,//max time to wait ,NULL=forever
+)
+FD_SET(fd,&fdset)
+FD_CLR(fd,&fdset)
+FD_ZERO(&fdset)
+         调用select用来等待一些描述符改变状态。有三个不相关的描述符集合被监测。列在参数pReadFds集合中的描述符监测是否有字符可以从某个描述符读入，列在pWriteFds集合中的描述符监测是否某个描述符准备好了可以立即写入，列在参数pExceptFds集合中的描述符检测是否某个描述符有异常出现。当该调用退出时，集合被指向状态改变的描述符。
+         FD_CLR、FD_SET、FD_ZERO这三个宏用来操作集合。FD_ZERO用来清空一个集合。FD_SET和FD_CLR用来从一个集合中增加或删除一个描述符。
+        在select调用中，参数width是三个集合中描述符的最大值。参数pTimeOut是指出select返回的时间限制。当pTimeOut为0时，select调用立即返回。如果参数pTimeOut为空（NULL）,select被阻塞。select调用成功时，返回在描述符集合中包含的描述符值，如果返回OK，表示在参数pTimeOut时间里没有描述符改变状态。当发生错误时，返回ERROR，错误发生后，集合和pTimeOut变为没有定义，所以出错后的值是无效的。
+        当select调用用于socket的费阻塞connect时要注意，一般当一个socket描述符为既可读又可写的状态时，表示发生了错误，但也有可能是该连接在执行到select之前，已经变为可读。这时可以用getsocket的SO_ERROR选项，得到该socket上的错误代码。如果调用正确并且错误代码为0，表示连接正常建立了。否则当socket描述符变为可写时，表示连接正常建立。
+       该调用用于I/O多路复用的情况，比如一个任务中有多个socket和终端都需要读入数据，而任务并不知道什么时候会有数据出现在哪个描述符上，这时就可以使用select。
+       
+select()作用是挂起一系列的文件描述符，其API为：
+int select
+    (
+    int              width,      /* number of bits to examine from 0 */
+    fd_set *         pReadFds,   /* read fds */
+    fd_set *         pWriteFds, /* write fds */
+    fd_set *         pExceptFds, /* exception fds (unsupported) */
+    struct timeval * pTimeOut    /* max time to wait, NULL = forever */
+    )
+该函数允许一个任务挂起一系列的文件描述符，直到文件描述符已经准备好时，再将其唤醒。参数pReadFds, pWriteFds, and pExceptFds 分别指向相应的文件描述符，每一个 bit对应一个文件描述符。pReadFds置位将会使select() 挂起读文件描述符，直到相应的文件描述符有数据准备好时才释放。同样pWriteFds将会引起写文件描述符发生相关的操作。pExceptFds在vxworks中没有用到。
+下边的一些宏用于设置fd_set()
+    FD_SET(fd, &fdset)
+    FD_CLR(fd, &fdset)
+    FD_ZERO(&fdset)
+width为设置的bit数，可以是最大文件描述符数+1,或者FD_SETSIZE。当函数select返回时，将准备好的文件描述符对应的bit 置位，其他的清0。可以使用FD_ISSET 来检查那些被置位。
+例： vxworks下基于select的tcp服务器端设计
+#include <vxworks.h>
+#include <sockLib.h>
+#include <inetLib.h>
+#include <MyServer.h>
+#define DEFAULT_SERVER_PORT   6699
+int server;
+SEM_ID Server_SM;
+/*
+* Start the function Server() as a task in AppInit() like this:
+* int ret = 0;
+* ret = taskSpawn("tServer", 165, 0x0002, 1024,(FUNCPTR) Server, 
+*                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0); 
+*/
+void Server()
+{
+    int rc = 0,sd = 0;
+    int addr_len = 0; 
+    int server_sock = 0;
+    struct sockaddr_in server_addr,client_addr;
+    
+    memset(&server_addr,0,sizeof(struct sockaddr_in));
+    memset(&client_addr,0,sizeof(struct sockaddr_in));
+    server_sock = socket(AF_INET,SOCK_STREAM,0);
+    if(server_sock < 0)
+    {
+    printf("Failed to create Socket./n"); 
+        return;
+    }
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    server_addr.sin_port = htons(DEFAULT_SERVER_PORT);
+    rc = bind(server_sock,(struct sockaddr *)&server_addr,sizeof(struct sockaddr_in));
+    if(rc == -1)
+    {
+    close(server_sock);
+    printf("Failed to bind socket/n");
+    return;
+    }
+    rc = listen(server_sock,2);
+    if(rc == -1)
+    {
+    printf("socket listen error/n");
+    return;
+    }   
+    printf("TCP server is ready for receive connection request/n");
+    while(1)
+    {
+        addr_len = sizeof(struct sockaddr_in);
+    sd = accept(server_sock,(struct sockaddr *)&client_addr,&addr_len);
+    if(sd <= 0)
+    {
+         printf("socket accept error/n");
+         return;
+    }
+    else
+    {
+         printf("Socket connect success/n");
+         server = sd;
+         server_proc(sd);
+    }
+    }
+}
+     
+void server_proc(int sock)
+{
+    int rc = 0;
+    char buffer[32];
+    fd_set socket;
+    struct timeval wait;
+    
+    wait.tv_sec = 0;
+    wait.tv_usec = 500000;
+    
+    while(server > 0)
+    {
+    FD_ZERO(&socket);
+    FD_SET(sock,&socket);
+    
+    rc = select(FD_SETSIZE,&socket,(fd_set *)0,(fd_set *)0,&wait);
+    if(rc == 0)
+         continue;
+    if(FD_ISSET(sock,&socket))
+    {
+         semTake(Server_SM, WAIT_FOREVER);
+         memset(buffer,0,sizeof(buffer));
+         rc = recv(sock,buffer,sizeof(buffer),0);
+         if(rc > 0)
+         {
+         /* you can add your application specific code here */
+             printf("RecvMsg:%s/n",buffer);
+             semGive(Server_SM);
+         }
+         else
+         {
+         printf("Socket closed/n");
+         close(sock);
+         server = 0;
+         semGive(Server_SM);
+         break;
+         }
+    }   
+    taskDelay(10);
+    }
+     
+} 
+/* end of the file */       
+

@@ -1,0 +1,45 @@
+Recently I was trying to install an application using the apt command on Ubuntu when I encountered the following error:
+
+E: Could not get lock /var/lib/dpkg/lock – open (11: Resource temporarily unavailable)
+E: Unable to lock the administration directory (/var/lib/dpkg/), is another process using it?
+
+In fact, there is a similar error you may see:
+
+E: Could not get lock /var/lib/apt/lists/lock – open (11: Resource temporarily unavailable)
+E: Unable to lock directory /var/lib/apt/lists/ 
+E: Could not get lock /var/lib/dpkg/lock – open (11: Resource temporarily unavailable) 
+E: Unable to lock the administration directory (/var/lib/dpkg/), is another process using it?
+
+Both of these errors are very similar to another common Ubuntu error Unable to lock directory /var/cache/apt/archives/ and the interesting thing is that the fixes for all these errors are similar as well.
+
+Method 1: Fixing Unable to lock the administration directory (/var/lib/dpkg/) error
+There could be many reasons why you see this error. The first and most obvious reason could be that some other process is using APT package management tool (apt or apt-get command in other words). Check if Ubuntu Software Center or Synaptic Package Manager is running or not.
+
+You can also use Linux command line to find and kill the running process. To do that use the command below:
+
+ps aux | grep -i apt
+This will show you the id of the process running apt or apt-get. In the example below, the process id is 7343. You can ignore the last line containing ‘grep –color=auto’.
+
+Kill apt process in Ubuntu
+You can use this process id to kill it:
+
+sudo kill -9 <process id>
+Another easier way would be to use killall command. This will kill all the instances of a running program.
+
+sudo killall apt apt-get
+Method 2: Further fixing Unable to lock the administration directory (/var/lib/dpkg/) error
+Normally, this would fix the problem for you in most cases. But my case was a bit different. I was updating my system and accidentally closed the terminal. For that reason, there were no processes running apt but it still showed me the error.
+
+In this case, the root cause is the lock file. Lock files are used to prevent two or more processes from using the same data. When apt or apt-commands are run, it creates lock files in a few places. When the previous apt command was not terminated properly, the lock files were not deleted and hence they prevent any new instances of apt/apt-get commands.
+
+To fix the problem, all you need to do is to remove the lock files. You can do that easily using the commands below:
+
+sudo rm /var/lib/apt/lists/lock
+sudo rm /var/cache/apt/archives/lock
+sudo rm /var/lib/dpkg/lock
+After that, reconfigure the packages
+
+sudo dpkg --configure -a
+Now if you run the sudo apt update command, everything should be fine.
+
+I hope this small tip helped you in fixing the ‘Could not get lock /var/lib/dpkg/lock’ error. If you have questions or suggestion, please feel free to drop a comment.

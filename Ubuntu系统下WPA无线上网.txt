@@ -1,0 +1,49 @@
+Ubuntu系统下WPA无线上网
+
+
+本文介绍四步，轻松搞定wpa模式下使用无线网络的方法
+1.安装wpa_supplicant
+  在终端输入sudo apt-get install wpasupplicant
+2.创建/etc/wpa_supplicant.conf包含的内容：
+      network={    
+             ssid="你的无线网ssid"        
+             psk="你的wpa口令"            
+             key_mgmt=WPA-PSK            
+             proto=WPA          
+             pairwise=TKIP              
+                }
+3.编辑/etc/network/interfaces
+ 
+        iface eth1 inet dhcp
+        pre-up wpa_supplicant -Bw -Dwext -i eth1 -c/etc/wpa_supplicant.conf
+        post-down killall -q wpa_supplicant
+        注：eth1是你的网卡，并且假设你使用dhcp协议。
+4.启动网卡
+       终端输入：ifup eth1
+OK！
+
+wpa_passphrase iHome beijingjiaotongdaxue>>/etc/wpa_supplicant.conf  
+
+wpa_supplicant -B -Dwext -ira0 -c/etc/wpa_supplicant.conf
+
+wpa_supplicant -Dwext -ira0 -c/etc/wpa_supplicant.conf
+
+
+可以工作的配置命令（该命令看行为，应该只是负责登录wifi的安全验证）
+wpa_supplicant -iwlxc83a35cb6dd9 -c/etc/wpa_supplicant.conf
+
+wpa_supplicant -iwlxc83a35cb6dd9 -c/etc/wpa_supplicant/iHome.conf
+
+
+
+network={
+        ssid="iHome"
+        psk="beijingjiaotongdaxue" 
+        key_mgmt=WPA-PSK
+        proto=WPA
+        pairwise=TKIP CCMP
+        #psk=dbb26173876faa03f783244c0d5574698bf9c64f4b74cb78059c3414826e3989
+}
+
+wpa_supplicant -iwlx001d43100027 -c/etc/wpa_supplicant/iHome.conf
+

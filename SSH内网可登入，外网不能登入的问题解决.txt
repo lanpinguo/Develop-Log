@@ -1,0 +1,15 @@
+一例SSH内网可登入，外网不能登入的问题解决
+
+　一台sco openserver 5.0.5操作系统，设好SSH、通过SCOADMIN设好IP地址后，位于本局域网段内的其他客户端可以登入，在路由器中加入端口映射后，本来希望外网可以直接映射登入，未成功，无法连接。
+　　仔细查询后，发现是网关的问题。
+　　假定sco系统的IP为192.168.0.2 ,执行：
+　　route add default 192.168.0.1 1
+　　完成后，外网即可访问。便重启后网关失效。
+　　于是在/etc/rc2.d下建一个S开头的数字大一点的脚本文件，如S96gateway，加入route add default 192.168.0.1 1　内容，然后chmod +x S96gateway，reboot 即可。
+　　其他类型操作系统同样会有此问题。
+　　参考自：http://zhangyu.blog.51cto.com/197148/167708/
+
+
+ubuntu 下解决的命令：
+（3） 添加默认网关。
+#route add default gw 192.168.1.1

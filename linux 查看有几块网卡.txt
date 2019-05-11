@@ -1,0 +1,66 @@
+
+
+
+ifconfig  -a 
+
+引用
+cat  /proc/net/dev
+ 
+[root@srmdr:/root]#ifconfig
+eth0      Link encap:Ethernet  HWaddr 00:11:0A:62:40:80
+          inet addr:10.150.4.103  Bcast:10.150.7.255  Mask:255.255.252.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:220807670 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:61149521 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:1442472732 (1375.6 Mb)  TX bytes:471126490 (449.3 Mb)
+          Base address:0x5000 Memory:fdfe0000-fe000000
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:16436  Metric:1
+          RX packets:4187111 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:4187111 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:392729695 (374.5 Mb)  TX bytes:392729695 (374.5 Mb)
+[root@srmdr:/root]#ifconfig -a
+eth0      Link encap:Ethernet  HWaddr 00:11:0A:62:40:80
+          inet addr:10.150.4.103  Bcast:10.150.7.255  Mask:255.255.252.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:220807728 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:61149544 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:1442489048 (1375.6 Mb)  TX bytes:471129561 (449.3 Mb)
+          Base address:0x5000 Memory:fdfe0000-fe000000
+eth1      Link encap:Ethernet  HWaddr 00:11:0A:62:40:81
+          BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 b)  TX bytes:0 (0.0 b)
+          Base address:0x5040 Memory:fdf60000-fdf80000
+eth2      Link encap:Ethernet  HWaddr 00:19:BB:21:6B:9C
+          BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 b)  TX bytes:0 (0.0 b)
+          Interrupt:25
+eth3      Link encap:Ethernet  HWaddr 00:19:BB:21:6B:9B
+          BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 b)  TX bytes:0 (0.0 b)
+          Interrupt:26
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:16436  Metric:1
+          RX packets:4187111 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:4187111 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:392729695 (374.5 Mb)  TX bytes:392729695 (374.5 Mb)
+[root@srmdr:/root]#lspci |grep -i eth
+02:02.0 Ethernet controller: Broadcom Corporation NetXtreme BCM5704 Gigabit Ethernet (rev 10)
+02:02.1 Ethernet controller: Broadcom Corporation NetXtreme BCM5704 Gigabit Ethernet (rev 10)
+0a:01.0 Ethernet controller: Intel Corporation 82546EB Gigabit Ethernet Controller (Copper) (rev 01)
+0a:01.1 Ethernet controller: Intel Corporation 82546EB Gigabit Ethernet Controller (Copper) (rev 01)

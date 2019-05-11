@@ -1,0 +1,18 @@
+ubuntu root默认密码（初始密码）
+
+
+
+
+ubuntu安装好后，root初始密码（默认密码）不知道，需要设置。
+ 
+1、先用安装时候的用户登录进入系统
+ 
+2、输入：sudo passwd  按回车
+ 
+3、输入新密码，重复输入密码，最后提示passwd：password updated sucessfully
+ 
+此时已完成root密码的设置
+ 
+4、输入：su root
+ 
+切换用户到root试试.......

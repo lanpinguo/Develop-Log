@@ -1,0 +1,7 @@
+
+
+强化你的Terminal IDE---在android平板/手机上编写C/C++ 
+http://www.cnblogs.com/simpleyyt/archive/2012/11/24/GNU4Android.html
+
+terminal_ide download:
+http://sj.zol.com.cn/detail/51/50364.shtml

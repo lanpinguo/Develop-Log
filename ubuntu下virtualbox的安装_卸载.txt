@@ -1,0 +1,36 @@
+一、添加VirtualBox的源并安装5.1版本
+virtualbox官网：https://www.virtualbox.org/wiki/Download_Old_Builds
+虽然也可以直接安装deb包（例如：sudo dpkg -i virtualbox-4.3_4.3.10-93012~Ubuntu~raring_amd64.deb），但是我个人通过deb包进行安装出现了问题，
+
+所以采用了这种方式进行安装，而且通过添加源的方式安装可以保持更新：
+
+$ sed -i '$adeb http://download.virtualbox.org/virtualbox/debian xenial contrib' /etc/apt/sources.list
+
+为apt-secure导入公钥：
+$ wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+$ wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
+
+通过apt安装VirtualBox和dkms，其中dkms包可以确保在下次通过apt upgrade更新内核时，VirtualBox的内核模块也正确地更新：
+$ sudo apt-get update
+$ sudo apt-get install virtualbox-5.1 dkms
+
+转自：http://www.cnblogs.com/BlackStorm/p/RECORD_Install_VirtualBox_Under_Ubuntu.html
+
+
+
+二、卸载。dpkg -l |grep <程序名>
+
+首先，在终端查看已经安装的VirtualBox的版本：
+$ dpkg -l |grep virtualbox
+查看到版本号，例如我的：virtualbox-4.1
+
+执行卸载：
+$ sudo apt-get remove virtualbox-4.2
+
+
+
+三、查看程序安装路径。
+
+dpkg -L <程序名>
+
+例如：dpkg -L virtualbox-4.2

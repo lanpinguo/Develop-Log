@@ -1,0 +1,5 @@
+
+"No package 'libffi' found" error during pip install
+
+
+Probably need to install the python-dev and libffi-dev packages.

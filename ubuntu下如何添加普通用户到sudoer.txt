@@ -1,0 +1,39 @@
+在普通用户下，比如用户名是 nbz. 执行某些操作可能会得到如下错误信息。
+
+nbz is not in the sudoers file. This incident will be reported.
+
+看了需要将 nbz 增加到 sudoer 文件中。怎么办？
+
+su - root #进入 root用户下
+
+chmod u+w /etc/sudoers #给root用户增加sudoers文件的写权限
+
+vi /etc/sudoers #打开这个文件
+
+找到下面这些文字
+
+# User privilege specification
+
+root ALL=(ALL:ALL) ALL
+
+把root用户的这一行文字复制到下一行，并把root 替换成 nbz即可。
+
+# User privilege specification
+
+root ALL=(ALL:ALL) ALL
+
+nbz ALL=(ALL:ALL) ALL
+
+保存关闭文件即可。
+
+随后把这个文件的权限恢复。
+
+chmod u-w /etc/sudoers
+
+退出root用户。
+
+在普通用户nbz下，再试试执行一些系统管理员才可以执行的命令（一般都在/sbin/:/usr/sbin/:/usr/local/sbin/下面）
+
+在命令前面加上 sudo 即可。比如关机命令。(在 /sbin/shutdown)
+
+sudo shutdown now #现在关机

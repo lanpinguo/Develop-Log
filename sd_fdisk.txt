@@ -1,0 +1,9 @@
+
+# fdisk -u -l mmcblk0
+
+Disk mmcblk0: 1977 MB, 1977614336 bytes
+177 heads, 13 sectors/track, 1678 cylinders, total 3862528 sectors
+Units = sectors of 1 * 512 = 512 bytes
+
+   Device Boot      Start         End      Blocks  Id System
+mmcblk0p1             128     3657855     1828864   b Win95 FAT32

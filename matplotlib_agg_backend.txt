@@ -1,0 +1,21 @@
+userwaring: matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure
+
+
+
+On my Ubuntu machine this gives me a value of agg ; however, through my testing and debugging, this value needs to be TkAgg  for the TkInter windowing system (at least when using Ubuntu and Raspbian).
+
+Luckily, we can resolve this issue by using apt-get  to install a few libraries:
+
+Resolved: Matplotlib figures not showing up or displayingShell
+
+$ sudo apt-get install tcl-dev tk-dev python-tk python3-tk
+
+
+But we’re not quite done yet. In order to get matplotlib to recognize the TkInter GUI library, we need to:
+
+Step 1: Use pip to uninstall matplotlib (since we installed it via pip earlier in this article).
+Step 2: Pull down matplotlib from the GitHub repo.
+Step 3: Install matplotlib  from source using setup.py .
+
+使用源码安装的情况下，可以再执行一次安装程序：
+../matplotlib-3.0.2# python3 setup.py install

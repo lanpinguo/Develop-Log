@@ -1,0 +1,31 @@
+
+
+1、按ALT+CTRL+F1切换到字符界面（Linux实体机）
+
+     如果是VMware虚拟机安装的linux系统，则切换到字符界面的时候需要以下操作
+
+     按下ALT+CTRL+SPACE(空格)，ALT+CTRL不松开，再按F1。这样就可以切换到字符界面了。
+
+
+2、按ALT+CTRL+F7切换到图形界面（Linux实体机）
+
+     如果是VMware虚拟机安装的Linux系统，则切换到图形界面的时候需要以下操作
+
+     按下ALT+CTRL+SPACE(空格)，ALT+CTRL不松开，再按F7。这样就可以切换到图形界面了。
+
+ 
+
+    在Linux中一般有ALT+CTRL+F1----F6为字符终端（字符界面），ALT+CTRL+F7为图形界面。不同的发行版本可能有一些差别，但切换方法都是一样的。可以自己试试就可以知道哪些是字符终端，哪些是图形界面。
+
+
+    如果想 Ubuntu 在每次启动到 command prompt ，可以输入以下指令:
+
+    $echo “false” | sudo tee /etc/X11/default-display-manager
+
+    当下次开机时，就会以命令行模式启动（text模式，字符界面登录），如果想变回图形界面启动（X windows启动），可以輸入:
+
+    $echo “/usr/sbin/gdm” | sudo tee /etc/X11/default-display-manager
+
+    如果在Ubuntn以命令行模式启动，在字符终端想回到图形界面的话只需以下命令:
+
+    $startx

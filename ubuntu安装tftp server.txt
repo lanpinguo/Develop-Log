@@ -1,0 +1,58 @@
+准备在自己的Ubuntu14.04上使用tftpd服务，然后在网上查怎么搞，方法很多蛋疼得一米，按照这些方式,配置一大堆，尤其是有人要求安装xinetd,然后还要配置这个xinetd.conf文件，事实证明根本没必要，如果你按照这个来，我运行半天总是time out。
+我来说下我的步骤sudo apt-get install tftpd-hpa,  tftp-hpa
+然后sudo vim /etc/default/tftpd-hpa
+配置文件如下
+TFTP_USERNAME="tftp"
+TFTP_DIRECTORY="/tftp"　　-->这个是你的工作目录，需要自己选定，chmod 777 /tftp我是在根目录下搞了个
+TFTP_ADDRESS="0.0.0.0:69"
+TFTP_OPTIONS="-l -c -s"
+
+然后重启tftpd-hpa服务sudo service tftpd-hpa restart
+
+
+查看69端口是否有打开 ：netstat -an | more | grep udp
+
+    udp 0 0 0.0.0.0:69 0.0.0.0:*
+
+
+最后tftp 127.0.0.1/localhost　
+输入get xxx
+看能否下载某个文件。
+
+
+
+
+Tftpd-hpa - Ubuntu中文官方说明：
+
+tftpd-hpa 是一个功能增强的TFTP服务器。它提供了很多TFTP的增强功能，它已经被移植到大多数的现代UNIX系统。
+
+安装
+
+使用下面的命令来安置 tftpd-hpa 服务器：
+
+ $ sudo apt-get install tftpd-hpa
+
+注：若server未安装xinetd则在ubuntu9.04中会自动下载openbsd-inetd并安装，使用tftp过程中出错很多时候是因xinetd版本问题；
+配置
+
+tftp-hpa 的配置文件为 /etc/default/tftpd-hpa
+
+ RUN_DAEMON="yes" 
+ OPTIONS="-l -c -s /tftpboot"    
+
+    -c为可创建新文件，若无此参数，put命令则可能出现错误提示，此时只能覆盖原有文件不能创建新文件；
+
+无论何种方式配置tftp-server -c参数决定是否能正常写入数据； 这里指定 tftpd 使用的目录为 /tftpboot，注意要修改目录属性：chmod 777 tftpboot
+启动和停止
+启动
+
+ # /etc/init.d/tftpd-hpa start
+
+停止
+
+ # /etc/init.d/tftpd-hpa stop
+
+参考
+http://freshmeat.net/projects/tftp-hpa/
+http://www.davidsudjiman.info/2006/03/27/installing-and-setting-tftpd-in-ubuntu/
+

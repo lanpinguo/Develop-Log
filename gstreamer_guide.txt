@@ -1,0 +1,50 @@
+
+1\安装gstreamer-1.0：
+sudo apt-get install python-gi python3-gi \
+gstreamer1.0-tools \
+gir1.2-gstreamer-1.0 \
+gir1.2-gst-plugins-base-1.0 \
+gstreamer1.0-plugins-good \
+gstreamer1.0-plugins-ugly \
+gstreamer1.0-plugins-bad \
+gstreamer1.0-libav
+
+2\本地验证成功的例子：
+发送：
+gst-launch-1.0 videotestsrc pattern=ball ! x264enc ! rtph264pay ! udpsink host=192.168.1.7 port=5600
+接收：
+gst-launch-1.0 udpsrc port=5600 caps='application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264' ! rtph264depay ! decodebin ! videoconvert ! autovideosink
+
+3\网上的例子：
+Sender: 
+ gst-launch-1.0 -v filesrc location=/home/ … /sample_h264.mov ! decodebin ! x264enc ! rtph264pay ! udpsink host=192.168.52.129 port=9001 
+Receiver: 
+ gst-launch-1.0 -v udpsrc port=5600 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! autovideosink
+ 
+##########################################################################################################################################################
+4\使用orangepi和ubuntu 16.04 vm测试成功：
+发送： 
+gst-launch-1.0 v4l2src ! video/x-raw ! videoconvert ! x264enc ! rtph264pay ! udpsink host=192.168.1.7 port=5600
+
+接收：
+gst-launch-1.0 udpsrc port=5600 caps='application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264' ! rtph264depay ! decodebin ! videoconvert ! autovideosink sync=false
+
+5\实际使用优化：
+gst-launch-1.0 v4l2src ! video/x-raw,framerate=30/1 ! videoconvert ! x264enc ! rtph264pay mtu=512 ! udpsink host=192.168.1.7 port=5600 
+
+gst-launch-1.0 v4l2src ! video/x-raw,framerate=30/1 ! videoconvert ! x264enc ! rtph264pay mtu=512 ! udpsink host=127.0.0.1 port=5600 
+
+
+
+
+6\实际验证成功：
+发送：
+gst-launch-1.0 v4l2src ! video/x-raw,width=1280,height=720,framerate=30/1 ! videoconvert ! x264enc ! rtph264pay mtu=512 ! udpsink host=192.168.1.5 port=5600
+接收：
+gst-launch-1.0 udpsrc port=5600 caps='application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264' ! rtph264depay ! decodebin ! videoconvert ! autovideosink fps-update-interval=1000 sync=false
+
+
+8、采用c920 h264的摄像头后，下面的配置也是支持的，并且画面流畅！！
+gst-launch-1.0 uvch264src initial-bitrate=1000000 average-bitrate=1000000 iframe-period=1000 device=/dev/video0 name=src auto-start=true src.vidsrc ! video/x-h264,width=1920,height=1080,framerate=24/1 ! h264parse ! rtph264pay ! udpsink host=192.168.1.9 port=5600 
+接收：
+gst-launch-1.0 udpsrc port=5600 caps='application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264' ! rtph264depay ! avdec_h264 ! autovideosink fps-update-interval=1000 sync=false

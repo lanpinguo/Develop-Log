@@ -1,0 +1,24 @@
+
+实例：
+
+1、查看当前管脚
+root@Orangepi:/sys/kernel/debug/sunxi_pinctrl# cat sunxi_pin
+PA16
+
+2、查看PA15管脚当前功能类型
+root@Orangepi:/sys/kernel/debug/sunxi_pinctrl# echo PA15 > sunxi_pin
+
+3、读取PA5当前数据和功能类型
+root@Orangepi:/sys/kernel/debug/sunxi_pinctrl# cat data 
+pin[PA15] data: 0
+root@Orangepi:/sys/kernel/debug/sunxi_pinctrl# cat function 
+pin[PA15] funciton: 2
+
+3、查看PA16管脚当前功能类型，并修改为功能2
+root@Orangepi:/sys/kernel/debug/sunxi_pinctrl# echo PA16 > sunxi_pin   
+root@Orangepi:/sys/kernel/debug/sunxi_pinctrl# cat function 
+pin[PA16] funciton: 1
+root@Orangepi:/sys/kernel/debug/sunxi_pinctrl# echo PA16 2 > function   
+root@Orangepi:/sys/kernel/debug/sunxi_pinctrl# cat function 
+pin[PA16] funciton: 2
+root@Orangepi:/sys/kernel/debug/sunxi_pinctrl# 

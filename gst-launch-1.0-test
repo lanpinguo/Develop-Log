@@ -1,0 +1,11 @@
+
+ffmpegcolorspace
+The "ffmpegcolorspace" element has been replaced with the new "videoconvert" element. 
+
+第一组：
+接收：gst-launch-1.0 udpsrc port=1234 ! theoradec ! videoconvert ! xvimagesink
+
+发送：gst-launch-1.0 v4l2src ! videoconvert ! theoraenc ! udpsink host=127.0.0.1 port=1234
+这组可以成功显示摄像头图片
+放心使用也可以把 ximagesink 换成 xvimagesink 没有影响。
+

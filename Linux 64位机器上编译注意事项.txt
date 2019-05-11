@@ -1,0 +1,19 @@
+Linux 64位机器上编译 1<<62，编译提示：warning: left shift count >= width of type
+
+在64位机器上1分配Int类型（4字节）。
+
+错误修改：
+
+1UL << 62 指定1为8字节整数，因此可以解决该问题。
+
+在64位机器上以下类型字的长度
+
+
+
+类型 长度（字节） 
+int 4 
+unsigned int 4 
+long 8 
+unsigned long 8 
+long unsigned int 8 
+double 8 

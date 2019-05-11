@@ -1,0 +1,61 @@
+
+1\
+git clone git://github.com/tridge/MAVProxy.git
+
+2\
+sudo python setup.py install
+
+3\
+usage
+
+
+MAVProxy is powerful ground station software that excellently complements your favorite GUI ground station, such as Mission Planner, APM Planner etc. A key driver for me to look into MAVProxy was it's capability to forward the signal from your UAV over the network via UDP to multiple other ground station software on other devices. For example; you can run a ground station on a laptop next to your antenna and forward via wifi to a smartphone/tablet which lets you easily relocate to launch into wind before heading back to your fixed antenna. I have also used it to send telemetry data to a friend acting as spotter several kilometers away (via 4G vpn) during a longer flight so that he could monitor the entire flight and determine where to look to find the aircraft in flight.
+Alas it is not the easiest to understand how to run on Windows and I had no luck finding a single step by step guide for the non technical, so I have had a go at creating one. This guide will let you successfully set up MAVProxy to allow forwarding via network interfaces and usage via command line. There may be other ways to get this running and you may need other packages as per the official MAVProxy documentation at http://tridge.github.io/MAVProxy/ in order to use more advanced functions. No warranty responsibility for damage etc. Full credit to Andrew Tridgell and all other contributors to MAVProxy and the other software used here.
+
+Step 1 - Check you can connect to your UAV
+Before starting anything make sure you can make a direct connection to your aircraft with your normal Ground Station software on the PC in question. Check that you know the correct COM port and baudrate for the modem attached to your laptop as we will need that info later.
+
+Step 2 - Install Python
+Download and install Python 2.7 - Windows x86 MSI Installer works regardless of OS/CPU type. Install with default settings to C:\Python27\
+
+Step 3 - Install Pyserial
+Download and install Pyserial 2.7 - Win32 for Python 2.x (2.4...2.7) - Use default settings to the C:\Python27\ directory.
+
+Step 4 - Install and set up MAVProxy
+Download MAVProxy latest .tar.gz file and extract (Install WinRAR if you have no suitable archive extractor) to C:\Python27\
+Once extracted you should be able to open up the path C:\Python27\MAVProxy-1.3.3\MAVProxy and see a file called mavproxy.py
+Right click on mavproxy.py and select Edit with IDLE. On line 20 of the file remove the # in front of the line sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')) so that it appears as below
+
+
+Step 5 - Install pymavlink
+Download pymavlink latest .tar.gz file and extract to C:\Python27\MAVProxy-1.3.3\MAVProxy
+This will create a directory in the above folder called something like "pymavlink-1.1.29". Rename this folder to pymavlink.
+
+Step 6 - Ready to run!
+Check your radio modem is connected via USB, the aircraft modem and APM are powered and ensure any other ground station software is closed.
+Open a command prompt window (Click start, type cmd and then press enter) and then enter cd "C:\Python27\MAVProxy-1.3.3\MAVProxy" and push enter. The command prompt will open that directory.
+Then type mavproxy.py --master="com14" --baudrate 57600 (replacing the com port and baudrate with your local modem settings) and then push enter.
+If everything has worked you should see MAVProxy start up and some basic flight data such as mode and current waypoint appear. Occasionally some data does seem to result in glitching and odd characters appearing onscreen but this does not seem to affect reliability or performance.
+
+
+Enter a command such as mode FBWA  and press enter. You should see MAVLink report the mode change and notice your aircraft change behavior into that mode.
+The full list of MAVLink commands can be found here if you want to experiment further with the command line.
+To exit MAVLink press Control+C together.
+
+Step 7 - Forwarding over network
+To forward the MAV data over the network including to a local program on your PC we simply need to add some extra parameters when starting MAVProxy via the command line. 
+To connect with a local ground station software such as Mission Planner start MAVProxy as above with the command mavproxy.py --master="com14" --baudrate 57600 --out 127.0.0.1:14550 and press enter.
+Then open Mission Planner and select UDP and click connect. Clink OK on the default prompt for port number (14550) and you should see mission planner start downloading parameters and connecting to your UAV.
+
+Finally you can add the IP address of any computer to forward the telemetry stream onwards to other ground stations.
+1) On the local network/wifi you will need to ensure there is no firewall on the client PC stopping the incoming stream to your ground station software.
+2) Add --out IP_ADDRESS:14550 to the end of the mavproxy.py command. You can add as many separate --out parameters as you want depending on how many extra ground stations you are running.
+3) Set each ground station to listen for UDP packets on port 14550
+
+Step 8 - Simple startup using a batch file
+To simplify the starting up of MAVProxy I have written a simple 5 line batch file:
+ Mavproxy Startup Batch File
+You should edit this to reflect your local port, baudrate and include any additional IP addresses to forward the data to.
+Simply save this anywhere and double click to start MAVProxy (assuming you have followed the instructions above).
+
+I really hope this is helpful to some people. It took me a while to figure it out and hope my learning experience can benefit others. 

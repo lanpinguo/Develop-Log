@@ -1,0 +1,165 @@
+
+
+如何在Linux中设置线程的优先级
+
+我们使用int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine)(void*), void *arg);
+来创建线程，但是如何设置线程的优先级呢？
+在讨论这个问题的时候，我们先要确定当前线程使用的调度策略，posix提供了
+int pthread_attr_getschedpolicy(const pthread_attr_t *attr, int *policy);函数来获取所
+使用的调度策略，它们是：SCHED_FIFO, SCHED_RR 和 SCHED_OTHER。
+
+我们可以使用
+int sched_get_priority_max(int policy);
+int sched_get_priority_min(int policy);
+来获取线程线程可是设置的最大和最小的优先级值，如果调用成功就返回最大和最小的优先级值，否则返回－1。
+从我现在运行的linux系统中，我使用下列程序（程序见附录）获取了对应三种调度策略中的最大和最小优先级：
+policy = SCHED_OTHER
+Show current configuration of priority
+max_priority = 0
+min_priority = 0
+Show SCHED_FIFO of priority
+max_priority = 99
+min_priority = 1
+Show SCHED_RR of priority
+max_priority = 99
+min_priority = 1
+Show priority of current thread
+priority = 0
+Set thread policy
+Set SCHED_FIFO policy
+policy = SCHED_FIFO
+Set SCHED_RR policy
+policy = SCHED_RR
+Restore current policy
+policy = SCHED_OTHER
+
+我们可以看到
+SCHED_OTHER是不支持优先级使用的，而SCHED_FIFO和SCHED_RR支持优先级的使用，他们分别为1和99，数值越大优先级越高。 从上面的结果我们可以看出，如果程序控制线程的优先级，一般是用pthread_attr_getschedpolicy来获取系统使用的调度策略，如果是SCHED_OTHER的话，表明当前策略不支持线程优先级的使用，否则可以。当然所设定的优先级范围必须在最大和最小值之间。我们可以通过sched_get_priority_max和sched_get_priority_min来获取。
+
+可能网友会问，是否我们可以通过int pthread_attr_setschedpolicy(pthread_attr_t *attr, int policy);来设定自己所需的调度策略呢？我觉得是完全可以的（有些系统需要定义_POSIX_THREAD_PRIORITY_SCHEDULING），只要系统实现了对应的调用策略。
+
+说了半天，我们还没有说，在系统允许使用线程优先级别的时候，如何设置优先级别呢？
+int pthread_attr_setschedparam(pthread_attr_t *attr, const struct sched_param *param);
+int pthread_attr_getschedparam(const pthread_attr_t *attr,  struct sched_param *param);
+上面两个函数分别用于设置线程的优先级，struct sched_param的定义如下
+struct sched_param
+{
+    int __sched_priority; //所要设定的线程优先级
+};
+
+例：创建优先级为10的线程
+pthread_attr_t   attr;  
+struct   sched_param   param;  
+pthread_attr_init(&attr);  
+pthread_attr_setschedpolicy(&attr,   SCHED_RR);  
+param.sched_priority   =   10;  
+pthread_attr_setschedparam(&attr,   &param);  
+pthread_create(xxx   ,   &attr   ,   xxx   ,   xxx);  
+pthread_attr_destroy(&attr);  
+
+
+附：使用的测试程序：
+
+#include <iostream>
+#include <pthread.h>
+#include <sched.h>
+#include <assert.h>
+
+using namespace std;
+
+static int get_thread_policy( pthread_attr_t &attr )
+{
+        int policy;
+        int rs = pthread_attr_getschedpolicy( &attr, &policy );
+        assert( rs == 0 );
+        switch ( policy )
+        {
+        case SCHED_FIFO:
+                cout << "policy = SCHED_FIFO" << endl;
+                break;
+
+        case SCHED_RR:
+                cout << "policy = SCHED_RR" << endl;
+                break;
+
+        case SCHED_OTHER:
+                cout << "policy = SCHED_OTHER" << endl;
+                break;
+
+        default:
+                cout << "policy = UNKNOWN" << endl;
+                break;
+        }
+
+        return policy;
+}
+
+static void show_thread_priority( pthread_attr_t &attr, int policy )
+{
+        int priority = sched_get_priority_max( policy );
+        assert( priority != -1 );
+        cout << "max_priority = " << priority << endl;
+
+        priority = sched_get_priority_min( policy );
+        assert( priority != -1 );
+        cout << "min_priority = " << priority << endl;
+}
+
+static int get_thread_priority( pthread_attr_t &attr )
+{
+        struct sched_param param;
+
+        int rs = pthread_attr_getschedparam( &attr, &param );
+        assert( rs == 0 );
+        cout << "priority = " << param.__sched_priority << endl;
+
+        return param.__sched_priority;
+}
+
+static void set_thread_policy( pthread_attr_t &attr,  int policy )
+{
+        int rs = pthread_attr_setschedpolicy( &attr, policy );
+        assert( rs == 0 );
+        get_thread_policy( attr );
+}
+
+int main( void )
+{
+        pthread_attr_t attr;
+        struct sched_param sched;
+        int rs;
+
+        rs = pthread_attr_init( &attr );
+        assert( rs == 0 );
+
+        int policy = get_thread_policy( attr );
+
+        cout << "Show current configuration of priority" << endl;
+        show_thread_priority( attr, policy );
+
+        cout << "Show SCHED_FIFO of priority" << endl;
+        show_thread_priority( attr, SCHED_FIFO );
+
+        cout << "Show SCHED_RR of priority" << endl;
+        show_thread_priority( attr, SCHED_RR );
+
+        cout << "Show priority of current thread" << endl;
+        int priority = get_thread_priority( attr );
+
+        cout << "Set thread policy" << endl;
+        cout << "Set SCHED_FIFO policy" << endl;
+        set_thread_policy( attr, SCHED_FIFO );
+        cout << "Set SCHED_RR policy" << endl;
+        set_thread_policy( attr, SCHED_RR );
+        cout << "Restore current policy" << endl;
+        set_thread_policy( attr, policy );
+
+
+        rs = pthread_attr_destroy( &attr );
+        assert( rs == 0 );
+
+        return 0;
+} 
+  
+编译命令： 
+#g++ pthread_priority3.c -o pthread_priority3 -lpthread 

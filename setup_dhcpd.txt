@@ -1,0 +1,39 @@
+一、安装
+
+在ubuntu安装dhcp十分简单。执行以下命令即可：
+
+$ sudo apt-get install isc-dhcp-server
+
+
+二、配置
+
+在/etc/default/isc-dhcp-server文件中修改网口，由于测试场合特殊性，使用eth1，如下：
+
+# On what interfaces should the DHCP server (dhcpd) serve DHCP requests?
+ #    Separate multiple interfaces with spaces, e.g. "eth0 eth1".
+ INTERFACES="eth1"
+
+
+另外，还要修改/etc/dhcp/dhcpd.conf文件，该文件主要是配置DHCP分配的IP范围，下面是设置为192.168.2.0网段的示例：
+subnet 192.168.2.0 netmask 255.255.255.0 {
+   range 192.168.2.100 192.168.2.105;
+ #  option domain-name-servers ns1.internal.example.org;
+ #  option domain-name "internal.example.org";
+ #  option routers 10.5.5.1;
+   option broadcast-address 192.168.2.255;
+   default-lease-time 600;
+   max-lease-time 7200;
+ }
+
+
+注：在这个文件中还有如host passacaglia和host fantasia的字段，但按网上说法改了，似乎不生效，而google又没有太多的信息，于是就不管它了。
+
+三、使用
+
+安装后自动运行，但也可以手动重启，命令如下：
+
+# service isc-dhcp-server start
+
+客户端使用如下命令自动获取IP：
+
+# dhclient eth1

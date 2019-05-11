@@ -1,0 +1,104 @@
+
+
+1.Set ENV
+$ export CCVIEWS_HOME="/eptn"
+$ export KERNEL_SRC="/eptn/linux"
+$ export CROSS_COMPILE="/eptn/buildroot/usr/bin/arm-linux-"
+$ export LD_LIBRARY_PATH=/eptn/buildroot/usr/lib
+$ export ARCH=arm
+$ export EOS_UBUNTU_BUILD=1
+
+脚本：
+export CCVIEWS_HOME=/eptn
+export KERNEL_SRC=/eptn/linux
+export CROSS_COMPILE=/eptn/buildroot/usr/bin/arm-linux-
+export LD_LIBRARY_PATH=/eptn/buildroot/usr/lib
+export ARCH=arm
+export EOS_UBUNTU_BUILD=1
+
+2.Build u-boot
+$ cd u-boot 
+$ make O=./build-output distclean 
+$ make O=./build-output northstar_plus_config  (SPI u-boot) 
+$ make O=./build-output northstar_plus_nand_config (NAND u-boot)
+$ make O=./build-output all
+Find bin image at /eptn/u-boot/build-output
+
+脚本：
+(SPI u-boot) 
+cd u-boot 
+make O=./build-output distclean 
+make O=./build-output northstar_plus_config
+make O=./build-output all
+
+(NAND u-boot)
+make O=./build-output distclean 
+make O=./build-output northstar_plus_nand_config 
+make O=./build-output all
+
+(iTN167C NAND u-boot)
+make O=./build-output distclean 
+make O=./build-output northstar_plus_nand_config 
+make O=./build-output all
+
+3.Build Kernel
+$ cd /eptn/linux
+$ make
+Find vmlinux image at /eptn/linux
+
+脚本：
+cd /eptn/linux
+make
+
+4.Building PAE 
+$ cd /eptn/pae_fw/toolchain 
+$ tar xzf gcc-arm-none-eabi-4_7-2013q3_bin.gzip
+$ cd /eptn/pae_fw
+$ make
+The srec image is copied to /eptn/eos/bsp/platform/broadcom/robo-ns/hpc/pae_mpls.srec
+
+脚本：
+cd /eptn/pae_fw/toolchain 
+tar xzf gcc-arm-none-eabi-4_7-2013q3_bin.gzip
+cd /eptn/pae_fw
+make
+
+5.Build eOS
+$ cd /eptn/eos 
+$ cd vobs/openflow/ofdpa/output/iproc-nsp-brl36
+$ make client && make ofagent
+$ cd /eptn/eos
+$ make
+Find stk image at /eptn/eos/output/Fast*/ipl
+
+脚本：
+cd /eptn/eos 
+cd vobs/openflow/ofdpa/output/iproc-nsp-brl36
+make client && make ofagent
+cd /eptn/eos
+make
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

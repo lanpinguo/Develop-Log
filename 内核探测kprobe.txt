@@ -1,0 +1,26 @@
+内核探测kprobe
+kprobe（内核探测，kernel probe）是一个动态地收集调试和性能信息的工具，如：收集寄存器和全局数据结构等调试信息，无需对Linux内核频繁编译和启动。用户可以在任何内核代码地址进行陷阱，指定调试断点触发时的处理例程。工作机制是：用户指定一个探测点，并把用户定义的处理函数关联到该探测点，当内核执行到该探测点时，相应的关联函数被执行，然后继续执行正常的代码路径。
+kprobe允许用户编写内核模块添加调试信息到内核。当在远程机器上调试有bug的程序而日志/var/log/messages不能看出错误时，kprobe显得非常有用。用户可以编译一个内核模块，并将内核模块插入到调试的内核中，就可以输出所需要的调试信息了。
+内核探测分为kprobe, jprobe和kretprobe（也称return probe，返回探测）三种。kprobe可插入内核中任何指令处；jprobe插入内核函数入口，方便于访问函数的参数；return probe用于探测指定函数的返回值。
+内核模块的初始化函数init安装（或注册）了多个探测函数，内核模块的退出函数exit将注销它们。注册函数（如：register_kprobe()）指定了探测器插入的地方、探测点触发的处理例程。
+（1）配置支持kprobe的内核
+配置内核时确信在.config文件中设置了CONFIG_KPROBES、CONFIG_MODULES、CONFIG_MODULE_UNLOAD、CONFIG_KALLSYMS_ALL和CONFIG_DEBUG_INFO。
+配置了CONFIG_KALLSYMS_ALL，kprobe可用函数kallsyms_lookup_name从地址解析代码。配置了CONFIG_DEBUG_INFO后，可以用命令"objdump -d -l vmlinux"查看源到对象的代码映射。
+调试文件系统debugfs含有kprobe的调试接口，可以查看注册的kprobe列表，还可以关闭/打开kprobe。
+查看系统注册probe的方法列出如下：
+#cat /debug/kprobes/list c015d71a k vfs_read+0x0 c011a316 j do_fork+0x0 c03dedc5 r tcp_v4_rcv+0x0 
+
+第一列表示探测点插入的内核地址，第二列表示内核探测的类型，k表示kprobe，r表示kretprobe，j表示jprobe，第三列指定探测点的"符号+偏移"。如果被探测的函数属于一个模块，模块名也被指定。
+打开和关闭kprobe的方法列出如下：
+#echo ‘1’ /debug/kprobes/enabled #echo ‘0’ /debug/kprobes/enabled 
+（2）kprobe样例
+Linux内核源代码在目录samples/kpobges下提供了各种kprobe类型的探测处理例程编写样例，分别对应文件kprobe_example.c、jprobe_example.c和kretprobe_example.c，用户稍加修改就可以变成自己的内核探测模块。下面仅说明kprobe类型的探测例程。
+样例kprobe_example是kprobe类型的探测例程内核模块，显示了在函数do_fork被调用时如何使用kprobe转储栈和选择的寄存器。当内核函数do_fork被调用创建一个新进程时，在控制台和/var/log/messages中将显示函数printk打印的跟踪数据。样例kprobe_example列出如下（在samples/kprobe_example.c中）：
+#include <linux/kernel.h> #include <linux/module.h> #include <linux/kprobes.h> static struct kprobe kp = { .symbol_name = "do_fork", }; static int handler_pre(struct kprobe *p, struct pt_regs *regs) { #ifdef CONFIG_X86 printk(KERN_INFO "pre_handler: p->addr = 0x%p, ip = %lx," " flags = 0x%lx\n", p->addr, regs->ip, regs->flags); #endif #ifdef CONFIG_PPC printk(KERN_INFO "pre_handler: p->addr = 0x%p, nip = 0x%lx," " msr = 0x%lx\n", p->addr, regs->nip, regs->msr); #endif return 0; } static void handler_post(struct kprobe *p, struct pt_regs *regs, unsigned long flags) { #ifdef CONFIG_X86 printk(KERN_INFO "post_handler: p->addr = 0x%p, flags = 0x%lx\n", p->addr, regs->flags); #endif #ifdef CONFIG_PPC printk(KERN_INFO "post_handler: p->addr = 0x%p, msr = 0x%lx\n", p->addr, regs->msr); #endif } static int handler_fault(struct kprobe *p, struct pt_regs *regs, int trapnr) { printk(KERN_INFO "fault_handler: p->addr = 0x%p, trap #%dn", p->addr, trapnr); return 0; } static int __init kprobe_init(void) { int ret; kp.pre_handler = handler_pre; kp.post_handler = handler_post; kp.fault_handler = handler_fault; ret = register_kprobe(&kp); if (ret < 0) { printk(KERN_INFO "register_kprobe failed, returned %d\n", ret); return ret; } printk(KERN_INFO "Planted kprobe at %p\n", kp.addr); return 0; } static void __exit kprobe_exit(void) { unregister_kprobe(&kp); printk(KERN_INFO "kprobe at %p unregistered\n", kp.addr); } module_init(kprobe_init) module_exit(kprobe_exit) MODULE_LICENSE("GPL"); 
+
+Systemtap调试
+（1）Systemtap原理
+Systemtap是一个基于kprobe调试内核的开源软件。调试者只需要写一些脚本，通过Systemtap提供的命令行接口对正在运行的内核进行诊断调试，不需要修改或插入调试代码、重新编译内核、安装内核和重启动等工作，使内核调试变得简单容易。Systemtap调试过程与在gdb调试器中用断点命令行调试类似。
+Systemtap用类似于awk语言的脚本语言编写调试脚本，该脚本命名事件并给这些事件指定处理例程。只要指定的事件发生，Linux内核将运行对应的处理例程。
+有几种类型的事件，如：进入或退出一个函数，一个定时器超时或整个systemtap会话开始或停止。处理例程是一系列脚本语言语句指定事件发生时所做的工作，包括从事件上下文提取数据，存储它们进入内部变量或打印结果。
+Systemtap的运行过程如图2所示，用户调试时用Systemtap编写调试脚本，Systemtap的翻译模块（translator）将脚本经语法分析（parse）、功能处理（elaborate）和翻译后生成C语言调试程序，然后，运行C编译器编译（build）创建调试内核模块。再接着将该内核模块装载入内核，通过kprobe机制，内核的hook激活所有的探测事件。当任何处理器上有这些事件发生时，对应的处理例程被触发工作，kprobe机制在内核获取的调试数据通过文件系统relayfs传回Systemtap，输出调试数据probe.out。在调试结束时，会话停止，内核断开hook连接，并卸载内核模块。整个操作过程由单个命令行程序strap驱动控制。

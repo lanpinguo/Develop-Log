@@ -1,0 +1,22 @@
+在linux 命令下面的svn update
+出现
+
+1
+2
+D     C Runtime
+      >   local unversioned, incoming add upon update
+这是命令行下的 svn 树冲突
+（文件本身没有改变，只是本地版本库里面出现冲突）
+解决方法如下
+
+1
+2
+3
+4
+5
+#svn resolve --accept working ./Runtime
+Resolved conflicted state of 'Runtime'
+#svn revert ./Runtime
+Reverted 'Runtime'
+#svn status
+移除本地svn版本库里面的冲突信息

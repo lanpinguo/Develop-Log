@@ -1,0 +1,97 @@
+
+Install CMAKE developer packages
+
+1
+sudo apt-get install build-essential cmake pkg-config -y
+
+
+2
+Install Image I/O packages
+
+sudo apt-get install libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev -y
+3
+Install Video I/O packages
+
+sudo apt-get install libavcodec-dev libavformat-dev libswscale-dev libv4l-dev -y
+sudo apt-get install libxvidcore-dev libx264-dev -y
+
+4
+
+Install the GTK development library for basic GUI windows
+
+sudo apt-get install libgtk2.0-dev libgtk-3-dev -y
+
+Install optimization packages (improved matrix operations for OpenCV)
+
+sudo apt-get install libatlas-base-dev gfortran -y
+
+
+
+Step 4: Install Python 3, setuptools, dev and Numpy
+Install Python 3 and numpy
+
+sudo apt-get install python3 python3-setuptools python3-dev -y
+wget https://bootstrap.pypa.io/get-pip.py
+sudo python3 get-pip.py
+sudo pip3 install numpy
+
+
+Step 5: Download the OpenCV 3.4 and contrib extra modules
+
+cd ~
+wget -O opencv.zip https://github.com/Itseez/opencv/archive/3.4.0.zip
+unzip opencv.zip
+wget -O opencv_contrib.zip https://github.com/Itseez/opencv_contrib/archive/3.4.0.zip
+unzip opencv_contrib.zip
+
+cd ~
+wget -O opencv.zip https://github.com/Itseez/opencv/archive/3.4.0.zip
+unzip opencv.zip
+wget -O opencv_contrib.zip https://github.com/Itseez/opencv_contrib/archive/3.4.0.zip
+unzip opencv_contrib.zip
+
+
+
+Step 6: Compile and Install OpenCV 3.4.0 for Python 3
+cd opencv-master
+mkdir build
+cd build
+cmake -D CMAKE_BUILD_TYPE=RELEASE \
+-D CMAKE_INSTALL_PREFIX=/usr/local \
+-D BUILD_opencv_java=OFF \
+-D BUILD_opencv_python2=OFF \
+-D BUILD_opencv_python3=ON \
+-D PYTHON_DEFAULT_EXECUTABLE=$(which python3) \
+-D INSTALL_C_EXAMPLES=OFF \
+-D INSTALL_PYTHON_EXAMPLES=ON \
+-D BUILD_EXAMPLES=ON\
+-D OPENCV_EXTRA_MODULES_PATH=/work/tools/opencv/opencv_contrib/modules \
+-D WITH_CUDA=OFF \
+-D BUILD_TESTS=OFF \
+-D BUILD_PERF_TESTS= OFF ..
+
+Step 9: Verify the OpenCV build
+
+We need to rename cv2.cpython-35m-aarch64-linux-gnu.so to cv2.so using the following command:
+cd /usr/local/lib/python3.5/dist-packages/
+mv /usr/local/python/cv2/python-3.5/cv2.cpython-35m-aarch64-linux-gnu.so cv2.so 
+
+这一步使用下面的方法更为妥当：
+cp /usr/local/python/cv2/python-3.5/cv2.* /usr/lib/python3.5/
+
+Step 10: Testing OpenCV 3.4.0 install
+root@Orangepi:/work# python3
+Python 3.5.2 (default, Nov 12 2018, 13:43:14) 
+[GCC 5.4.0 20160609] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import cv2 as cv
+>>> cv.__version__
+'3.4.4'
+>>> 
+
+
+
+
+
+
+

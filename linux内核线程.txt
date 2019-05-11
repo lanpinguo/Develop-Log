@@ -1,0 +1,168 @@
+内核经常需要在后台执行一些操作，这种任务就可以通过内核线程（kernle thread）完成独立运行在内核空间的标准进程。内核线程和普通的进程间的区别在于内核线程没有独立的地址空间，mm指针被设置为NULL；它只在内核空间运行，从来不切换到用户空间去；并且和普通进程一样，可以被调度，也可以被抢占。实际上，内核线程只能由其他内核线程创建，在现有的内核线程中创建一个新的内核线程的方法：
+
+kthread_create：创建线程。
+struct task_struct *kthread_create(int (*threadfn)(void *data),void *data,const char *namefmt, ...);//注意，第二个参数data用于向线程传递参数
+
+线程创建后，不会马上运行，而是需要将kthread_create() 返回的task_struct指针传给wake_up_process()，然后通过此函数运行线程。
+
+kthread_run ：创建并启动线程的函数，相当于kthread_create +  wake_up_process功能;
+
+struct task_struct *kthread_run(int (*threadfn)(void *data),void *data,const char *namefmt, ...);
+kthread_stop：通过发送信号给线程，使之退出。
+int kthread_stop(struct task_struct *thread);线程一旦启动起来后，会一直运行，除非该线程主动调用do_exit函数，或者其他的进程调用kthread_stop函数，结束线程的运行。 但如果线程函数正在处理一个非常重要的任务，它不会被中断的。当然如果线程函数永远不返回并且不检查信号，它将永远都不会停止，因此，线程函数必须能让出CPU，以便能运行其他线程。同时线程函数也必须能重新被调度运行。在例子程序中，这是通过schedule_timeout()函数完成的（下面的例子会看到）。
+
+ 
+
+1.      头文件
+
+#include <linux/sched.h>  //wake_up_process()
+
+#include <linux/kthread.h>//kthread_create()、kthread_run()
+
+#include<err.h>             //IS_ERR()、PTR_ERR()
+
+2.      实现
+
+2.1创建线程
+
+在模块初始化时，可以进行线程的创建。使用下面的函数和宏定义：
+
+struct task_struct *kthread_create(int (*threadfn)(void *data),
+
+                           void *data,
+
+                           const char namefmt[], ...);
+
+#define kthread_run(threadfn, data, namefmt,...)                    \
+
+({                                                           \
+
+    struct task_struct*__k                                       \
+
+          = kthread_create(threadfn, data, namefmt, ## __VA_ARGS__); \
+
+    if(!IS_ERR(__k))                                       \
+
+          wake_up_process(__k);                               \
+
+   __k;                                                    \
+
+})
+
+例如：
+
+static struct task_struct *test_task;
+
+static inttest_init_module(void)    //驱动加载函数
+
+{
+
+    int err;
+
+    test_task = kthread_create(threadfunc, NULL, "test_task");
+
+    if(IS_ERR(test_task)){
+
+     printk("Unable to start kernel thread.\n");
+
+      err = PTR_ERR(test_task);
+
+      test_task =NULL;
+
+      return err;
+
+    }
+
+wake_up_process(test_task);
+        return 0;
+    }
+
+   module_init(test_init_module);
+
+2.2线程函数
+
+在线程函数里，完成所需的业务逻辑工作。主要框架如下所示：
+
+int threadfunc(void *data){
+
+       …
+
+       while(1){
+
+              set_current_state(TASK_UNINTERRUPTIBLE);//将当前的状态表示设置为休眠
+
+if(kthread_should_stop()) break;  //解释见“注意”
+
+              if(){//条件为真
+
+                     //进行业务处理
+
+              }
+
+              else{//条件为假
+
+                     //让出CPU运行其他线程，并在指定的时间内重新被调度
+
+                    schedule_timeout(HZ);   // 休眠，与set_current_state配合使用，需要计算，这里表示休眠一秒
+
+              }
+
+       }
+
+       …
+
+       return 0;
+
+}
+
+注意：
+
+a. 值得一提的是kthread_should_stop函数，我们需要在开启的线程中嵌入该函数并检查此函数的返回值，否则kthread_stop是不起作用的
+
+b. 休眠有两种相关的状态:TASK_INTERRUPTIBLE and TASK_UNINTERRUPTIBLE。它们的惟一却不是处于TASK_UNINTERRUPTIBLE状态的进程会忽略信号，而处于TASK_INTERRUPTIBLE状态的进程如果收到信号会被唤醒并处理信号(然后再次进入等待睡眠状态)。两种状态的进程位于同一个等待队列上，等待某些事件，不能够运行。
+
+c.schedule_time(s*HZ)的参数为节拍数，HZ宏每个系统定义不一样，表示每一秒时钟中断数，如在2.6中为1000，2.4中为100, s为秒单位，例如如果要休眠20ms，则schedule_time(0.02*HZ)就可以了。
+
+2.3结束线程
+
+在模块卸载时，可以结束线程的运行。使用下面的函数：
+
+int kthread_stop(structtask_struct *k);
+
+例如：
+
+static void test_cleanup_module(void)
+
+{
+
+           if(test_task){
+
+               kthread_stop(test_task);
+
+               test_task = NULL;
+
+           }
+
+}
+
+module_exit(test_cleanup_module);
+
+3.       注意事项
+
+（1）       在调用kthread_stop函数时，线程函数不能已经运行结束。否则，kthread_stop函数会一直进行等待。在执行kthread_stop的时候，目标线程必须没有退出，否则会Oops。原因很容易理解，当目标线程退出的时候，其对应的task结构也变得无效，kthread_stop引用该无效task结构就会出错。
+
+（2）       线程函数必须能让出CPU，以便能运行其他线程。同时线程函数也必须能重新被调度运行。在例子程序中，这是通过schedule_timeout()函数完成的。
+
+4．性能测试
+
+可以使用top命令来查看线程（包括内核线程）的CPU利用率。命令如下：
+
+       top–p 线程号
+
+可以使用下面命令来查找线程号：
+
+       psaux|grep 线程名
+
+
+ 可以用下面的命令显示所有内核线程：
+      ps afx

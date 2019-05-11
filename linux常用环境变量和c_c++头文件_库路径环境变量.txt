@@ -1,0 +1,39 @@
+linux常用环境变量和c/c++头文件/库路径环境变量
+
+
+环境变量设置
+/etc/profile：在登录时，操作系统定制用户环境时使用的第一个文件，此文件为系统的每个用户设置环境信息，当用户第一次登录时，该文件被执行。并从/etc/profile.d目录的配置文件中搜集shell的设置。
+/etc/bashrc:为每一个运行bash shell的用户执行此文件.当bash shell被打开时,该文件被读取。
+~/.bash_profile:每个用户都可使用该文件输入专用于自己使用的shell信息,当用户登录时,该文件仅仅执行一次!默认情况下,他设置一些环境变量,执行用户的.bashrc文件.每个用户都可使用该文件输入专用于自己使用的shell信息,当用户登录时,该文件仅仅执行一次!默认情况下,他设置一些环境变量,执行用户的.bashrc文件.
+/etc/environment ：在登录时操作系统使用的第二个文件，系统在读取你自己的profile前，设置文件的环境变量。
+~/.profile：在登录时用到的第三个文件。profile文件，每个用户都可使用该文件输入专用于自己使用的shell信息，当用户登录时，该文件仅仅执行一次！默认情况下，他设置一些环境变量，执行用户的.bashrc文件。
+/etc/bashrc：为每一个运行bash shell的用户执行此文件。当bash shell被打开时，该文件被读取。
+~/.bashrc：该文件包含专用于你的bash shell的bash信息，当登录时以及每次打开新的shell时，该该文件被读取。
+Ubuntu
+在bash配置文件中添加环境变量
+对所有用户有效修改/etc/profile
+对个人有效则修改~/.bashrc
+#在PATH中找到可执行文件程序的路径。
+export PATH =$PATH:$HOME/bin  
+#gcc找到头文件的路径
+C_INCLUDE_PATH=/usr/include/libxml2:/MyLib  
+export C_INCLUDE_PATH  
+#g++找到头文件的路径
+CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/include/libxml2:/MyLib  
+export CPLUS_INCLUDE_PATH  
+#找到动态链接库的路径
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/MyLib  
+export LD_LIBRARY_PATH  
+#找到静态库的路径
+LIBRARY_PATH=$LIBRARY_PATH:/MyLib  
+export LIBRARY_PATH  
+下面是在gcc命令中手动设置搜索路径：
+#添加头文件搜索路径
+# gcc foo.c -I /home/xiaowp/include -o foo  
+ #添加动态库搜索路径
+# gcc foo.c -L /home/xiaowp/lib -lfoo -o foo  
+#添加静态库搜索路径
+# gcc foo.c -L /home/xiaowp/lib -static -lfoo -o foo  
+
+
+

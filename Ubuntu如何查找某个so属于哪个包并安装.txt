@@ -1,0 +1,47 @@
+有时我们会遇到如下情况：
+
+error while loading shared libraries: libz.so.1: cannot open shared object file: No such file or directory，
+
+我们首先知道的是缺少libz.so.1这个库文件。
+
+
+解决方法：很明显就是安装这个库所在包，可是我们怎么这知道 libz.so.1在哪个包呢？
+
+
+我们使用命令：apt-file search 来查找，首先安装，按如下命令：
+
+sudo apt-get install apt-file
+
+安装完以后系统会提示你update，如果没有提示，在终端输入如下命令：
+
+sudo apt-file update
+
+使用apt-file  search命令来查找某个命令或某一个库所在的包，具体用法如下：
+
+~$ apt-file search libz.so.1
+
+
+运行命令显示如下：
+
+lib32z1: /usr/lib32/libz.so.1
+
+lib32z1: /usr/lib32/libz.so.1.2.3.3
+
+lib32z1-dev: /usr/lib32/libz.so
+
+lsb-build-base3: /usr/lib/lsb3/libz.so
+
+zlib1g: /lib/libz.so.1
+
+zlib1g: /lib/libz.so.1.2.3.3
+
+zlib1g-dbg: /usr/lib/debug/lib/libz.so.1.2.3.3
+
+zlib1g-dbg: /usr/lib/debug/usr/lib32/libz.so.1.2.3.3
+
+zlib1g-dev: /usr/lib/libz.so
+
+
+使用apt-file search 查找你的库所在包就行了，右边的是匹配你的库，左边的是你查的库所在的包，所以最后安装对应的包就行了。我们会发现与libz.so.1相对应的是左边名字叫：lib32z1的包，所以安装这个lib32z1包即可。
+
+sudo apt-get install lib32z1

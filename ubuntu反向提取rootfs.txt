@@ -1,0 +1,25 @@
+
+1、使用fdisk查看镜像的分区情况：
+Disk OrangePi_WinPlus_Ubuntu16.04_Desktop_Xfce4_v0_5.img: 2.6 GiB, 2726297600 bytes, 5324800 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x0009694f
+
+Device                                               Boot  Start     End Sectors  Size Id Type
+OrangePi_WinPlus_Ubuntu16.04_Desktop_Xfce4_v0_5.img1       40960  143359  102400   50M  c W95 
+OrangePi_WinPlus_Ubuntu16.04_Desktop_Xfce4_v0_5.img2      143360 5285887 5142528  2.5G 83 Linu
+
+2、定位出rootfs所在143360扇区，每个扇区512字节，则(143360 * 512) / (1024 * 1024) = 70 (MB)
+跳过70M读取镜像文件，并保存到rootfs_tmp文件
+dd if=OrangePi_WinPlus_Ubuntu16.04_Desktop_Xfce4_v0_5.img conv=notrunc bs=1M skip=70 of=rootfs_tmp
+
+3、挂载rootfs_tmp文件
+mount -t ext4 rootfs_tmp /media/tmp
+
+4、提取rootfs
+
+cp -rfa /media/tmp ./xenial_rootfs_std
+
+

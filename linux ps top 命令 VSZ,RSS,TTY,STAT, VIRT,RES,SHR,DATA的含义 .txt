@@ -1,0 +1,610 @@
+ linux ps top 命令 VSZ,RSS,TTY,STAT, VIRT,RES,SHR,DATA的含义 
+ 
+ 
+ 
+
+http://javawind.net/p131
+
+VIRT：virtual memory usage 虚拟内存
+1、进程“需要的”虚拟内存大小，包括进程使用的库、代码、数据等
+2、假如进程申请100m的内存，但实际只使用了10m，那么它会增长100m，而不是实际的使用量
+
+RES：resident memory usage 常驻内存
+1、进程当前使用的内存大小，但不包括swap out
+2、包含其他进程的共享
+3、如果申请100m的内存，实际使用10m，它只增长10m，与VIRT相反
+4、关于库占用内存的情况，它只统计加载的库文件所占内存大小
+
+SHR：shared memory 共享内存
+1、除了自身进程的共享内存，也包括其他进程的共享内存
+2、虽然进程只使用了几个共享库的函数，但它包含了整个共享库的大小
+3、计算某个进程所占的物理内存大小公式：RES – SHR
+4、swap out后，它将会降下来
+
+DATA
+1、数据占用的内存。如果top没有显示，按f键可以显示出来。
+2、真正的该程序要求的数据空间，是真正在运行中要使用的。
+
+top 运行中可以通过 top 的内部命令对进程的显示方式进行控制。内部命令如下：
+s – 改变画面更新频率
+l – 关闭或开启第一部分第一行 top 信息的表示
+t – 关闭或开启第一部分第二行 Tasks 和第三行 Cpus 信息的表示
+m – 关闭或开启第一部分第四行 Mem 和 第五行 Swap 信息的表示
+N – 以 PID 的大小的顺序排列表示进程列表
+P – 以 CPU 占用率大小的顺序排列进程列表
+M – 以内存占用率大小的顺序排列进程列表
+h – 显示帮助
+n – 设置在进程列表所显示进程的数量
+q – 退出 top
+s – 改变画面更新周期
+
+序号 列名 含义
+a PID 进程id
+b PPID 父进程id
+c RUSER Real user name
+d UID 进程所有者的用户id
+e USER 进程所有者的用户名
+f GROUP 进程所有者的组名
+g TTY 启动进程的终端名。不是从终端启动的进程则显示为 ?
+h PR 优先级
+i NI nice值。负值表示高优先级，正值表示低优先级
+j P 最后使用的CPU，仅在多CPU环境下有意义
+k %CPU 上次更新到现在的CPU时间占用百分比
+l TIME 进程使用的CPU时间总计，单位秒
+m TIME+ 进程使用的CPU时间总计，单位1/100秒
+n %MEM 进程使用的物理内存百分比
+o VIRT 进程使用的虚拟内存总量，单位kb。VIRT=SWAP+RES
+p SWAP 进程使用的虚拟内存中，被换出的大小，单位kb。
+q RES 进程使用的、未被换出的物理内存大小，单位kb。RES=CODE+DATA
+r CODE 可执行代码占用的物理内存大小，单位kb
+s DATA 可执行代码以外的部分(数据段+栈)占用的物理内存大小，单位kb
+t SHR 共享内存大小，单位kb
+u nFLT 页面错误次数
+v nDRT 最后一次写入到现在，被修改过的页面数。
+w S 进程状态。（D=不可中断的睡眠状态，R=运行，S=睡眠，T=跟踪/停止，Z=僵尸进程）
+x COMMAND 命令名/命令行
+y WCHAN 若该进程在睡眠，则显示睡眠中的系统函数名
+z Flags 任务标志，参考 sched.h
+
+默认情况下仅显示比较重要的 PID、USER、PR、NI、VIRT、RES、SHR、S、%CPU、%MEM、TIME+、COMMAND 列。可以通过下面的快捷键来更改显示内容。
+
+通过 f 键可以选择显示的内容。按 f 键之后会显示列的列表，按 a-z 即可显示或隐藏对应的列，最后按回车键确定。
+按 o 键可以改变列的显示顺序。按小写的 a-z 可以将相应的列向右移动，而大写的 A-Z 可以将相应的列向左移动。最后按回车键确定。
+按大写的 F 或 O 键，然后按 a-z 可以将进程按照相应的列进行排序。而大写的 R 键可以将当前的排序倒转。
+
+http://blog.chinaunix.net/uid-22858177-id-381533.html
+Linux中ps与top命令
+这两个命令都是查看系统进程信息的命令，但是用处有点儿不同
+1.ps命令–提供系统过去信息的一次性快照
+也就是说ps命令能够查看刚刚系统的进程信息  命令：ps aux或者ps lax
+[root@Linux ~]# ps aux
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root         1  0.1  0.1   2032   644 ?        Ss   21:55   0:01 init [3]
+root         2  0.0  0.0      0     0 ?        S    21:55   0:00 [migration/0]
+root         3  0.0  0.0      0     0 ?        SN   21:55   0:00 [ksoftirqd/0]
+……
+解释如下：
+VSZ–进程的虚拟大小
+RSS–驻留集的大小，可以理解为内存中页的数量
+TTY–控制终端的ID
+STAT–也就是当前进程的状态，其中S-睡眠，s-表示该进程是会话的先导进程，N-表示进程拥有比普通优先级更低的优先级，R-正在运行，D-短期等待，Z-僵死进程，T-被跟踪或者被停止等等
+STRAT–这个很简单，就是该进程启动的时间
+TIME–进程已经消耗的CPU时间，注意是消耗CPU的时间
+COMMOND–命令的名称和参数
+而]#ps lax  可以看到父进程，谦让值以及该进程正在等待的资源等待
+2.top命令–这个命令就很有用了
+top命令反应的是系统进程动态信息，默认10s更新一次
+[root@Linux ~]#top
+top – 22:30:58 up 35 min,  1 user,  load average: 0.12, 0.07, 0.08
+Tasks:  72 total,   1 running,  71 sleeping,   0 stopped,   0 zombie
+Cpu(s):  0.2%us,  0.2%sy,  0.0%ni, 99.7%id,  0.0%wa,  0.0%hi,  0.0%si,  0.0%st
+Mem:    373320k total,    88600k used,   284720k free,     9956k buffers
+Swap:   514072k total,        0k used,   514072k free,    45092k cached
+  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
+3217 root      15   0  2160  976  788 R    1  0.3   0:00.07 top
+1 root      15   0  2032  644  552 S    0  0.2   0:01.55 init
+2 root      RT   0     0    0    0 S    0  0.0   0:00.02 migration/0
+3 root      34  19     0    0    0 S    0  0.0   0:00.00 ksoftirqd/0
+4 root      RT   0     0    0    0 S    0  0.0   0:00.00 watchdog/0
+5 root      RT   0     0    0    0 S    0  0.0   0:00.02 migration/1
+6 root      39  19     0    0    0 S    0  0.0   0:00.00 ksoftirqd/1
+7 root      RT   0     0    0    0 S    0  0.0   0:00.00 watchdog/1
+……
+以上就是top命令的部分输出，可以看到该命令显示了较为详细的信息
+顶部始终显示的是系统当前最活跃的进程，此时还可以接受用户的键盘输入向进程发送信号等待
+3.ps和top都是从/proc目录下读取进程的状态信息，内核把当前系统进程的各种有用信息都放在这个伪目录下。
+Linux查看进程/子进程/线程信息
+
+查看进程ID：
+
+
+[root@QLB data]# ps -ef | grep mysqld | grep -v "grep"
+root      3988     1  0 Feb20 ?        00:00:00 /bin/sh /usr/local/mysql/bin/mysqld_safe --user=mysql
+mysql     4256  3988  2 Feb20 ?        01:08:10 /usr/local/mysql/bin/mysqld --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data --plugin-dir=/usr/local/mysql/lib/plugin --user=mysql --log-error=/usr/local/mysql/data/QLB.err --pid-file=/usr/local/mysql/data/QLB.pid --socket=/tmp/mysqld.sock --port=3306
+
+查看某个进程的所有线程:
+
+[root@QLB data]# ps mp 4256 -o THREAD,tid
+USER     %CPU PRI SCNT WCHAN  USER SYSTEM   TID
+mysql     2.5   -    - -         -      -     -
+mysql     0.0  24    - -         -      -  4256
+mysql     0.0  14    - futex_    -      -  4258
+mysql     0.0  23    - futex_    -      -  4259
+mysql     0.0  24    - futex_    -      -  4260
+mysql     0.0  24    - futex_    -      -  4261
+mysql     0.0  23    - futex_    -      -  4262
+mysql     0.0  24    - futex_    -      -  4263
+mysql     0.0  24    - futex_    -      -  4264
+mysql     0.0  24    - futex_    -      -  4265
+mysql     0.0  24    - futex_    -      -  4266
+mysql     0.0  24    - futex_    -      -  4267
+mysql     0.0  24    - futex_    -      -  4269
+mysql     0.0  24    - futex_    -      -  4270
+mysql     0.0  21    - futex_    -      -  4271
+mysql     0.0  24    - futex_    -      -  4272
+mysql     0.0  20    - -         -      -  4273
+
+查看进程树:
+
+[root@QLB data]# pstree -p 3988
+mysqld_safe(3988)───mysqld(4256)─┬─{mysqld}(4258)
+                                 ├─{mysqld}(4259)
+                                 ├─{mysqld}(4260)
+                                 ├─{mysqld}(4261)
+                                 ├─{mysqld}(4262)
+                                 ├─{mysqld}(4263)
+                                 ├─{mysqld}(4264)
+                                 ├─{mysqld}(4265)
+                                 ├─{mysqld}(4266)
+                                 ├─{mysqld}(4267)
+                                 ├─{mysqld}(4269)
+                                 ├─{mysqld}(4270)
+                                 ├─{mysqld}(4271)
+                                 ├─{mysqld}(4272)
+                                 └─{mysqld}(4273)
+
+查看某个进程的状态信息:
+
+[root@QLB data]# cat /proc/4256/status
+Name:	mysqld
+State:	S (sleeping)
+SleepAVG:	98%
+Tgid:	4256
+Pid:	4256
+PPid:	3988
+TracerPid:	0
+Uid:	102	102	102	102
+Gid:	501	501	501	501
+FDSize:	512
+Groups:	501 
+VmPeak:	  410032 kB
+VmSize:	  410032 kB
+VmLck:	       0 kB
+VmHWM:	  204356 kB
+VmRSS:	  199920 kB
+VmData:	  372332 kB
+VmStk:	      88 kB
+VmExe:	    8720 kB
+VmLib:	    3544 kB
+VmPTE:	     608 kB
+StaBrk:	0ed3d000 kB
+Brk:	136ae000 kB
+StaStk:	7fff2268a570 kB
+Threads:	16
+SigQ:	0/69632
+SigPnd:	0000000000000000
+ShdPnd:	0000000000000000
+SigBlk:	0000000000087007
+SigIgn:	0000000000001006
+SigCgt:	00000001800066e9
+CapInh:	0000000000000000
+CapPrm:	0000000000000000
+CapEff:	0000000000000000
+Cpus_allowed:	00000000,00000000,00000000,00000000,00000000,00000000,00000000,0000000f
+Mems_allowed:	00000000,00000001
+
+Linux User’s Manual上的ps的使用例子:
+1. To see every process on the system using standard syntax:
+ps -e
+ps -ef
+ps -eF
+ps -ely
+
+2. To see every process on the system using BSD syntax:
+ps ax
+ps axu
+
+3. To print a process tree:
+ps -ejH
+ps axjf
+
+4. To get info about threads:
+ps -eLf
+ps axms
+
+5. To get security info:
+ps -eo euser,ruser,suser,fuser,f,comm,label
+ps axZ
+ps -eM
+6. To see every process running as root (real & effective ID) in user format:
+ps -U root -u root u
+
+7. To see every process with a user-defined format:
+ps -eo pid,tid,class,rtprio,ni,pri,psr,pcpu,stat,wchan:14,comm
+ps axo stat,euid,ruid,tty,tpgid,sess,pgrp,ppid,pid,pcpu,comm
+ps -eopid,tt,user,fname,tmout,f,wchan
+
+8. Print only the process IDs of syslogd:
+ps -C syslogd -o pid=
+
+9. Print only the name of PID 42:
+ps -p 42 -o comm=
+Posted in Linux/Unix.
+
+Comments are closed.
+
+首先，得到进程的pid：
+ps -ef | grep process_name | grep -v “grep” | awk ‘{print $2}’
+
+查看进程的所有线程
+# ps mp 6648 -o THREAD,tid
+USER %CPU PRI SCNT WCHAN USER SYSTEM TID
+root 0.0 – - – - – -
+root 0.0 24 – - – - 6648
+root 0.0 21 – - – - 6650
+root 1.0 24 – - – - 14214
+root 0.0 23 – futex_ – - 14216
+root 0.0 22 – 184466 – - 15374
+root 0.0 23 – 184466 – - 15376
+root 0.0 23 – 184466 – - 15378
+root 0.0 23 – 184466 – - 15380
+root 0.0 23 – 184466 – - 15392
+root 0.0 23 – 184466 – - 15394
+root 0.0 23 – 184466 – - 15398
+
+查看所有子进程：
+# pstree -p 6648
+agent_executor(6648)─┬─tar(15601)───gzip(15607)
+├─{agent_executor}(6650)
+├─{agent_executor}(14214)
+├─{agent_executor}(14216)
+├─{agent_executor}(15374)
+├─{agent_executor}(15376)
+├─{agent_executor}(15378)
+├─{agent_executor}(15380)
+├─{agent_executor}(15392)
+├─{agent_executor}(15394)
+└─{agent_executor}(15398)
+
+查看/proc/pid/status可以看到一些进程的当前状态：
+Name: bash
+State: S (sleeping)
+SleepAVG: 98%
+Tgid: 11237
+Pid: 11237
+PPid: 11235
+TracerPid: 0
+Uid: 0 0 0 0
+Gid: 0 0 0 0
+FDSize: 256
+Groups: 0 1 2 3 4 6 10
+VmPeak: 66260 kB
+VmSize: 66228 kB
+VmLck: 0 kB
+VmHWM: 1684 kB
+VmRSS: 1684 kB
+VmData: 456 kB
+VmStk: 88 kB
+VmExe: 712 kB
+VmLib: 1508 kB
+VmPTE: 68 kB
+StaBrk: 008c3000 kB
+Brk: 011b1000 kB
+StaStk: 7fff8b728170 kB
+Threads: 1
+SigQ: 1/30222
+SigPnd: 0000000000000000
+ShdPnd: 0000000000000000
+SigBlk: 0000000000010000
+SigIgn: 0000000000384004
+SigCgt: 000000004b813efb
+CapInh: 0000000000000000
+CapPrm: 00000000fffffeff
+CapEff: 00000000fffffeff
+Cpus_allowed: 00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000003
+Mems_allowed: 1
+http://hi.baidu.com/shiqyn/item/03fbc1382a7fe523b2c0c5b7
+一、PS命令：$ ps
+PID TTY          TIME CMD
+6986 pts/5    00:00:00 bash
+7975 pts/5    00:00:00 ps· PID是进程的标识号。
+
+· TTY是进程所属的终端控制台。
+
+· TIME列是进程所使用的总的CPU时间。
+
+· CMD列列出正在执行的命令行。
+
+使用带有-ef选项的ps，返回系统中所有用户的所有进程的完整列表。一般将此ps命令的结果传送到grep中，则该结果更易于查看。例如：
+
+$ ps -ef | grep chenxj
+
+UID       PID PPID C STIME TTY        TIME CMD
+
+root      4011 2776 0 11:02 ?        00:00:00 sshd: chenxj [priv]
+chenxj    4117 4011 0 11:02 ?        00:00:00 sshd: chenxj@pts/2
+chenxj    4141 4117 0 11:02 pts/2    00:00:00 -bash
+chenxj    4208 4141 0 11:02 pts/2    00:00:00 /bin/bash /bin/s
+root      4811 4210 0 12:12 pts/2    00:00:00 grep chenxj
+
+-e :在命令执行后显示环境
+-f :完整显示输出
+
+· 标为C的列是由CPU用于计算执行优先级的因子。
+
+· STIME是指进程的启动时间。
+
+· 问号表示这些进程不属于任何TTY，因为它们是由系统启动的。
+
+主要参数说明：
+
+1)进程用户ID（UID），
+虽然uid通常是指数字型的标识，但在第一列下指定的是用户名，标记为UID
+2)进程ID（PID）
+3)父进程ID（PPID）
+PPID是父进程的标识号。
+4) CPU调度情况（C）
+即是是由CPU用于计算执行优先级的因子。
+5)进程启动的时间（STIME）
+6)进程共占用CPU的时间（TIME）
+7)启动进程的命令（CMD）
+8）问号表示这些进程不属于任何TTY，因为它们是由系统启动的。
+
+使用PS命令分析系统性能的方法主要有：
+1)首先，根据用户ID寻找由同一用户执行的许多相似任务，这些任务很可能是因为用户运行的某个脚本程序在后台启动多个进程而造成的。
+2)接下来，检查TIME域中各进程累计占用CPU的时间，如果有某个进程累计占用了大量的CPU时间，通常说明该进程可能陷入了无限循环，或该进程的某些逻辑出了错
+3)找到那些已陷入死锁的进程ID后，就可以使用kill命令强制终止该进程了。
+
+二、TOP命令：
+
+top – 12:17:59 up 1:24, 3 users, load average: 0.06, 0.04, 0.00
+Tasks: 88 total,   2 running, 86 sleeping,   0 stopped,   0 zombie
+Cpu(s): 0.0% us, 0.0% sy, 0.0% ni, 100.0% id, 0.0% wa, 0.0% hi, 0.0% si
+Mem:   1024180k total,   537708k used,   486472k free,    56528k buffers
+Swap:        0k total,        0k used,        0k free,   255732k cached
+
+PID USER      PR NI VIRT RES SHR S %CPU %MEM    TIME+ COMMAND
+1 root      16   0 1980 544 468 S 0.0 0.1   0:01.43 init
+2 root      RT   0     0    0    0 S 0.0 0.0   0:00.00 migration/0
+3 root      34 19     0    0    0 S 0.0 0.0   0:00.00 ksoftirqd/0
+4 root       5 -10     0    0    0 S 0.0 0.0   0:00.06 events/0
+
+统计信息区
+前五行是系统整体的统计信息。第一行是任务队列信息，同 uptime 命令的执行结果。其内容如下：
+
+12:17:59 当前时间
+up 1:24 系统运行时间，格式为时:分
+3 user 当前登录用户数
+load average: 0.06, 0.04, 0.00 系统负载，即任务队列的平均长度。
+三个数值分别为 1分钟、5分钟、15分钟前到现在的平均值。
+第二、三行为进程和CPU的信息。当有多个CPU时，这些内容可能会超过两行。内容如下：
+
+Tasks: 88 total 进程总数
+2 running 正在运行的进程数
+86 sleeping 睡眠的进程数
+0 stopped 停止的进程数
+0 zombie 僵尸进程数
+Cpu(s): 0.0% us 用户空间占用CPU百分比
+0.0% sy 内核空间占用CPU百分比
+0.0% ni 用户进程空间内改变过优先级的进程占用CPU百分比
+100.0 id 空闲CPU百分比
+0.0% wa 等待输入输出的CPU时间百分比
+0.0% hi
+0.0% si
+
+最后两行为内存信息。内容如下：
+
+Mem: 1024180k total 物理内存总量
+537708k used 使用的物理内存总量
+486472k free 空闲内存总量
+56528k buffers 用作内核缓存的内存量
+Swap: 0k total 交换区总量
+0k used 使用的交换区总量
+0k free 空闲交换区总量
+255732k cached 缓冲的交换区总量。
+内存中的内容被换出到交换区，而后又被换入到内存，但使用过的交换区尚未被覆盖，
+该数值即为这些内容已存在于内存中的交换区的大小。
+相应的内存再次被换出时可不必再对交换区写入。
+
+进程信息区
+统计信息区域的下方显示了各个进程的详细信息。首先来认识一下各列的含义。
+
+ 
+
+序号  
+
+列名
+
+含义
+
+PID : 进程id
+
+PPID : 父进程id
+
+RUSER : Real user name
+
+UID : 进程所有者的用户id
+
+USER : 进程所有者的用户名
+
+GROUP : 进程所有者的组名
+
+TTY : 启动进程的终端名。不是从终端启动的进程则显示为 ?
+
+PR : 优先级
+
+NI : nice值。负值表示高优先级，正值表示低优先级
+
+P : 最后使用的CPU，仅在多CPU环境下有意义
+
+%CPU : 上次更新到现在的CPU时间占用百分比
+
+TIME : 进程使用的CPU时间总计，单位秒
+
+TIME+ : 进程使用的CPU时间总计，单位1/100秒
+
+%MEM : 进程使用的物理内存百分比
+
+VIRT : 进程使用的虚拟内存总量，单位kb。VIRT=SWAP+RES
+
+SWAP : 进程使用的虚拟内存中，被换出的大小，单位kb。
+
+RES : 进程使用的、未被换出的物理内存大小，单位kb。RES=CODE+DATA
+
+CODE : 可执行代码占用的物理内存大小，单位kb
+
+DATA : 可执行代码以外的部分(数据段+栈)占用的物理内存大小，单位kb
+
+SHR : 共享内存大小，单位kb
+
+nFLT : 页面错误次数
+
+nDRT : 最后一次写入到现在，被修改过的页面数。
+
+S : 进程状态。D=不可中断的睡眠状态 R=运行 S=睡眠 T=跟踪/停止 Z=僵尸进程
+
+COMMAND : 命令名/命令行
+
+WCHAN : 若该进程在睡眠，则显示睡眠中的系统函数名
+
+Flags : 任务标志，参考 sched.h
+
+默认情况下仅显示比较重要的 PID、USER、PR、NI、VIRT、RES、SHR、S、%CPU、%MEM、TIME+、COMMAND 列。可以通过下面的快捷键来更改显示内容。 更改显示内容
+通过 f 键可以选择显示的内容。按 f 键之后会显示列的列表，按 a-z 即可显示或隐藏对应的列，最后按回车键确定。
+
+按 o 键可以改变列的显示顺序。按小写的 a-z 可以将相应的列向右移动，而大写的 A-Z 可以将相应的列向左移动。最后按回车键确定。
+
+按大写的 F 或 O 键，然后按 a-z 可以将进程按照相应的列进行排序。而大写的 R 键可以将当前的排序倒转。
+
+命令使用
+
+1． 工具（命令）名称
+top
+
+2．工具（命令）作用
+显示系统当前的进程和其他状况； top是一个动态显示过程,即可以通过用户按键来不断刷新当前状态.如果在前台执行该命令,它将独占前台,直到用户终止该程序为止. 比较准确的说,top命令提供了实时的对系统处理器的状态监视.它将显示系统中CPU最“敏感”的任务列表.该命令可以按CPU使用.内存使用和执行时间对任务进行排序；而且该命令的很多特性都可以通过交互式命令或者在个人定制文件中进行设定.
+
+3．环境设置
+在linux下使用。
+
+4．使用方法
+
+4．1使用格式
+top [-] [d] [p] [q] [c] [C] [S] [s] [n]
+
+4．2参数说明
+
+ 
+
+d
+
+指定每两次屏幕信息刷新之间的时间间隔。当然用户可以使用s交互命令来改变之。
+
+p
+
+通过指定监控进程ID来仅仅监控某个进程的状态。
+
+q
+
+该选项将使top没有任何延迟的进行刷新。如果调用程序有超级用户权限，那么top将以尽可能高的优先级运行。
+
+S
+
+指定累计模式
+
+s
+
+使top命令在安全模式中运行。这将去除交互命令所带来的潜在危险。
+
+i
+
+使top不显示任何闲置或者僵死进程。
+
+c
+
+显示整个命令行而不只是显示命令名
+
+4.3其他
+
+下面介绍在top命令执行过程中可以使用的一些交互命令。从使用角度来看，熟练的掌握这些命令比掌握选项还重要一些。这些命令都是单字母的，如果在命令行选项中使用了s选项，则可能其中一些命令会被屏蔽掉。
+Ctrl+L
+
+擦除并且重写屏幕。
+
+h或者?
+
+显示帮助画面，给出一些简短的命令总结说明。
+
+k
+
+终止一个进程。系统将提示用户输入需要终止的进程PID，以及需要发送给该进程什么样的信号。一般的终止进程可以使用15信号；如果不能正常结束那就使用信号9强制结束该进程。默认值是信号15。在安全模式中此命令被屏蔽。
+
+i
+
+忽略闲置和僵死进程。这是一个开关式命令。
+
+q
+
+退出程序。
+
+r
+
+重新安排一个进程的优先级别。系统提示用户输入需要改变的进程PID以及需要设置的进程优先级值。输入一个正值将使优先级降低，反之则可以使该进程拥有更高的优先权。默认值是10。
+
+S
+
+切换到累计模式。
+
+s
+
+改变两次刷新之间的延迟时间。系统将提示用户输入新的时间，单位为s。如果有小数，就换算成m s。输入0值则系统将不断刷新，默认值是5 s。需要注意的是如果设置太小的时间，很可能会引起不断刷新，从而根本来不及看清显示的情况，而且系统负载也会大大增加。
+
+f或者F
+
+从当前显示中添加或者删除项目。
+
+o或者O
+
+改变显示项目的顺序。
+
+l
+
+切换显示平均负载和启动时间信息。
+
+m
+
+切换显示内存信息。
+
+t
+
+切换显示进程和CPU状态信息。
+
+c
+
+切换显示命令名称和完整命令行。
+
+M
+
+根据驻留内存大小进行排序。
+
+P
+
+根据CPU使用百分比大小进行排序。
+
+T
+
+根据时间/累计时间进行排序。
+
+W
+
+将当前设置写入~/.toprc文件中。

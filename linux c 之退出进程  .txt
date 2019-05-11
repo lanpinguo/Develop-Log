@@ -1,0 +1,98 @@
+linux c 之退出进程  
+
+http://blog.csdn.net/muge0913/article/details/7317580
+
+
+linux中常用退出函数：
+
+[cpp] view plaincopyprint?
+#include<stdlib.h>  
+  
+void exit(int status);  
+  
+int atexit(void (*function)(void))  
+  
+int on_exit(void (*function)(int,void *),void arg*)  
+  
+void abort(void)  
+#include<unistd.h>  
+  
+void _exit(int status)  
+#include<assert.h>  
+  
+void assert(int expression)  
+
+ 
+atexit：在其中注册的无参数函数在退出时调用。成功返回0失败返回-1，并影响errno
+on_exit：在其中注册的有参数函数在退出时调用。成功返回0失败返回-1，并影响errno
+ 
+assert是宏定义，检查是否出错，出错则退出。
+abort发送SIGABRT消息结束当前进程。
+ 
+ 
+exit和_exit函数都是用来终止进程的。当程序执行到exit或_exit时，系统无条件的停止剩下所有操作，清除包括PCB在内的各种数据结构，并终止本进程的运行。但是，这两个函数是有区别的。
+ 
+exit()函数与_exit()函数最大区别就在于exit()函数在调用do_exit之前要检查文件的打开情况，把文件缓冲区的内容写回文件。
+ 
+由于Linux的标准函数库中，有一种被称作“缓冲I/O”的操作，其特征就是对应每一个打开的文件，在内存中都有一片缓冲区。每次读文件时，会连续的读出若干条记录，这样在下次读文件时就可以直接从内存的缓冲区读取；同样，每次写文件的时候也仅仅是写入内存的缓冲区，等满足了一定的条件（如达到了一定数量或遇到特定字符等），再将缓冲区中的内容一次性写入文件。这种技术大大增加了文件读写的速度，但也给编程代来了一点儿麻烦。比如有一些数据，认为已经写入了文件，实际上因为没有满足特定的条件，它们还只是保存在缓冲区内，这时用_exit()函数直接将进程关闭，缓冲区的数据就会丢失。因此，要想保证数据的完整性，就一定要使用exit()函数。
+ 
+exit的函数声明在stdlib.h头文件中。
+ 
+_exit的函数声明在unistd.h头文件当中。
+ 
+下面的实例比较了这两个函数的区别。printf函数就是使用缓冲I/O的方式，该函数在遇到“\n”换行符时自动的从缓冲区中将记录读出。实例就是利用这个性质进行比较的。
+ 
+exit.c源码
+ 
+[cpp] view plaincopyprint?
+#include<stdlib.h>  
+  
+#include<stdio.h>  
+  
+   
+  
+intmain(void)  
+  
+{  
+  
+    printf("Using exit...\n");  
+  
+    printf("This is the content inbuffer");  
+  
+    exit(0);  
+  
+}  
+
+ 
+输出信息：
+ 
+Usingexit...
+ 
+Thisis the content in buffer
+ 
+[cpp] view plaincopyprint?
+#include<unistd.h>  
+  
+#include<stdio.h>  
+  
+   
+  
+intmain(void)  
+  
+{  
+  
+    printf("Using exit...\n");  
+  
+    printf("This is the content inbuffer");  
+  
+    _exit(0);  
+  
+}  
+
+ 
+则只输出：
+ 
+Usingexit...
+ 
+说明：在一个进程调用了exit之后，该进程并不会马上完全消失，而是留下一个称为僵尸进程（Zombie）的数据结构。僵尸进程是一种非常特殊的进程，它几乎已经放弃了所有的内存空间，没有任何可执行代码，也不能被调度，仅仅在进程列表中保留一个位置，记载该进程的退出状态等信息供其它进程收集，除此之外，僵尸进程不再占有任何内存空间。
+总结：就是说退出进程的时候一般使用exit（），如果使用的—exit（）可能会使该打印出来的数据丢失，即缓冲IO被清除。
