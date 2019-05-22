@@ -98,6 +98,8 @@ git reset 9a42e8e3f41dcf5029a11ce651f36cbdf37fc84d -- 2.txt
 git checkout -- 2.txt
 git add .
 git commit --amend
+7.检出某一次commit的特定文件
+git checkout <commit id> <file-path>
 C.一些参考资料
 http://www.vogella.com/articles/Git/article.html [中文译文版本]
 https://www.kernel.org/pub/software/scm/git/docs/
