@@ -1,0 +1,9 @@
+Ubuntu的团队最近宣布了一个重磅消息：Ubuntu将在下一个发布版本17.10中放弃用了多年的Unity桌面环境，回归到Gnome桌面。
+
+其实用户完全可以自己为自己的Ubuntu来安装Gnome桌面。Gnome桌面相比Unity来说有着不少优势。最大的优势我个人觉得还是在流畅度上。当然我个人更习惯与使用Gnome的经典桌面。
+
+
+
+其实安装Gnome桌面超级简单，就一句命令：
+
+$sudo apt-get  install gnome
