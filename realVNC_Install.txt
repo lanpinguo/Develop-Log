@@ -1,0 +1,24 @@
+然后sudo dpkg -i安装该deb包即可。Real VNC还是很赞的，文档写得很棒，给个Debian安装卸载Real VNC的链接：
+
+      https://www.realvnc.com/en/connect/docs/debian-install-remove.html
+
+      安装成功后，根据文档指导，在命令行输入vnclicensewiz即可调出许可证设置，如下：
+	  
+	  
+	  
+Lan's Team
+
+License keys
+You can apply your subscription in bulk, offline or remotely using a license key. Run the appropriate post-install command below as an administrator, or deploy the key via the VNC Server MSI (Windows) or policy (any platform).
+
+Windows
+<install-dir>\vnclicense.exe -add KEY
+Mac
+sudo /Library/vnc/vnclicense -add KEY
+Linux
+sudo vnclicense -add KEY
+Product	Key	Explanation
+VNC Connect	BZ422-N46H6-XLS7K-H47C6-T9MX3	Use this key to license VNC Connect (version 6.x).
+VNC 5.x	
+Show
+Only use this key if you need to license VNC 5.x, and upgrade to 5.3.3 to remove the 'expired key' warning.

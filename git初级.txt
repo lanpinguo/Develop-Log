@@ -100,6 +100,12 @@ git add .
 git commit --amend
 7.检出某一次commit的特定文件
 git checkout <commit id> <file-path>
+
+8.gitignore 忽略文件
+当多级目录下都存在.gitignore文件的情况下，最后一级目录中的忽略规则生效；
+
+
+
 C.一些参考资料
 http://www.vogella.com/articles/Git/article.html [中文译文版本]
 https://www.kernel.org/pub/software/scm/git/docs/
