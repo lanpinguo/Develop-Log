@@ -1,13 +1,16 @@
 linux驱动加载命令和驱动模块信息查看
-驱动操作命令：
-      insmod / modprobe 加载驱动
-      rmmod                     卸载驱动
-      lsmod                       查看系统中所有已经被加载了的所有的模块以及模块间的依赖关系
-      modinfo                    获得模块的信息
+
+1、驱动操作命令：
+	insmod / modprobe 加载驱动
+	rmmod                     卸载驱动
+	lsmod                       查看系统中所有已经被加载了的所有的模块以及模块间的依赖关系
+	modinfo                    获得模块的信息
  
- 
-查看已经加载的驱动模块的信息：
-   lsmod   能够显示驱动的大小以及被谁使用  
-    cat /proc/modules    能够显示驱动模块大小、在内核空间中的地址
-      cat /proc/devices    只显示驱动的主设备号，且是分类显示 
-      /sys/modules          下面存在对应的驱动的目录，目录下包含驱动的分段信息等等。  
+2、加载模块时传递参数：
+# insmod module.ko [param1=value param2=value ...]
+
+3、查看已经加载的驱动模块的信息：
+	lsmod   能够显示驱动的大小以及被谁使用  
+	cat /proc/modules    能够显示驱动模块大小、在内核空间中的地址
+	cat /proc/devices    只显示驱动的主设备号，且是分类显示 
+	/sys/modules          下面存在对应的驱动的目录，目录下包含驱动的分段信息等等。  

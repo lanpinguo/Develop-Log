@@ -1,0 +1,324 @@
+/dev/mem可没那么简单
+
+这几天研究了下/dev/mem，发现功能很神奇，通过mmap可以将物理地址映射到用户空间的虚拟地址上，在用户空间完成对设备寄存器的操作，于是上网搜了一些/dev/mem的资料。网上的说法也很统一，/dev/mem是物理内存的全映像，可以用来访问物理内存，一般用法是open("/dev/mem",O_RDWR|O_SYNC)，接着就可以用mmap来访问物理内存以及外设的IO资源，这就是实现用户空间驱动的一种方法。
+用户空间驱动听起来很酷，但是对于/dev/mem，我觉得没那么简单，有2个地方引起我的怀疑：
+（1）网上资料都说/dev/mem是物理内存的全镜像，这个概念很含糊，/dev/mem到底可以完成哪些地址的虚实映射？
+（2）/dev/mem看似很强大，但是这也太危险了，黑客完全可以利用/dev/mem对kernel代码以及IO进行一系列的非法操作，后果不可预测，难道内核开发者们没有意识到这点吗?
+
+网上资料说法都很泛泛，只对mem设备的使用进行说明，没有对这些问题进行深究。要搞清这一点，我觉得还是从/dev/mem驱动开始下手。
+
+参考内核版本：3.4.55 
+参考平台：powerpc/arm
+
+mem驱动在drivers/char/mem.c，mmap是系统调用，产生软中断进入内核后调用sys_mmap，最终会调用到mem驱动的mmap实现函数。
+来看下mem.c中的mmap实现：
+
+static int mmap_mem(struct file *file, struct vm_area_struct *vma)
+{
+    size_t size = vma->vm_end - vma->vm_start;
+ 
+    if (!valid_mmap_phys_addr_range(vma->vm_pgoff, size))
+        return -EINVAL;
+ 
+    if (!private_mapping_ok(vma))
+        return -ENOSYS;
+ 
+    if (!range_is_allowed(vma->vm_pgoff, size))
+        return -EPERM;
+ 
+    if (!phys_mem_access_prot_allowed(file, vma->vm_pgoff, size,
+                        &vma->vm_page_prot))
+        return -EINVAL;
+ 
+    vma->vm_page_prot = phys_mem_access_prot(file, vma->vm_pgoff,
+                         size,
+                         vma->vm_page_prot);
+ 
+    vma->vm_ops = &mmap_mem_ops;
+ 
+    /* Remap-pfn-range will mark the range VM_IO and VM_RESERVED */
+    if (remap_pfn_range(vma,
+                vma->vm_start,
+                vma->vm_pgoff,
+                size,
+                vma->vm_page_prot)) {
+        return -EAGAIN;
+    }
+    return 0;
+}
+vma是内核内存管理很重要的一个结构体，
+
+其结构成员中start end代表要映射到的用户空间虚拟地址范围，用户空间的动态映射是以PAGE_SIZE也就是4K为一页，
+vma_pgoff是要映射的物理地址，vma_page_prot代表该页的权限。
+
+这些成员的赋值是在调用具体驱动的mmap实现函数之前，在sys_mmap中进行的。
+在mmap_mem最后调用remap_pfn_range，该函数完成指定物理地址与用户空间虚拟地址页表的建立。
+remap_pfn_range参数中vma->vm_pgoff即代表要映射的物理地址，并没有范围限制仅能够操作内存。
+mmap系统调用的函数定义如下：
+void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
+addr指定要映射到的虚拟地址，写NULL则有sys_mmap来分配该虚拟地址。
+mmap参数与mem_mmap参数对应关系如下：
+prot      ===> vma->vma_page_prot
+offset    ===> vma->vma_pgoff
+length    ===> size
+
+
+从刚才分析的mem_mmap流程来看，可以得出一个简单的结论：
+mem_mmap可以映射整个处理器的地址空间，而不单单是内存。这里要说明的是，地址空间不等于内存空间。站在处理器角度看，地址空间指处理器总线上的所有可寻址空间，除了内存，还有外设的IO空间，以及其他总线映射过来的mem（如PCI）
+我的理解，mem_mmap完全可以映射0-0xffffffff的所有物理地址（填TLB页表完成映射），但前提是保证该物理地址是真实有效的，也就是处理器访问该总线物理地址可以获取有效数据。
+所以现在看来mmap /dev/mem，只要确定我们处理器的地址空间分布，就可以将我们需要的地址映射到用户空间进行操作。
+如果地址不是一个有效物理地址（处理器地址空间分布中该地址没用），mmap建立该物理地址与用户空间虚拟地址的映射，填TLB，CPU经过TLB翻译后去访问该不存在的物理地址访问就有可能导致CPU挂掉。
+
+这也就解释了我第一个疑问，但是kernel的安全机制不会允许用户这么肆无忌惮的操作。接着来看remap_pfn_range之前mmap_mem如何进行防护。
+
+首先是valid_mmap_phys_addr_range，检查该物理地址是否是一个有效的mmap地址，如果平台定义了ARCH_HAS_VALID_PHYS_ADDR_RANGE则会实现该函数，
+arm中定义并实现了该函数，在arch/arm/mm/mmap.c中，如下：
+
+
+/*
+ * We don't use supersection mappings for mmap() on /dev/mem, which
+ * means that we can't map the memory area above the 4G barrier into
+ * userspace.
+ */
+int valid_mmap_phys_addr_range(unsigned long pfn, size_t size)
+{
+    return !(pfn + (size >> PAGE_SHIFT) > 0x00100000);
+}
+该函数确定mmap的范围是否超过4G，超过4G则为无效物理地址，这种情况用户空间一般不会出现。
+而对于powerpc，平台没有定义ARCH_HAS_VALID_PHYS_ADDR_RANGE，所以valid_mmap_phys_addr_range在mem.c中定义为空函数，返回1 表示该物理地址一直有效。
+物理地址有效，不会返回-EINVAL，继续往下走。
+
+接下来是private_mapping_ok，对于有MMU的CPU，实现如下：
+static inline int private_mapping_ok(struct vm_area_struct *vma)
+{
+    return 1;
+}
+MMU的权限管理可以支持私有映射，所以该函数一直成功。
+
+接下来是一个最为关键的检查函数range_is_allowed，定义如下：
+#ifdef CONFIG_STRICT_DEVMEM
+static inline int range_is_allowed(unsigned long pfn, unsigned long size)
+{
+    u64 from = ((u64)pfn) << PAGE_SHIFT;
+    u64 to = from + size;
+    u64 cursor = from;
+ 
+    while (cursor < to) {
+        if (!devmem_is_allowed(pfn)) {
+            printk(KERN_INFO
+        "Program %s tried to access /dev/mem between %Lx->%Lx.\n",
+                current->comm, from, to);
+            return 0;
+        }
+        cursor += PAGE_SIZE;
+        pfn++;
+    }
+    return 1;
+}
+#else
+static inline int range_is_allowed(unsigned long pfn, unsigned long size)
+{
+    return 1;
+}
+#endif
+可以看出如果不打开CONFIG_STRICT_DEVMEM,range_is_allowed是返回1，表示该物理地址范围是被允许的。查看kconfig文件（在相应平台目录下，如arch/arm/Kconfig.debug中）找到CONFIG_STRICT_DEVMEM说明如下
+
+config STRICT_DEVMEM
+    def_bool y
+    prompt "Filter access to /dev/mem"
+    help
+      This option restricts access to /dev/mem.  If this option is
+      disabled, you allow userspace access to all memory, including
+      kernel and userspace memory. Accidental memory access is likely
+      to be disastrous.
+      Memory access is required for experts who want to debug the kernel.
+ 
+      If you are unsure, say Y.
+该选项menuconfig时在kernel hacking目录下。
+根据说明可以理解，CONFIG_STRICT_DEVMEM是严格的对/dev/mem访问检查，如果关掉该选项，用户就可以通过mem设备访问所有地址空间（根据对我提出的第一个问题理解，这里memory应该理解为地址空间）。该选项对于调试内核有帮助。
+如果打开该选项，内核就会对mem设备访问加以检查，检查函数就是range_is_allowed。
+
+range_is_allowed函数对要检查的物理地址范围以4K页为单位，一页一页的调用devmem_is_allowed，如果不允许，则会进行打印提示，并返回0，表示该物理地址范围不被允许。
+
+来看devmem_is_allowed.该函数是平台相关函数，不过arm跟powerpc的实现相差不大，以arm的实现为例。在arch/arm/mm/mmap.c中。
+
+/*
+ * devmem_is_allowed() checks to see if /dev/mem access to a certain
+ * address is valid. The argument is a physical page number.
+ * We mimic x86 here by disallowing access to system RAM as well as
+ * device-exclusive MMIO regions. This effectively disable read()/write()
+ * on /dev/mem.
+ */
+int devmem_is_allowed(unsigned long pfn)
+{
+    if (iomem_is_exclusive(pfn << PAGE_SHIFT))
+        return 0;
+    if (!page_is_ram(pfn))
+        return 1;
+    return 0;
+}
+首先iomem_is_exclusive检查该物理地址是否被独占保留，实现如下：
+
+#ifdef CONFIG_STRICT_DEVMEM
+static int strict_iomem_checks = 1;
+#else
+static int strict_iomem_checks;
+#endif
+ 
+/*
+ * check if an address is reserved in the iomem resource tree
+ * returns 1 if reserved, 0 if not reserved.
+ */
+int iomem_is_exclusive(u64 addr)
+{
+    struct resource *p = &iomem_resource;
+    int err = 0;
+    loff_t l;
+    int size = PAGE_SIZE;
+ 
+    if (!strict_iomem_checks)
+        return 0;
+ 
+    addr = addr & PAGE_MASK;
+ 
+    read_lock(&resource_lock);
+    for (p = p->child; p ; p = r_next(NULL, p, &l)) {
+        /*
+         * We can probably skip the resources without
+         * IORESOURCE_IO attribute?
+         */
+        if (p->start >= addr + size)
+            break;
+        if (p->end < addr)
+            continue;
+        if (p->flags & IORESOURCE_BUSY &&
+             p->flags & IORESOURCE_EXCLUSIVE) {
+            err = 1;
+            break;
+        }
+    }
+    read_unlock(&resource_lock);
+ 
+    return err;
+}
+如果打开了CONFIG_STRICT_DEVMEM,iomem_is_exclusive遍历iomem_resource链表，查看要检查的物理地址所在resource的flags，如果是bug或者exclusive，则返回1，表明该物理地址是独占保留的。
+
+据我了解，iomem_resource是来表征内核iomem资源的链表。
+
+对于外设的IO资源，kernel中使用platform device机制来注册平台设备（platform_device_register）时调用insert_resource将该设备相应的io资源插入到iomem_resource链表中。
+如果我要对某外设的IO资源进行保护，防止用户空间访问，可以将其resource的flags置位exclusive即可。
+
+不过我查看我平台支持包里的所有platform device的resource，flags都没有置位exclusive或者busy。如果我映射的物理地址范围是外设的IO，检查可以通过。
+
+
+对于内存的mem资源，如何注册到iomem_resource链表中，内核代码中我还没找到具体的位置，不过iomem在proc下有相应的表征文件，可以cat /proc/iomem。
+根据我的实际操作测试，内存资源也都没有exclusive，所以如果我映射地址是内存，检查也可以通过。
+
+
+所以这里iomem_is_exclusive检查一般是通过的，接下来看page_is_ram，看devmem_is_range的逻辑，如果地址是ram地址，则该地址不被允许。page_is_ram也是平台函数，查看powerpc的实现如下。
+
+int page_is_ram(unsigned long pfn)
+{
+#ifndef CONFIG_PPC64    /* XXX for now */
+    return pfn < max_pfn;
+#else
+    unsigned long paddr = (pfn << PAGE_SHIFT);
+    struct memblock_region *reg;
+ 
+    for_each_memblock(memory, reg)
+        if (paddr >= reg->base && paddr < (reg->base + reg->size))
+            return 1;
+    return 0;
+#endif
+}
+max_pfn赋值在在do_init_bootmem中，如下.
+void __init do_init_bootmem(void)
+{
+    unsigned long start, bootmap_pages;
+    unsigned long total_pages;
+    struct memblock_region *reg;
+    int boot_mapsize;
+ 
+    max_low_pfn = max_pfn = memblock_end_of_DRAM() >> PAGE_SHIFT;
+    total_pages = (memblock_end_of_DRAM() - memstart_addr) >> PAGE_SHIFT;
+max_pfn代表了内核lowmem的页个数，lowmem在内核下静态线性映射，系统启动之初完成映射之后不会改动，读写效率高，内核代码都是跑在lowmem。
+lowmem大小我们可以通过cmdline的“mem=”来指定。
+
+这里就明白了如果要映射的物理地址在lowmem范围内，也是不允许被映射的。
+
+这样range_is_allowed就分析完了，exclusive的iomem以及lowmem范围内的物理地址是不允许被映射的。
+
+接下来phys_mem_access_prot_allowed实现为空返回1，没有影响。
+
+phys_mem_access_prot确定我们映射页的权限，该函数也是平台函数，以powerpc实现为例，如下：
+pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
+                  unsigned long size, pgprot_t vma_prot)
+{
+    if (ppc_md.phys_mem_access_prot)
+        return ppc_md.phys_mem_access_prot(file, pfn, size, vma_prot);
+ 
+    if (!page_is_ram(pfn))
+        vma_prot = pgprot_noncached(vma_prot);
+ 
+    return vma_prot;
+}
+如果有平台实现的phys_mem_access_prot，则调用之。如果没有，对于不是lowmem范围内的物理地址，权限设置为uncached。
+
+以上的检查完毕，最后调用remap_pfn_range完成页表设置。
+
+所以如果打开CONFIG_STRICT_DEVMEM,mem驱动会对mmap要映射的物理地址进行范围和位置的检查然后才进行映射，检查条件如下：
+（1）映射范围不能超过4G。
+（2）该物理地址所在iomem不能exclusive.
+（3）该物理地址不能处在lowmem中。
+
+所以说对于网上给出的各种利用/dev/mem来操作内存以及寄存器的文章，如果操作范围在上述3个条件内，内核必须关闭CONFIG_STRICT_DEVMEM才行。
+
+这样对于mem设备我的2个疑问算是解决了。查看mem.c时我还看到了另外一个有趣的设备kmem，这个设备mmap的是哪里的地址，网上的说法是内核虚拟地址，这个说法我不以为然，这里记录下我的想法。
+
+如果内核打开CONFIG_KMEM，则会创建kmem设备，它与mem设备主要差别在mmap的实现上，kmem的mmap实现如下：
+#ifdef CONFIG_DEVKMEM
+static int mmap_kmem(struct file *file, struct vm_area_struct *vma)
+{
+    unsigned long pfn;
+ 
+    /* Turn a kernel-virtual address into a physical page frame */
+    pfn = __pa((u64)vma->vm_pgoff << PAGE_SHIFT) >> PAGE_SHIFT;
+ 
+    /*
+     * RED-PEN: on some architectures there is more mapped memory than
+     * available in mem_map which pfn_valid checks for. Perhaps should add a
+     * new macro here.
+     *
+     * RED-PEN: vmalloc is not supported right now.
+     */
+    if (!pfn_valid(pfn))
+        return -EIO;
+ 
+    vma->vm_pgoff = pfn;
+    return mmap_mem(file, vma);
+}
+#endif
+引起我注意的是__pa，完成内核虚拟地址到物理地址的转换，最后调用mmap_mem，简单一看kmem的确是映射的内核虚拟地址。
+但是搞清楚__pa的实现，我就不这么认为了。以powerpc为例，在arch/powerpc/include/asm/page.h,定义如下：
+
+#define __va(x) ((void *)(unsigned long)((phys_addr_t)(x) + VIRT_PHYS_OFFSET))
+#define __pa(x) ((unsigned long)(x) - VIRT_PHYS_OFFSET)
+....
+#define VIRT_PHYS_OFFSET (KERNELBASE - PHYSICAL_START)
+内核中定义了4个变量来表示内核一些基本的物理地址和虚拟地址，如下：
+KERNELBASE     内核的起始虚拟地址，我的是0xc0000000
+PAGE_OFFSET    低端内存的起始虚拟地址，一般是0xc0000000
+PHYSICAL_START 内核的起始物理地址，我的是0x80000000
+MEMORY_START   低端内存的起始物理地址，我的是0x80000000
+
+内核在启动过程中对于lowmem的静态映射，就是以上述的物理地址和虚拟地址的差值进行线性映射的。
+所以__pa __va转换的是线性映射的内存部分，也就是lowmem。
+所以kmem映射的是lowmem，如果我的cmdline参数中mem=512M，这就意味着通过kmem的mmap我最多可以访问内核地址空间开始的512M内存。
+对于超过lowmem范围，访问highmem，如果使用__pa访问，由于highmem是动态映射的，其映射关系不是线性的那么简单了，根据__pa获取的物理地址与我们想要的内核虚拟地址是不对应的。
+
+
+--------------------- 
+作者：kerneler_ 
+来源：CSDN 
+原文：https://blog.csdn.net/skyflying2012/article/details/47611399 
+版权声明：本文为博主原创文章，转载请附上博文链接！

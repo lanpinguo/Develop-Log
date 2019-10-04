@@ -1,0 +1,23 @@
+要使在任务级别处理包接受的工作排队，中断服务必须调用netJobAdd()。在输入的时候，这个例行程序（Routine）收到一个功能函数的指针并且直到收到五个额外的参数（指针所指功能函数的参数）。
+
+STATUS netJobAdd
+
+    (
+
+    FUNCPTR routine,
+
+    int param1,
+
+    int param2,
+
+    int param3,
+
+    int param4,
+
+    int param5
+
+    );
+
+如果调用netJobAdd()，就必须定义网络驱动在任务级别处理包的接入点。netJobAdd例行程序将功能函数调用（包括其参数）放入tNetTask的任务队列中。VxWorks使用tNetTask处理任务级别的网络处理功能。
+
+这里只是举例说明了接收包的情况，其它情况下netJobAdd()也一样能执行对应的入列功能。

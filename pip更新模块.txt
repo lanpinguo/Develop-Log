@@ -1,0 +1,11 @@
+pip更新模块：
+
+1) 使用控制台命令进入到pip的安装路径：D:/Python27/Lib/site-packages
+
+2) 使用更新命令行：pip install -U PackageName
+
+pip卸载模块：
+
+1) 使用控制台命令进入到pip的安装路径：D:/Python27/Lib/site-packages
+
+2） 使用更新命令行：pip uninstall PackageName

@@ -1,0 +1,91 @@
+The BBB has 7 ADC pins available for use with the Venus builds.
+
+TI ADC Kernel documentation is here.
+
+The BBB ADC's are 12-bit (0-4095) and have a input range of 0 - 1.8V
+
+Description	Port
+Resistive tank sensor 1	P9.33 AIN4
+Resistive tank sensor 2	P9.35 AIN6
+Resistive tank sensor 3	P9.37 AIN2
+Generic 0-10V sensor input	P9.39 AIN0
+Temp sensor 1 (LM335)	P9.36 AIN5
+Temp sensor 2 (LM335)	P9.38 AIN3
+Battery voltage	P9.40 AIN1
+P9.34 AGND
+Access the ADC pins through the sysfs iio interface
+
+root@venus:~# ls  /sys/bus/iio/devices/iio\:device0
+buffer           in_voltage2_raw  in_voltage6_raw  scan_elements
+dev              in_voltage3_raw  name             subsystem
+in_voltage0_raw  in_voltage4_raw  of_node          uevent
+in_voltage1_raw  in_voltage5_raw  power
+Here's a simple script to read the ADC values
+
+#!/bin/sh
+
+for i in 0 1 2 3 4 5 6; do
+    echo -n "ADC[${i}]: "
+    cat /sys/bus/iio/devices/iio\:device0/in_voltage${i}_raw
+done
+And here are a few tests using that script
+
+All pins floating
+
+root@venus:~# ./read_adc.sh
+ADC[0]: 3969
+ADC[1]: 3641
+ADC[2]: 3985
+ADC[3]: 1688
+ADC[4]: 1956
+ADC[5]: 3637
+ADC[6]: 3516
+All pins grounded
+
+root@venus:~# ./read_adc.sh
+ADC[0]: 1
+ADC[1]: 1
+ADC[2]: 9
+ADC[3]: 8
+ADC[4]: 11
+ADC[5]: 7
+ADC[6]: 11
+All pins at 0.5V
+
+root@venus:~# ./read_adc.sh
+ADC[0]: 1112
+ADC[1]: 1108
+ADC[2]: 1110
+ADC[3]: 1115
+ADC[4]: 1109
+ADC[5]: 1110
+ADC[6]: 1106
+All pins at 1.0V
+
+root@venus:~# ./read_adc.sh
+ADC[0]: 2428
+ADC[1]: 2432
+ADC[2]: 2433
+ADC[3]: 2433
+ADC[4]: 2430
+ADC[5]: 2428
+ADC[6]: 2438
+All pins at 1.5V
+
+root@venus:~# ./read_adc.sh
+ADC[0]: 3505
+ADC[1]: 3508
+ADC[2]: 3507
+ADC[3]: 3507
+ADC[4]: 3503
+ADC[5]: 3501
+ADC[6]: 3499
+ODD pins at 1.5V, EVEN pins grounded
+
+ADC[0]: 0
+ADC[1]: 3503
+ADC[2]: 4
+ADC[3]: 3504
+ADC[4]: 18
+ADC[5]: 3507
+ADC[6]: 22

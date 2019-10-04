@@ -1,0 +1,24 @@
+
+How to bind socket to an interface in python (socket.SO_BINDTODEVICE missing)
+
+
+
+import socket
+import IN
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.setsockopt(socket.SOL_SOCKET, IN.SO_BINDTODEVICE, b"eth0")
+
+
+Or,
+
+You may even "export" a missing option:
+
+if not hasattr(socket,'SO_BINDTODEVICE') :
+    socket.SO_BINDTODEVICE = 25
+then
+
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_BINDTODEVICE, interface+'\0')
+
+实际验证，下面的方式可以正常工作：
+s.bind(('usb0',0)) 

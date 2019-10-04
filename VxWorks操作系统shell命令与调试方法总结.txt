@@ -1,0 +1,2971 @@
+VxWorks操作系统shell命令与调试方法总结
+
+https://yq.aliyun.com/articles/48125
+
+VxWorks下的调试手段
+
+主要介绍在Tornado集成开发环境下的调试方法和利用支撑定位问题的步骤、思路。
+
+1         Tornado的调试工具
+嵌入式实时操作系统VxWorks和集成开发环境Tornado的组成结构如下图1。分为主机和目标机系统。
+
+图1 集成开发环境结构图
+
+在Tornado下调试相关操作在Debug菜单下包括
+
+图2 Debug菜单
+
+简单解释各菜单项的功能
+
+1.1        WindShell
+1.1.1         简介
+Vxworks的Shell分为两种hostshell 和 target shell
+
+Tornado提供的WindShell建立了2者间的一个桥梁,从宿主机到目标机之间的一个命令 shell。WindSh 是一种非常受欢迎的开发工具它具有很强的交互性和可操作性允许用户调用内存中的应用程序模块或是 VxWorks模块中的任何例程。它不但具有一般命令语言的功能而且也具有 C 语言的设计特点能够解释几乎任何 C 语言表达式 执行大多数 C 语言算子解析符号表数据。对初用者来说WindSh学习起来比较简单使用比较方便对熟练用户而言则有较为高级的手段可以应用。
+
+WindSh是一个驻留在主机内的C语言解释器通过它可运行下载到目标机上的所有函数包括VxWorks系统调用和应用函数。Tornado外壳还能解释常规的工具命令语言TCL。
+
+WindSh不仅可以解释几乎所有的C语言表达式而且可以实现所有的调试功能。它主要有以下调试功能下载软件模块删除软件模块产生任务删除任务设置断点删除断点运行、单步、继续执行程序查看内存、寄存器、变量修改内存、寄存器、变量查看任务列表、内存使用情况、CPU利用率查看特定的对象任务、信号量、消息队列、内存分区、类复位目标机等。
+
+1.1.2         功能键
+Tab
+
+    补齐剩余部分
+
+Ctrl+D 
+
+l  显示与之匹配的所有符号
+
+-> CurM^D
+
+_CurMaster  _CurModule  
+
+l  补齐剩余部分 
+
+->CurMo^D
+
+->CurModule
+
+l  显示命令摘要
+
+->moduleShow ^D
+
+moduleShow() - show the current status for all theloaded modules (WindSh)
+
+STATUS moduleShow
+
+    (
+
+    char *moduleNameOrId /* name or ID of the module to show */
+
+)
+
+Ctrl+W
+
+键入完整的命令后继续键入空格+ [Ctrl+W]。将会显示html页帮助信息.
+
+Ctrl+H
+
+   删除一字符
+
+Ctrl+U
+
+   删除一行
+
+CTRL+C
+
+   重起shell
+
+CTRL+X
+
+   Reboot
+
+CTRL+S
+
+   临时挂起输出
+
+CTRL+Q
+
+   恢复挂起
+
+Esc   
+
+在输入和编辑模式间切换
+
+输入类似Vi编辑命令, 如[Esc + k]显示前一次输入的命令
+
+        h←j↓k↑l→
+
+h()设置命令缓冲区长度。->h 500
+
+ 
+
+1.1.3         特殊控制符
+?
+
+   C和TCL模式转换符号, 在c模式下敲?进入tcl模式, 在tcl下敲?则进入c模式;
+
+@
+
+       在target还是在host上运行, 在指令前加上@则在target上运行, 否则在host上运行
+
+> 
+
+       指令输出重定向
+
+< 
+
+指令输入重定向
+
+1.1.4         计算功能
+数据转换键入整数或字符后回车可以显示该整数的十进制及十六进制值。也可以键入字符常量或符号地址。
+
+比如
+
+->0x54+64
+
+value = 148 = 0x94
+
+->x = (8 * 6) / 4
+
+x = 0x20ff378: value = 12 = 0xc
+
+->Nom = “Nelson”
+
+new symbol “Nom” added to symbol table.
+
+Nom = 0x23fe798: value = 37742496 = 0x23fe7a0 =
+
+Nom + 0x8
+
+ 
+
+1.1.5         环境变量
+使用 shConfig 命令修改环境变量:
+
+SH_GET_TASK_IO
+
+    为调用函数设置I/O重定向。ON:重定向到WindSh;OFF:I/O显示到目标机控制台。
+
+LD_PATH
+
+为模块设置搜索路径用“”隔开。 例如ld 命令提交后Shell搜寻模块的路径顺序为首先在当前目录然后到LD_PATH设置的路径。
+
+LD_SEND_MODULES
+
+设置load模式。
+
+以下3个用不到
+
+LD_CALL_XTORS
+
+LD_COMMON_MATCH_ALL
+
+DSM_HEX_MOD
+
+1.1.6         内置指令
+1.1.6.1        所有内置指令
+tcl> setshellProcList
+
+b bh bd bdall ccret e s so sysResume sysSuspend d l ld lkAddr lkup m mRegs unld agentMode Showbrowse checkStack classShow devs i intVecShow iStrict iosDevShow iosDrvShowiosFdShow memPartShow memShow moduleIdFigure moduleShow mqPxShow mqShowmsgQShow rBuffShow semPxSho w semShow show smMemPartShow smMemShowsysStatusShow taskShow trgShow version wdShow sp sp s taskIdDefaulttaskIdFigure td ti tr ts tt bootChange cd h help ls period printErrno printLogo pwd quit reboot repeat shellHistory shellPromptSet cplusXtorSetcplusStratShow cplus Ctors cplusDtors wvHostInfoShow evtBufferToFile hostShowicmpstatShow ifShow inetstatShow ipstatShow routestatShow taskCreateHookShowtaskDeleteHookShow taskSwitchHookShow taskRegs Show tw w taskWaitShowtcpstatShow tftpInfoShow udpstatShow
+
+ 
+
+1.1.6.2        任务管理
+sp
+
+用缺省参数创建一个任务priority=100 返回值为任务ID或错误,立刻返回。任务的I/O不被重定向到shell。
+
+如果直接敲例程名回车执行完才返回。I/O被重定向。
+
+sps
+
+与上者不同在于启动该任务后马上将其挂起
+
+tr
+
+恢复一个挂起的任务
+
+ts
+
+挂起一个任务
+
+td
+
+删除一个任务
+
+period
+
+创建一个周期调用函数的任务
+
+period 5testPrn   每隔5秒调用testPrn易于做调试打印。
+
+repeat
+
+创建一个重复调用函数的任务
+
+repeat 10testFunc1   连续执行10次testFunc1函数易于做测试用。
+
+mRegs
+
+修改任务的寄存器变量。比较有用的是修改pc值使程序退回到具体位置再运行。      程序位置可以使用shift+F7(混合汇编方式显示代码)
+
+-> mRegs"pc", s1u0
+
+pc     : 0499efd7 - 0x499efd1
+
+1.1.6.3        任务状态信息
+i   显示系统信息:
+
+  NAME     ENTRY      TID    PRI   STATUS     PC       SP     ERRNO DELAY
+
+---------------------- -------- --- ---------- -------- -------- ------- -----
+
+tExcTask   _excTask     4b79170   0 PEND         4276be 4b7908c   d0003     0
+
+iStrict  类似于i但只查询目标机一次
+
+ 
+
+ti  显示相应任务的TCB信息:
+
+-> ti tWdbTask
+
+NAME    ENTRY       TID    PRI  STATUS      PC       SP    ERRNO  DELAY
+
+---------------------- -------- --- ---------- -------- -------- ------- -----
+
+tWdbTask  0x417cc4     4b70c08   3 READY        4276be 4b70ae4   d0003     0
+
+stack: base 0x4b70c08  end 0x4b6ccc8 size 16176   high 3840   margin 12336
+
+options: 0xe
+
+VX_UNBREAKABLE VX_DEALLOC_STACK VX_FP_TASK
+
+edi   = ffffffff   esi    = 4b70fb8   ebp    = 4b70aec   esp   =  4b70ae4
+
+ebx   =        0   edx   =   4276be   ecx   =    10101   eax   =        0
+
+eflags =     212   pc     =  4276be
+
+taskShow
+
+显示任务TCB信息, 基本同ti
+
+taskCreateHookShow
+
+显示任务创建调用例程列表
+
+_fppCreateHook 0x177008 
+
+_envCreateHook 0x156954 
+
+___wdbTaskCreat 0x114718 
+
+taskDeleteHookShow
+
+显示任务删除调用例程列表
+
+taskSwitchHookShow
+
+显示任务切换调用例程列表
+
+_dbgTaskSwitch 0x180384 
+
+_SwitchHook    0xde7b78 
+
+w
+
+显示所有或者一个挂起任务的信息
+
+-> w s1u1
+
+  NAME      ENTRY      TID      STATUS  DELAY  OBJ_TYPE   OBJ_ID  OBJ_NAME
+
+-------------------- -------- ---------- ----- ---------- -------- ------------
+
+s1u1      _t2         4b65898 PEND           0 SEM_M       4b7ea48 N/A
+
+tw
+
+显示某挂起任务的详细信息。
+
+-> tw s1u1
+
+NAME       ENTRY      TID     STATUS   DELAY  OBJ_TYPE  OBJ_ID   OBJ_NAME
+
+---------- ---------- -------- ---------- ----- ---------- --------------------
+
+s1u1       _t2         4b65898 PEND           0 SEM_M       4b7ea48 N/A       
+
+ 
+
+Semaphore Id        : 0x4b7ea48
+
+Semaphore Type      : MUTEX    
+
+Task Queueing       : FIFO     
+
+Pended Tasks        : 1        
+
+State               : Owner=0x4b6c960
+
+taskWaitShow
+
+同tw
+
+taskRegsShow
+
+显示任务寄存器的内容
+
+->taskRegsShow 0x1c615534 
+
+edi   =        0  esi    = 1dd65514   ebp   = 1c61546c   esp    = 1c615458
+
+ebx   =        1   edx   = 1dfccac8   ecx    =       7   eax    =       0
+
+eflags =     246   pc     =  119604
+
+CheckStack
+
+显示一个任务的使用堆栈的情况没有定义任务时显示所有
+
+-> checkStack tWdbTask
+
+  NAME        ENTRY        TID    SIZE   CUR  HIGH MARGIN
+
+------------ ------------ -------- ----- ----- -----------
+
+tWdbTask    0x417cc4      4b70c08 16176   292 3840  12336
+
+tt
+
+显示一个任务的调用状况,解析堆栈
+
+    -> tt tShell
+
+    地址        函数名         偏移      被调用函数函数参数
+
+43ad37  _vxTaskEntry   +47 : _shell (1, 0,0, 0, 0, 0, 0, 0, 0, 0)
+
+41c414  _shell         +13c: 41c438 ([1,0, 0, 0, 41c23c])
+
+41c52e  _shell         +256: _ledRead(522efb8, 51e45e4, 80)
+
+如果认为被挂起可找出在哪个函数调用时失败。
+
+taskIdFigure
+
+报告任务的ID,以及名称
+
+taskIdDefault
+
+设置或者取得缺省的任务id
+
+int taskIdDefault
+
+(
+
+int tid /* user-supplied task ID; if 0,return default */
+
+)
+
+taskPrioritySet
+
+    实时改变任务运行的优先级
+
+1.1.6.4        一组调试指令
+d  
+
+显示目标机内存, 可以替代内存观察;
+
+如　d  0x12345, 128, 1         显示128个字节
+
+          d 0x12345, 32,  4         显示32个DWORD
+
+          m 0x12345, 128, 1
+
+      m  0x12345, 32,  4
+m
+
+修改内存
+
+void m
+(
+void * adrs, /* address to change */
+int    width /* width of unit to be modified (1, 2, 4, 8) */
+)
+
+lkup
+
+显示指定符号信息, 和以下指令使用可以找到该变量附近变量, 对于查找变量被更改很有益处
+
+-> lkup "CurModule"
+
+_CurModule               0x01fd3160 comm     (down.out)
+
+-> lkup (“^_print”)
+
+_printf   0x00029622 text (vxWorks)
+
+_printErr 0x00029640 text (vxWorks)
+
+_printExc 0x0002965e text (vxWorks)
+
+value = 0 = 0x0
+
+ 
+
+lkAddr
+
+根据指定值搜索符号表显示的符号地址小于并最接近指定值
+
+-> lkAddr 0x01fd3160
+
+_CurUnit                 0x01fd315c comm     (down.out)
+
+_CurModule               0x01fd3160 comm     (down.out)
+
+_IsFsStarted             0x01fd3164 comm     (down.out)
+
+_IntTaskSemaphore        0x01fd3168 comm     (down.out)
+
+_gtSemTaskTable          0x01fd316c comm     (down.out)
+
+_tR04ModuleReportState   0x01fd3174 comm     (down.out)
+
+l
+
+显示从指定位置开始多少行的汇编
+
+printError
+
+将错误号翻译为具体错误信息。前16位错误号为module 在vwModNum.h中定义对应不同头文件。后16位错误号为error number在相应的头文件中定义。
+
+-> printErrno 0x110001
+
+0x110001 = S_memLib_NOT_ENOUGH_MEMORY
+
+ld
+
+加载模块到系统
+
+[syms[,noAbort][,"name"]]Load stdin, or file, into memory
+
+  (syms = add symbols to table: -1 = none, 0 = globals, 1 = all)
+
+unld
+
+       卸载模块
+
+reboot
+
+       reset network devices and transfercontrol to boot ROMs  重起, 有些mp板不能执行;
+
+bootChange
+
+修改启动行参数
+
+boot device     :  fei
+
+processor number    :  0
+
+host name       :  host
+
+file name       :  vxWorks
+
+inet on ethernet (e)    :  168.2.11.41:ffff0000
+
+inet on backplane (b)   :  
+
+host inet (h)       :  168.2.111.1
+
+gateway inet (g)    :  
+
+user (u)        :  x86
+
+ftp password (pw) (blank = use rsh) :  x86
+
+flags (f)       :  
+
+target name (tn)    :  
+
+startup script (s)  :  
+
+other (o)
+
+1.1.6.5        系统信息查看
+devs
+
+列出目标机系统上的所有设备, host:是指映象文件所在目录,有些上面为mars:
+
+-> devs
+
+drv name
+
+  0 /null
+
+  2 /pcConsole/0
+
+  2 /pcConsole/1
+
+  7 host:
+
+  8 /vio
+
+  9 /tgtsvr
+
+  4 /HDisk
+
+  3 prnpip
+
+iosDevShow
+
+基本同devs
+
+iosDrvShow
+
+显示系统中的驱动状态
+
+drv    create    delete       open      close       read     write      ioctl
+
+1    421db4          0    421db4     421ddc     42b76c    42b69c     421e08
+
+2         0          0    424fd4          0     425004    425044     425130
+
+3    426e88    426f04     427170     426e34    427228     427254     426ffc
+
+4    415f40          0    415f40     416000     42b76c    42b69c     416074
+
+5    41626c    41642c     416288     416520    4165d0     416670     416710
+
+iosFdShow
+
+显示系统中的文件标识符
+
+fdname                 drv
+
+3/tyCo/0                1
+
+4/vio/1                  4
+
+5/vio/2                  4
+
+6/vio/3                  4
+
+intVecShow
+
+查看中断向量表,
+
+void intVecShow
+
+(
+
+   int vector /* interrupt vector number or -1 to display the whole vectortable */
+
+)
+
+moduleShow
+
+显示系统中所有加载的模块
+
+MODULENAME  MODULE ID  GROUP #   TEXT START DATA START  BSS START
+
+------------------------ -------------------- ---------- ---------- ----------
+
+vxWorks.exe       0x365420          1  0x401000   0x43f000   0x442000
+
+test.o             0xd32888          2  0x499efac   0x499eff4          
+
+msgQShow
+
+显示队列的使用状况
+
+Message Queue Id   : 0x1c710c0c 
+
+Task Queueing      : FIFO     
+
+Message Byte Len   : 8        
+
+Messages Max       : 4000     
+
+Messages Queued    : 0        
+
+Receivers Blocked  : 1        
+
+Send Timeouts      : 0        
+
+Receive Timeouts   : 709968   
+
+SemShow
+
+显示信号量的信息
+
+STATUS semShow
+
+    (
+
+    SEM_ID semId,/* semaphore to display */
+
+        int    level /* 0 = summary, 1 = details */
+
+    )
+
+->semShow NodeSemaphore ,0
+
+Semaphore Id       : 0x1c7a443c 
+
+Semaphore Type     : MUTEX    
+
+Task Queueing      : FIFO     
+
+Pended Tasks       : 0        
+
+State              : NotOwned 
+
+SemPxShow
+
+显示POSIX信号量的信息
+
+wdShow
+
+显示看门狗的信息
+
+mqPxShow
+
+显示POSIX消息队列的信息
+
+memPartShow
+
+显示分区块及统计信息
+
+memShow
+
+显示系统分区上空闲和已分配空间的总数等等
+
+SUMMARY:
+
+ status  bytes    blocks   avg block max block
+
+ ------ ----------------- ---------- ----------
+
+current
+
+   free  443257168     140    3166122 442697252
+
+  alloc  27726464     517      53629        -
+
+cumulative
+
+  alloc  50636892    5873       8621        -
+
+hostShow
+
+显示host列表
+
+hostname        inet address       aliases
+
+--------        ------------       -------
+
+vxTarget        168.2.11.9        
+
+localhost       127.0.0.1         
+
+host             168.2.111.1
+
+arpShow
+
+显示arp列表
+
+LINK LEVEL ARP TABLE
+
+destination     gateway            flags  Refcnt Use           Interface
+
+--------------------------------------------------------------------------
+
+168.2.111.1     00:05:5d:e4:14:3b    405    0      6897          fei0
+
+--------------------------------------------------------------------------
+
+ifShow
+
+显示网口信息
+
+fei (unit number 0):
+
+    Flags:(0x8063) UP BROADCAST RUNNING ARP MULTICAST
+
+    Type:ETHERNET_CSMACD
+
+    Internetaddress: 168.2.11.9
+
+    Broadcastaddress:   168.2.255.255
+
+    Netmask0xffff0000 Subnetmask 0xffff0000
+
+    Ethernetaddress is 00:d0:d0:10:0b:09
+
+    Metric is 0
+
+    MaximumTransfer Unit size is 1500
+
+    11325 packetsreceived; 6965 packets sent
+
+    4374 multicastpackets received
+
+    11 multicastpackets sent
+
+    0 inputerrors; 0 output errors
+
+    0 collisions;0 dropped
+
+lo (unit number 0):
+
+    Flags:(0x8069) UP LOOPBACK RUNNING ARP MULTICAST
+
+    Type:SOFTWARE_LOOPBACK
+
+    Internetaddress: 127.0.0.1
+
+    Netmask0xff000000 Subnetmask 0xff000000
+
+    Metric is 0
+
+    MaximumTransfer Unit size is 32768
+
+    0 packetsreceived; 0 packets sent
+
+    0 multicastpackets received
+
+    0 multicastpackets sent
+
+    0 inputerrors; 0 output errors
+
+    0 collisions;0 dropped
+
+ipstatShow
+
+显示ip信息
+
+               total 7571
+
+             badsum    0
+
+           tooshort    0
+
+           toosmall    0
+
+            badhlen    0
+
+             badlen    0
+
+        infragments    0
+
+        fragdropped    0
+
+        fragtimeout    0
+
+            forward    0
+
+        cantforward    0
+
+       redirectsent    0
+
+    unknownprotocol 6996
+
+          nobuffers    0
+
+        reassembled    0
+
+       outfragments    0
+
+            noroute    0
+
+icmpstatShow
+
+显示icmp信息
+
+ICMP:
+
+    7060 calls toicmp_error
+
+    0 error notgenerated because old message was icmp
+
+    Outputhistogram:
+
+        destinationunreachable: 7060
+
+    0 message withbad code fields
+
+    0 message <minimum length
+
+    0 bad checksum
+
+    0 message withbad length
+
+    0 messageresponse generated
+
+routestatShow
+
+       显示路由信息
+
+    routing:
+
+    0 bad routingredirect
+
+    0 dynamicallycreated route
+
+    0 new gatewaydue to redirects
+
+    12 destinationsfound unreachable
+
+    0 use of a wildcard route
+
+tcpstatShow
+
+显示tcp信息
+
+TCP:
+
+    11740 packets sent
+
+        2840 data packets (137764 bytes)
+
+        6 data packets (1867 bytes)retransmitted
+
+        5642 ack-only packets (0 delayed)
+
+        0 URG only packet
+
+        0 window probe packet
+
+        0 window update packet
+
+        3254 control packets
+
+    8485packets received
+
+        44 acks (for 2429 bytes)
+
+        2801 duplicate acks
+
+        0 ack for unsent data
+
+    2840 packets (2128 bytes) receivedin-sequence
+
+        1 completely duplicate packet (29 bytes)
+
+        0 packet with some dup. data  (0 byte duped)
+
+        2 out-of-order packets (0 byte)
+
+        0 packet (0 byte) of data after window
+
+        0 window probe
+
+        0 window update packet
+
+        0 packet received after close
+
+        0 discarded for bad checksum
+
+        0 discarded for bad header offset field
+
+        0 discarded because packet too short
+
+    2953 connection requests
+
+    0 connection accept
+
+    2802 connections established (includingaccepts)
+
+    2950 connections closed (including 2798drops)
+
+    147 embryonic connections dropped
+
+    2846 segments updated rtt (of 5797 attempts)
+
+    304 retransmit timeouts
+
+        0 connection dropped by rexmit timeout
+
+    0 persist timeout
+
+    147 keepalive timeouts
+
+        0 keepalive probe sent
+
+        147connections dropped by keepalive
+
+udpstatShow
+
+显示udp信息
+
+UDP:
+
+       7759 total packets
+
+       7757 input packets
+
+       2 output packets
+
+       0 incomplete header
+
+       0 bad data length field
+
+       0 bad checksum
+
+       581 broadcasts received with no ports
+
+       0 full socket
+
+       7176 pcb cache lookups failed
+
+       7176 pcb hash lookups failed
+
+inetstatShow
+
+显示连接信息
+
+Active Internetconnections (including servers)
+
+PCB      Proto Recv-Q Send-Q  Local Address      Foreign Address    (state)
+
+-------- ----------- ------  ------------------------------------ -------
+
+1de70b94TCP        0      0 0.0.0.0.111        0.0.0.0.0          LISTEN
+
+1de70a08UDP        0      0 0.0.0.0.111        0.0.0.0.0        
+
+tftpInfoShow
+
+显示ftp信息
+
+1.1.6.6        文件操作
+注意分清是对target还是host上的文件进行操作, 而相应使用@
+
+cd
+
+改变工作目录
+
+ls
+
+列出工作目录下的文件
+
+pwd
+
+显示当前工作目录
+
+copy
+
+拷贝文件
+
+copy “host:cnset.cfg”“/HDisk/cnset.cfg”
+
+remove
+
+删除文件
+
+remove “/HDisk/trace/error.log”
+
+rename
+
+更改文件名称
+
+usrAtaConfig
+
+将ATA硬盘作为一个dos文件系统加载
+
+STATUS usrAtaConfig
+
+(
+
+int    ctrl,    /* 0: primary address, 1: secondary address */
+ int    drive,   /* drive number of hard disk (0 or 1) */
+char * fileName /* mount point */
+)
+    如在MP上配置电子盘和硬盘
+usrAtaConfig00“HDISK”  加载硬盘
+usrAtaConfig10“FDISK”  加载电子盘
+usrTffsConfig 
+
+将Flash作为一个dos文件系统加载
+
+usrTffsConfig(int drive, int removable, char *  fileName)
+
+如在PPC板上配FLASH
+
+usrTffsConfig00“输入自己的设备名” 加载Flash盘
+
+tffsDevFormat
+
+格式化flash
+
+STATUS tffsDevFormat
+(
+int tffsDriveNo,  /* TrueFFS drive number (0 - DRIVES-1) */
+ int arg          /* pointer to tffsDevFormatParams structure */
+)
+例如: tffsDevFormat  0, 0
+
+1.1.6.7        其他
+1)       shell 本身的一些指令
+
+help                       Print this list
+
+h                          Print (or set) shell history
+
+shellHistory               设置或显示Shell命令
+
+shellPromptSet             改变C解释器Shell 提示
+
+printLogo                  显示Tornado Shell 登陆
+
+version                     Print VxWorks version info, andboot line
+
+exit                       退出shell
+
+quit                       退出shell
+
+2)   几个系统调试指令
+
+b                          Display breakpoints
+
+b                          Set breakpoint
+
+bd                         Delete breakpoint
+
+bdall                       Delete all breakpoints
+
+c                          Continue from breakpoint
+
+s                          Single step
+
+bh                         Set hardware breakpoint
+
+sysSuspend                  Suspend the system
+
+sysResume                  Resume the system
+
+agentModeShow              显示代理模式系统模式 或 任务模式
+
+sysStatusShow             显示系统上下文suspend或 running,系统模式下使用
+
+3)  几个不常用的指令
+
+smMemShow          show the shared memory systempartition blocks and statistics
+
+smMemPartShow       show user's shared memory systempartition blocks and statistics
+
+trgShow               show trigger information
+
+show                  在shell窗口打印特定对象的信息
+
+browse                在Tornado browser 显示特定的对象
+
+注某些命令只在TargetServer上执行如lkAddr。
+
+    某些需要到Target上执行如period()、repeat()。
+
+1.2        BROWSE
+可对系统对象任务、消息队列、信号量等和存储器使用情况进行观察的浏览器。可以方便地监视用户的目标系统。Browser汇总了应用进程内存消耗和一个目标内存的映像。通过Browser用户可以观察信号量、消息队列、内存分配、看门狗计时器、堆栈使用情况、目标 CPU使用率、对象模块结构和符号表以及每个任务的详细信息。
+
+可以分析: 内存泄漏、内存碎片、堆栈溢出、优先级反转
+
+1.2.1         内存查看
+Tools条显示的是归taget agent管理的内存归Tornado tools使用
+
+Application条显示的是归目标系统内所有任务使用
+
+以上2者独立分开共同占用目标板的内存
+
+栏内显示的是所有模块的所占用内存的信息
+
+1.2.2         模块信息
+可以知道该模块的地址空间比较有用的是他的符号表
+
+1.2.3         堆栈使用率
+可以检查堆栈状况
+
+1.2.4         CPU占有率
+由于辅助时钟和目前3gcn内的冲突建议不要使用否则会造成系统紊乱
+
+1.2.5         任务信息
+1.2.6         中断向量表
+Std Excep. Handler    standard exception handler
+
+Default Trap         default trap (Sparc)
+
+Uninit. Int           uninitialized interrupt vector
+
+Corrupted Int        corrupted interrupt vector
+
+ 
+
+ 
+
+1.2.7         实体查看
+可以查看诸如消息队列、信号量、watchdog、任务、系统内存等的状况。如
+
+1.3        Debugger
+1.3.1         条件断点
+condition 填入条件,变成条件断点
+
+keep   指一直有效
+
+delete  在断点到达后将之删除
+
+disable 先不让该断点有效
+
+1.3.2         代码显示
+Source
+
+以高级语言(c、c++)显示缺省的显示方式
+
+Disassembly
+
+以反汇编方式显示
+
+MixedSource and Disassembly
+
+混合高级和反汇编方式显示配和修改一些寄存器值如pc来达到控制调试流程。
+
+1.4        Target Server
+创建Target Server时需要配置的变量。
+
+1.4.1         使用串口调试
+提供了几种target/host联系方式
+
+wdbpipe   一般用于vxworks目标模拟
+
+netrom   我们用不着
+
+wdbrpc    用的最多的一种只要是ip连接的都行需要配置目标机的IP地址
+
+wdbserial  使用串口,填入连接的串口号,及其波特率即可
+
+1.4.2         重定向
+RedirectTarget IO
+
+重定向目标机上的全局stdin、 stdout和stderr 到target server。如果没有创建控制台窗口当有字符从目标机发送过来的时候 WTX 事件被发送给所有的WTX 工具 。
+
+Create Console Window
+
+在target server 所在的主机上创建一个虚拟控制台窗口作为目标机的I/O口。
+
+Redirect Target Shell
+
+创建一个虚拟控制台窗口当前target shell的标准input、output和error被重定向到该窗口。
+
+1.5        WindView
+在运行中可以记录一些重要信息(比如任务调度状况、信号量、消息队列、watchdog,、内存、信号)的状况从而便于对复杂的实时系统运行状况进行分析。
+
+可以对调度异常、资源挂死、死机等进行分析。
+
+1.5.1         记录层次
+根据需要可以记录3个层次上数据
+
+Context Switch Event-Logging Level (CSE Level)
+Task State Transition Event-Logging Level (TST Level)
+Additional Instrumentation Event-Logging Level (AIL Level)
+1.5.2         记录数据存储方式
+可以设定一定大小的内存在target上作为保存数据的缓冲。有这样几种方式将该缓冲输出一般用前两者
+
+Direct toGraph
+
+直接显示到屏幕
+
+File via TSFS
+
+   送到target server上的一个文件中/tgtsvr/XXX.Wvr文件。Targetserver的路径如下在TargetServer Configuration 中设置
+
+
+Socket viaTSFS   
+
+通过菜单打开/tgtsvr/TCP:xiaxinguo:6164[其实是创建了个连接]来接收taget的输出到屏幕
+
+Socket viaTCP/IP
+
+  通过菜单打开xiaxinguo:6164[其实是创建了个连接]来接收taget的输出到屏幕
+
+NFS toFile
+
+   保存到文件
+
+1.5.3         传送方式
+Deferred
+
+   host取一次taget记一次。
+
+Continuous
+
+   target在记到一定程度后传送到后台继续记录连续进行。
+
+Post-Mortem
+
+   target将数据记录到保留内存在异常热启动后可再取得相应数据从而可以知道是异常在哪里。
+
+1.5.4         数据分析
+Ø  具体图形的意义可以参看帮助”Event Dictionary”。
+
+Ø  可以选择关心的任务关心的实体而将不关心的部分隐藏掉。
+
+Ø  为便于查找可以自己创建几个实体以便标识比如信号量。在错误处操作从而可以很快定位而不用再达海中捞针。
+
+1.6        Trigger
+通过设置一些触发器触发一些操作主要有以下2个功能
+
+Ø  可以监控变量函数的执行情况特别对变量被修改这种问题有帮助。
+
+Ø  和windview配合使用使记录可控。
+
+1.7        telnet
+telnet功能类似shell不用起tornado而已省却启动target server对release比较有用。使用方法如下
+
+在包含了INCLUDE_TELNET 后能使用telnet如果要加上user/pass验证则需要加上 INCLUDE_SECURITY 。但注意的是下图中的pass为加密后的密码可以使用/host/x86-win32/bin/vxencrypt来将密码加密。
+
+1.8        调试模式
+Tornado集成环境提供两种调试模式任务调试模式和系统调试模式。在任务调试模式下在一个集成环境下一个时间内只能调试一个任务。调试只影响当前被调试的任务其它任务正常运行。在系统调试模式下可以同时调试多个任务、中断服务程序ISR调试影响整个系统。
+
+通过下面的例子说明调试步骤
+
+/* VxWorks includes */
+
+#include        "vxWorks.h"
+
+#include        "taskLib.h"
+
+#include        "stdio.h"
+
+#include        "msgQLib.h"
+
+ 
+
+int g_lTaskATid;
+
+int g_lTaskBTid;
+
+MSG_Q_ID g_MsgQ1id;
+
+MSG_Q_ID g_MsgQ2id;
+
+ 
+
+void MultiTaskTestTaskA(void) 
+
+{
+
+   char cMsgToTaskB[100];
+
+   char cMsgFromTaskB[100];
+
+ 
+
+   sprintf(cMsgToTaskB,"To TaskB \n");
+
+   printf(" Hello from MultiTaskTestTaskA \n");
+
+   taskSuspend(0); /*挂起*/
+
+   for(;;)
+
+   {    
+
+       printf(" Hello from MultiTaskTestTaskA \n");
+
+      msgQSend(g_MsgQ1id,cMsgToTaskB,sizeof(cMsgToTaskB),WAIT_FOREVER,                                     MSG_PRI_NORMAL); 
+
+       msgQReceive(g_MsgQ2id,cMsgFromTaskB,100,WAIT_FOREVER);
+
+       printf("%s",cMsgFromTaskB);
+
+    }
+
+}
+
+ 
+
+void MultiTaskTestTaskB(void)  
+
+{
+
+   char cMsgToTaskA[100];
+
+   char cMsgFromTaskA[100];
+
+ 
+
+   sprintf(cMsgToTaskA,"To TaskA \n");
+
+   printf(" Hello from MultiTaskTestTaskB \n");
+
+   taskSuspend(0);
+
+   for(;;)
+
+    {
+
+       printf(" Hello from MultiTaskTestTaskB \n");
+
+       msgQSend(g_MsgQ2id,cMsgToTaskA,sizeof(cMsgToTaskA),WAIT_FOREVER,                  MSG_PRI_NORMAL); 
+
+       msgQReceive(g_MsgQ1id,cMsgFromTaskA,100,WAIT_FOREVER);
+
+       printf("%s",cMsgFromTaskA);
+
+    }
+
+}
+
+ 
+
+void MultiTaskTestInit(void)
+
+{
+
+   printf(" Hello from MultiTaskTestInit \n");
+
+   g_MsgQ1id=msgQCreate(20,100,MSG_Q_FIFO); /*创建消息队列*/
+
+   if(g_MsgQ1id==NULL)
+
+    {
+
+       printf(" ERROR: create g_MsgQ1 error \n");
+
+    }
+
+ 
+
+   g_MsgQ2id=msgQCreate(20,100,MSG_Q_FIFO);
+
+   if(g_MsgQ1id==NULL)
+
+    {
+
+       printf(" ERROR: create g_MsgQ2 error \n");
+
+    }
+
+   printf(" Spawning a new task called MultiTaskTestTaskA \n\n");
+
+   g_lTaskATid=taskSpawn("MultiTaskTestTaskA",100,0,10000,                                                                                  (FUNCPTR)MultiTaskTestTaskA,0,0,0,0,0,0,0,0,0,0);
+
+   if(g_lTaskATid == ERROR)
+
+   { 
+
+       printf(" ERROR: task did not spawn \n");
+
+       exit(1);
+
+    }
+
+   printf(" Spawning a new task called MultiTaskTestTaskB \n");
+
+   g_lTaskBTid=taskSpawn("MultiTaskTestTaskB",100,0,10000,                                                                                          (FUNCPTR)MultiTaskTestTaskB, 0,0,0,0,0,0,0,0,0,0);
+
+   if(g_lTaskBTid == ERROR)
+
+   { 
+
+       printf(" ERROR: task did not spawn \n");
+
+       exit(1);
+
+    }
+
+   exit(0);
+
+}
+
+ 
+
+1.8.1         任务调试模式下的多任务调试
+在任务调试模式下在一个集成环境中在一个任务中调试在另一个任务中设置断点设置的断点不起作用。这是因为一个调试器只能处理一个TCB任务控制块每个任务都有一个TCB因此一个调试器只能调试一个任务要调试几个任务就要启动几个调试器。一个集成环境只能启动一个调试器所以要调试几个任务就要启动几个集成环境。另外需要在被调试的任务的待调试的第一条语句前加入taskSuspend(0)语句挂起该任务否则任务就可能会在调试前被执行。
+
+多任务调试步骤
+
+* 用-g选项编译源代码产生目标文件
+
+* 下载产生的目标文件
+
+* 在MultiTaskTestInit函数的开始设置断点
+
+* 把MultiTaskTestInit设置为调试任务的人口函数
+
+* 单步执行产生MultiTaskTestTaskA任务的语句后可以在串口超级终端上看到字符串Hello from MultiTaskTestTaskA用Browser查看任务可以看到任务MultiTaskTestTaskA出于挂起态suspended表明程序执行了taskSuspend(0)语句。
+
+* 运行另一个Tornado集成环境
+
+* Attach任务MultiTaskTestTaskA
+
+* 在语句msgQReceive(g_MsgQ2id,cMsgFromTaskB,100,WAIT_FOREVER)的下一条语句处设置断点
+
+* 运行任务MultiTaskTestTaskA。可以看到没有执行到断点处用Browser查看任务状态MultiTaskTestTaskA出于阻塞态pended因为它在等待消息。
+
+* 单步执行MultiTaskTestInit到产生MultiTaskTestTaskB任务的下一条语句可以看到MultiTaskTestTaskB任务处于挂起态
+
+* 再运行另一个Tornado集成环境
+
+* Attach任务MultiTaskTestTaskB
+
+* 在语句msgQReceive(g_MsgQ1id,cMsgFromTaskA,100,WAIT_FOREVER)下一条语句处设置断点
+
+* 运行任务MultiTaskTestTaskB。可以看到执行到断点处停下。这是因为MultiTaskTestTaskA任务已经发送一条消息到MultiTaskTestTaskB的接收队列中。
+
+* 此时可以看到MultiTaskTestTaskA任务也运行到断点处因为为MultiTaskTestTaskB任务已经发送一条消息到MultiTaskTestTaskA的接收队列中。
+
+1.8.2         系统调试模式下多任务的调试
+Tornado2.0集成环境提供了通过网口进行系统模式调试的功能。系统缺省使用网口通信如果需要使用串口通信需要修改文件C: \ Tornado \ target \ config\ all \ configAll.h的一些宏定义修改为
+
+#define WDB_COMM_TYPE      WDB_COMM_SERIAL   /*使用串口通信*/
+
+#define WDB_TTY_CHANNEL    0                      /*使用第一个串口*/
+
+#define WDB_TTY_BAUD       38400                   /*波特率38400bps*/
+
+重新编译链接vxWorks。 在启动Target server时要选择串口通信并进行相应配置。
+
+调试使用的源代码与任务调试模式中使用的代码相同。但是需要去掉为了能够在任务调试模式下进行多任务调试的MultiTaskTestTaskA和MultiTaskTestTaskB中的语句taskSuspend(0);。
+
+ 
+
+多任务调试步骤
+
+* 用-g选项编译源代码产生目标文件。
+
+* 下载产生的目标文件。
+
+* 在MultiTaskTestInit函数的开始设置断点。
+
+* 在Debugger命令窗口输入命令attach system进入系统调试模式。
+
+* 在Shell窗口输入命令sp MultiTaskTestInit产生一个以MultiTaskTestInit为入口函数的任务因为整个系统都停下了新产生的任务还没有执行这可以通过在Debugger命令窗口输入命令info threads显示当前系统中的任务列表看出来。
+
+* 执行菜单命令Debug | ContinueF5继续运行程序。
+
+* 系统在设置的断点处停下。
+
+* 在函数MultiTaskTestTaskA中的语句msgQReceive(g_MsgQ2id,cMsgFromTaskB, 100,WAIT_FOREVER)的下一条语句处设置断点。
+
+* 在函数MultiTaskTestTaskB中的语句msgQReceive(g_MsgQ1id,cMsgFromTaskA, 100,WAIT_FOREVER)的下一条语句处设置断点。
+
+* 执行菜单命令Debug | Continue继续运行程序。
+
+* 程序在任务MultiTaskTestTaskB中的断点处停下为什么不是在任务MultiTaskTestTaskA中停下请考虑。
+
+* 执行菜单命令Debug | Continue继续运行程序。
+
+* 程序在任务MultiTaskTestTaskA中的断点处停下。
+
+* 执行菜单命令Debug | Continue继续运行程序。
+
+* 程序又一次在任务MultiTaskTestTaskA中的断点处停下为什么停两次请考虑以后依次增加停的次数。
+
+* 执行菜单命令Debug | Continue继续运行程序。
+
+* 程序在任务MultiTaskTestTaskB中的断点处停下。
+
+ 
+
+1.8.3         中断服务程序的调试
+中断服务程序只能在系统调试模式下调试不能在任务调试模式下调试。因为中断服务程序是作为系统的一部分运行不是以任务方式运行因此不需要为它产生任务。
+
+中断服务程序调试步骤
+
+* 用-g选项编译源代码产生目标文件。
+
+* 下载产生的目标文件。
+
+* 在MultiTaskTestInit函数的开始设置断点。
+
+* 在Debugger命令窗口输入命令attach system进入系统调试模式。
+
+* 执行菜单命令Debug | Continue继续运行程序。
+
+* 如果产生相应的中断程序就会在中断服务程序的断点处停下。进行需要的调试。
+
+使用logMsg()打印不能用printf()。
+
+ 
+
+2         V2支撑的调试手段
+2.1        各模块提供的函数
+R01提供的调试函数需要将MEM_TRACE_ON宏定义打开重新编译生成目标文件。
+
+  VOID r01UBUseStatShow (VOID);
+
+显示所有内存池的占用信息包括内存池大小, 总共个数, 使用个数, 使用峰值个数, 失败个数。如果用的个数不变小,可以使用r01UBPoolShow来看是被谁占用;
+
+  VOID r01DispCpu (VOID); 
+
+打印当前CPU占用情况
+
+  BOOL r01PcbShow (WORD16 wPno);
+
+打印进程的运行状态
+
+  BOOL  r01UBShowByPno (WORD16 pno)
+
+显示所有进程占用内存情况
+
+  BOOL r01ProcShow (WORD16dwFlag)
+
+显示当前激活的进程信息包括进程名, 任务号PID, 运行时间pentium为ms,powerpc为10ms, 进程堆栈使用率。DwFlag低四位=1dwRunTickSum字段清零其余不清零。
+
+ 
+
+  BOOL r01TcbShow (WORD16 dwFlag)    
+
+功能打印显示任务情况可以显示相应任务所用的邮箱(消息队列)的ID号, 运行时间。
+
+=======================================================
+
+ no  name            mail_box     ready block  run_times
+
+  0  uMonitor        0x1a4d8200   0    0      0
+
+  1  uSchTask1       0x1a4c87a0   0     8     3268
+
+  2  uSchTask2       0x1a4b8d40   0    42     53638
+
+  3  uSchTask3       0x1a4a92e0   0    2      0
+
+  4  uSchTask4       0x1a499880   0    11     66
+
+  5  uSchTask5       0x1a489e20   0    20     35440
+
+  6  uSchTask6       0x1a47a3c0   0     0     0
+
+  7  uSchTask7       0x1a46a960   0    2      0
+
+  8  uSchTask8       0x1a45af00   0    1      17518
+
+  9  uSchTask9       0x1a44b4a0   0    0      0
+
+ 10  uTimer          0x1a43ba40   0    0      0
+
+ 
+
+  BOOL r01UBShowByPno (WORD16pno)
+
+显示所有进程占用内存情况
+
+  WORD16 r01UBPoolPeakGet (WORD16wPool)
+
+显示某个内存池的UB使用峰值   
+
+  BOOL r01ProcMsgTrace (WORD16wPno, BYTE byTrace)
+
+打开进程的消息跟踪生效后收发消息有打印
+
+  BOOL r01UBPoolShow (WORD16wPool)    
+
+显示所有某个内存池的当前占用情况
+
+ 
+
+   BOOL r03Trace(BYTE m, BYTE u, BYTE trace)
+
+打印与逻辑节点mu间的所以通信消息。
+
+   VOID r04node(BYTE md_in, BYTE ut_in, BYTE sut_in)
+
+打印指定节点的信息
+
+   VOID r04dogoff()
+
+关闭硬件狗要调试程序需先关闭看门狗否则系统将被复位。
+
+2.2        如何查看error.log文件
+典型错误page fault
+
+**************************************************
+
+** Schedule Task  Page Fault
+
+Date: 2004-08-03 14:38:55
+
+Module: 1, Unit: 0
+
+State: Master
+
+Cpu Percent: 1%
+
+UB: 3998, 4000, 4000, 3988, 3995,4000, 199, 200, 100,
+
+Process Name: M01Mgt
+
+Task No: 3
+
+Process Entry Address: 0x15a1f0
+
+Ret EIP(pEsf->pc):         0x15a813
+
+taskIdCurrent->excInfo.pc:0x15a813
+
+taskIdCurrent->regs.pc:    0x114c2e2
+
+taskIdCurrent->pExcRegSet->pc0x15a813
+
+Stack Size: 8192
+
+Last Run Count: 1
+
+Current Run Count: 2
+
+Send Msg Count: 0
+
+Send Msg Bytes: 0
+
+Syn Wait Flag: 0
+
+MsgNum in Process Queue: 0
+
+Process SP: 0x1d8d4c64
+
+Current Send Event: 0
+
+Current Receiver: 255-255-16383-255-1
+
+Current State: 3
+
+Current Receive Event: 8404
+
+Current Sender: 1-0-97-200-0
+
+ 
+
+Msg:
+
+01 cc 01 03 10 01 cd cd cd
+
+Code:
+
+8a 90 1e 01 00 00 0f b6 c2 83 f8 0274 3f 83 f8 02 7f 0a 83 f8 01 74 15 e9
+
+a0 00 00 00 83 f8 03 74 4b 83 f8 0474 06 e9 91 00 00 00 90 0f b7 45 a2 50
+
+8b 45 94 50 8b 45 08 50 e8 0e 06 0000 83 c4 0c 89 c0 88 45 aa eb 78 8d 74
+
+26 00 0f b7 45 a2 50 8b 45 94 50 8b45 08 50 e8 fe 06 00 00 83 c4 0c 89 c0
+
+88 45 aa eb 58 8d 74 26 00 80 7d 9801 74 0a 80 7d 98 41 74 04 eb 22 8d 36
+
+0f b6 45 98 50 8b 45 08 50 e8 d2 0000 00 83 c4 08 89 c0 88 45 aa eb 22 90
+
+8d b4 26 00 00 00 00 0f b7 45 a2 508b 45 94 50 8b 45 08 50 e8 7e 03 00 00
+
+83 c4 0c 89 c0 88 45 aa eb 08 8d 7426 00 c6 45 aa 04 80 7d aa 46 74 26 83
+
+taskIdCurrent->pStackBase:0x1d7b6070;
+
+pStackLimit:0x1d7b507c;pStackEnd:0x1d7b5070;
+
+taskIdCurrent->wdbInfo.taskSp:0x00000000;
+
+ 
+
+Current call stack:
+
+nargs=10;  0x1157c02 : 0x115f80   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+nargs= 1;   0x115f91 : 0x11c09f   (0)
+
+nargs= 1;   0x11c106 : 0x11e89c   (0x1d8db07b)
+
+nargs= 1;   0x11e8c5 : 0x11bac8   (0x1d8db07b)
+
+nargs= 0;   0x11bae0 : 0x11e91c   ()
+
+nargs= 3;   0x11e947 : 0x15a1f0   (0x1df0c7fb, 0, 0)
+
+nargs= 1;   0x15a2e4 : 0x15a640   (0x1df0c7fb)
+
+ 
+
+Total size: 1924 bytes
+
+ 
+
+分析其记录的堆栈调用关系可找到发生异常的函数。lkAddr 0x15a640
+
+ 
+
+2.2.1         定位到具体的出错行
+1 使用tornado中view\mixed source and disassembly会将代码和反汇编混合显示反汇编中会显示具体位置比对异常记录中出错位置指针就可找到具体代码行。
+
+2 Error.log会记录异常发生时该进程的接收消息内容和事件号如果内容比较少的话可找一块没有使用的内存将该内容敲进去如果比较多的话可将接收内容放到一全局数组重编版本。在shell中启动一任务入口是该进程入口并停在该进程入口处修改相关内容指针状态事件号等跟踪下去直到出错的行。
+
+3 最简便办法是使用bh硬件断点一些情况可在前后加上内存页保护这两种均能找到具体行如果被修改的有规律可往被修改的地址往上查。
+
+常见错误死循环、pagefault、除0错、越界修改内存、
+
+3         V3支撑的调试手段
+1.1.       进程调试
+平台的OSS在vxWorks的基础上创建了一些通信任务、监控任务、485任务、调度任务等等。其中在调度任务下又引入了进程的概念进程的用法见相关设计文档。
+
+1.2.       查看所有进程信息OSS_DbgGetAllUsePCBInfo
+->OSS_DbgGetAllUsePCBInfo
+
+************************UsedProcess Info***************************
+
+WTno
+
+wProcType
+
+MsgCount
+
+ucRunStatus
+
+PCB
+
+ScheCount
+
+0x0009
+
+0x0805
+
+0x0000
+
+0x03
+
+0x038bc390
+
+0x000005b2
+
+0x0008
+
+0x0804
+
+0x0000
+
+0x03
+
+0x038bc498
+
+0x000015ef
+
+0x0008
+
+0x0803
+
+0x0000
+
+0x03
+
+0x038bc5a0
+
+0x00000001
+
+0x0000
+
+0x0807
+
+0x0000
+
+0x03
+
+0x038bc6a8
+
+0x0000009d
+
+0x0009
+
+0x0401
+
+0x0000
+
+0x03
+
+0x038bcbd0
+
+0x00000019
+
+0x0009
+
+0x0402
+
+0x0000
+
+0x03
+
+0x038bccd8
+
+0x000028a7
+
+0x0009
+
+0x0404
+
+0x0000
+
+0x03
+
+0x038bcde0
+
+0x000015e1
+
+0x0001
+
+0x0411
+
+0x0000
+
+0x03
+
+0x038bcee8
+
+0x000003a8
+
+0x0008
+
+0x0406
+
+0x0000
+
+0x03
+
+0x038bcff0
+
+0x00000013
+
+0x0008
+
+0x0407
+
+0x0000
+
+0x03
+
+0x038bd0f8
+
+0x000008e2
+
+MsgCount一栏是进程待处理的消息一般为0。PCB这一列是进程控制块指针可以在GDB中用 p *((T_PCB *)0x38bc390)命令查看详细信息。ScheCount是进程的运行次数。
+
+ 
+
+1.3.       查看当前运行的进程信息
+1.3.1.       进程断点设置b
+如果不设置断点一般是不会有任何显示的因为进程的运行时间很短。
+
+在状态管理中心进程入口设置断点
+
+-> b SCS_BSMgt   
+
+断点到达
+
+->
+
+Break at 0x06086dac:SCS_BSMgt               Task: 0x7e97c40(SCH9)
+
+1.3.2.       当前进程运行信息OSS_DbgGetCurPCBInfo
+查看当前运行进程信息就可以看到显示了状态管理中心进程
+
+->OSS_DbgGetCurPCBInfo
+
+Current ProcessType  0x402, InstanceNo 0x1 , wTno 0x9,Status 0x2
+
+1.3.3.       当前进程的消息信息OSS_DbgGetCurMsgInfo
+查看当前进程的消息可以看到进程消息信息
+
+->OSS_DbgGetCurMsgInfo
+
+Current Msg 0x5dd issent From Pno 0x4020001 ,wUnit 0xffff To Pno 0x4020001 ,wUnit 0xffff
+
+消息号0x5dd十进制为1501可以看出是TIMER1消息。
+
+-> 0x5dd
+
+value = 1501 = 0x5dd
+
+1.3.4.       进程断点取消bd
+取消断点
+
+è bd SCS_BSMgt
+
+1.3.5.       恢复进程运行tr
+再恢复SCH9的运行
+
+-> tr SCH9
+
+这时再看当前进程的消息已经没有可显示的了。
+
+->OSS_DbgGetCurMsgInfo
+
+No Running Process,No message!
+
+ 
+
+1.4.       内存观察
+1.4.1.       消息队列堆积、阻塞观察tw
+任务间通信(包括不同调度任务的进程间)是通过队列来进行的。因此每个任务都有一个队列该任务不停地从队列中取消息进行处理相当于消费者如果队列为空则任务挂起等待消息。其他任务(如通信任务等)向该任务的队列发送消息相当于生产者。在一个稳定的系统中消息队列应该基本不堆积消息。以调度任务9为例用tw命令可以清楚地看到SCH9阻塞在队列上。
+
+-> tw SCH9
+
+  NAME      ENTRY      TID      STATUS  DELAY  OBJ_TYPE   OBJ_ID  OBJ_NAME
+
+-------------------- -------- ---------- ----- ---------- -------- ------------
+
+SCH9       0x5fe4110   7e97c40 PEND           0 MSG_Q(R)    7e97e58 N/A      
+
+Message QueueId    : 0x7e97e58  
+
+Task Queueing       : FIFO     
+
+Message ByteLen    : 4        
+
+Messages Max        : 4000     
+
+Messages Queued     : 0        
+
+ReceiversBlocked   : 1        
+
+Send Timeouts       : 0        
+
+ReceiveTimeouts    : 0        
+
+ 
+
+Receivers Blocked:
+
+   NAME     TID    PRI TIMEOUT
+
+---------- ----------- -------
+
+SCH9        7e97c40 80       0
+
+ 
+
+此外在系统中还有一个统一的内存UB池包括内部UB和用户UB。生产者发送消息时从UB池中获取内存发送给消费者消费者处理消息后释放UB。这一切对上层应用而言是透明的。
+
+在状态管理中心进程入口设置断点
+
+-> b SCS_BSMgt   
+
+断点到达可以看到调度任务9被断住。
+
+->
+
+Break at 0x06086dac:SCS_BSMgt               Task: 0x7e97c40(SCH9)
+
+还可以用msgQNumMsgs0x7e97e58看当前消息个数。
+
+ 
+
+1.4.2.       任务消息队列观察OSS_DbgShowQueueCtl
+通过OSS_DbgShowQueueCtl调试函数可以看出调度任务9地队列堆积了22个消息。
+
+->OSS_DbgShowQueueCtl
+
+Display the contentof all used queue control block
+
+QueueName
+
+EntrySize
+
+TotalCount
+
+UsedCount
+
+VxWorksId
+
+ptHead
+
+ 
+
+CommRudpProto
+
+4
+
+4000
+
+0
+
+7f43400
+
+VXWORKS
+
+ 
+
+SCH0
+
+4
+
+4000
+
+0
+
+7f337d8
+
+VXWORKS
+
+ 
+
+SCH1
+
+4
+
+4000
+
+0
+
+7f22b60
+
+VXWORKS
+
+ 
+
+SCH2
+
+4
+
+4000
+
+0
+
+7f11ee8
+
+VXWORKS
+
+ 
+
+SCH3
+
+4
+
+4000
+
+0
+
+7f01270
+
+VXWORKS
+
+ 
+
+SCH4
+
+4
+
+4000
+
+0
+
+7ef05f8
+
+VXWORKS
+
+ 
+
+SCH5
+
+4
+
+4000
+
+0
+
+7edf980
+
+VXWORKS
+
+ 
+
+SCH6
+
+4
+
+4000
+
+0
+
+7eced08
+
+VXWORKS
+
+ 
+
+SCH7
+
+4
+
+4000
+
+0
+
+7ebe090
+
+VXWORKS
+
+ 
+
+SCH8
+
+4
+
+4000
+
+0
+
+7ead418
+
+VXWORKS
+
+ 
+
+SCH9
+
+4
+
+4000
+
+22
+
+7e9c7a0
+
+VXWORKS
+
+ 
+
+RS485
+
+16
+
+4000
+
+0
+
+7e83e28
+
+VXWORKS
+
+ 
+
+USB
+
+16
+
+1
+
+0
+
+7e7fb98
+
+VXWORKS
+
+ 
+
+EXCINT
+
+16
+
+4000
+
+0
+
+7e64220
+
+VXWORKS
+
+ 
+
+BootAgt
+
+16
+
+4000
+
+0
+
+7e488a8
+
+VXWORKS
+
+ 
+
+MateScan
+
+16
+
+4000
+
+0
+
+7e2cf30
+
+VXWORKS
+
+ 
+
+MONI
+
+4
+
+100
+
+0
+
+7e28678
+
+VXWORKS
+
+ 
+
+TIMER
+
+4
+
+100
+
+0
+
+7e26dc0
+
+VXWORKS
+
+ 
+
+PRIN
+
+4
+
+100
+
+0
+
+7e25508
+
+VXWORKS
+
+ 
+
+IDLE
+
+4
+
+100
+
+0
+
+7e23c50
+
+VXWORKS
+
+ 
+
+DLDEAL
+
+4
+
+100
+
+0
+
+7e22398
+
+VXWORKS
+
+ 
+
+TOIL
+
+4
+
+100
+
+0
+
+7e20ae0
+
+VXWORKS
+
+ 
+
+UDPPrintf
+
+4096
+
+100
+
+0
+
+7dbb548
+
+VXWORKS
+
+ 
+
+ 
+
+1.4.3.       任务UB使用观察OSS_DbgShowTaskUB
+通过OSS_DbgShowTaskUB可以大致看出消息的生产者是定时器任务和通信任务定时器任务有5个UB还没有释放通信任务有26个UB没有释放。
+
+->OSS_DbgShowTaskUB 
+
+TASK UB SHOW:
+
+Task
+
+tNetTask
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+tFtpdTask
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+s1u0
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+WATCHDOG
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+SCH0
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+SCH1
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+SCH2
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+SCH3
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+SCH4
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+SCH5
+
+InnerUB
+
+0x00000003
+
+UserUB
+
+0x00000000
+
+Task
+
+SCH6
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+SCH7
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+SCH8
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+SCH9
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+RS485
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+USB
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+EXCINT
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+BootAgt
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+MateScan
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+MONI
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+TIMER
+
+InnerUB
+
+0x00000005
+
+UserUB
+
+0x00000000
+
+Task
+
+PRIN
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+DLDEAL
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+TOIL
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+tUdpPrnCln
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+tUdpPrnSvr
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+CommRudpProtoTask
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+Task
+
+CommUdpDaemonTask
+
+InnerUB
+
+0x0000001a
+
+UserUB
+
+0x00000000
+
+Task
+
+CommTcpDaemonTask
+
+InnerUB
+
+0x00000000
+
+UserUB
+
+0x00000000
+
+ 
+
+1.4.4.       进程使用UB情况OSS_DbgShowProcUBInfo
+另外还提供了一个进程使用UB情况的调试函数这个函数的参数是调度任务的TID。如下为查看调度任务9下的所有进程的UB使用情况。
+
+->OSS_DbgShowProcUBInfo 0x7e97c40
+
+PROC UB SHOW:
+
+Proc      CommControlProc
+
+ Pno 0x08050001
+
+   InnerUB 0x00    UserUB 0x00
+
+Proc            SCSMCProc
+
+ Pno 0x04010001
+
+   InnerUB 0x00    UserUB 0x00
+
+Proc            SCS_BSMgt
+
+ Pno 0x04020001
+
+   InnerUB 0x00    UserUB 0x00
+
+Proc            SCS_RTMgt
+
+ Pno 0x04040001
+
+   InnerUB 0x00    UserUB 0x00
+
+ 
+
+1.4.5.       UB的配置和当前状态OSS_DbgMemUbUsePrn/ OSS_DbgShowUbPool
+以下调试函数查看UB的配置和当前状态。另有一个调试函数OSS_DbgShowUbPool功能类似。
+
+->OSS_DbgMemUbUsePrn
+
+UB info for Sys UbPool!
+
+#######################
+
+UBSize TotalNumUsedNum
+
+64     4000    9     
+
+128    3000    7     
+
+256    2000    7     
+
+512    3000    0     
+
+640    2000    0     
+
+16384  10      0     
+
+UB info for User UbPool!
+
+#######################
+
+UBSize TotalNumUsedNum
+
+64     200     0     
+
+128    200     0     
+
+256    100     0     
+
+512    20      0     
+
+640    20      0     
+
+6400   20      0     
+
+ 
+
+1.5.       通信和定时器状态观察
+1.5.1.       通信状态显示OSS_DbgShowComm
+单板上电时根据物理地址可以算出自身的IP和MAC地址逻辑地址需要向OMP请求根据数据库的配置得到。对于应用程序使用板间通信来说要用逻辑地址、主备、左右等参数定位目标板而底层通信需要根据目标板的逻辑地址获取目标板的IP地址本地解析不了就需要向OMP解析。
+
+在OMP上运行OSS_DbgShowComm可以看到已上电运行的单板对应连接板包括逻辑地址、左右板位、IP地址、连接状态等。连接状态为3表示通信正常。以下是在OMP的主用左板上运行该函数时显示的信息。
+
+->OSS_DbgShowComm
+
+Rudp LinkTable(Board is master):
+
+Item (subsys moduleunit   sunit ) pos  state   IP(hex)    sndQ   bufQ  udpQ
+
+ 0 (255   128    65535  255   )L    0        ffffffff      0     0      0
+
+ 0 (255   128    65535  255   )R    0        ffffffff      0     0      0
+
+ 1 (255   1      65535  255   )L    0        80001f01      0     0      0
+
+ 1 (255   1      65535  255   )R    1        80001f09      2     0      0
+
+ 2 (2     1      3      1    ) L    3        80502301      0     0      0
+
+ 2 (2     1      3      1    ) R    0        ffffffff      0     0      0
+
+ 3 (2     1      7      1    ) L    3        80502d01      0     0      0
+
+ 3 (2     1      7      1    ) R    0        ffffffff      0     0      0
+
+ 
+
+Back ground linktable:(Ip attached)
+
+module   IP(hex) socket   state    kpalive rcvFrag  sndFrag  sndQ   
+
+ 
+
+GroupTable:
+
+    20,127,
+
+ 
+
+1.5.2.       测试板间通信是否正常OSS_DbgRudpPing
+还有一个比较方便的调试命令是OSS_DbgRudpPing(wModule, wUnit, ucSUnit, ucSubSystem, ucRouteType)可以测试本板和指定目标板的通信是否正常。运行命令之前先打开本板的telnet打印界面运行命令之后如果通信正常在telnet打印界面上会打印消息返回成功。UcRouteType : 1 主板2 备板3 左板4 右板。
+
+1.5.3.       单板上定时器的使用信息OSS_DbgGetTimerInfo
+定时器调试函数OSS_DbgGetTimerInfo用来查看单板上定时器的使用信息。
+
+1.5.4.       单板进程使用定时器的信息OSS_DbgGetTimerInfoOfProc
+定时器调试函数 OSS_DbgGetTimerInfoOfProc(dwPno)用来查看某个进程使用定时器的信息。
+
+1.6.       杂项观察
+1.6.1.       异常发生后信息观察OSS_DbgShowExcInfo
+异常发生后可以用OSS_DbgShowExcInfo查看异常发生的一些信息。
+
+1.6.2.       堆栈使用率/运行时间统计zte
+zte命令可以观察所有进程和任务的一些运行信息。其中ID < 0x10000的为任务反之为进程。可以显示堆栈的使用率。对于进程来说还可以显示最近20秒运行的次数/总运行次数(RunCount)最近20秒运行的时间/总运行时间(以毫秒为单位), 进程打印内容的总长度进程是否被断住。
+
+->zte
+
+Id
+
+IdName
+
+StackUse(%)
+
+RunCount
+
+Run(ms)
+
+PrnLen
+
+Breaked
+
+0x1                                                      
+
+tDcacheUpd
+
+7
+
+0/0
+
+0/0
+
+0
+
+ 
+
+0x8050001
+
+CommControlProc
+
+11
+
+6/956
+
+0/16
+
+0
+
+ 
+
+0x8040001
+
+OSS_Config
+
+7
+
+24/3611
+
+0/166
+
+0
+
+ 
+
+0x8030001
+
+P_R_485Agent
+
+6
+
+0/1
+
+0/0
+
+0
+
+ 
+
+0x8070001
+
+P_R_FileManageAgt
+
+52
+
+0/157
+
+0/1116
+
+0
+
+ 
+
+0x4010001
+
+SCSMCProc
+
+32
+
+0/15
+
+0/266
+
+203
+
+ 
+
+ 
+
+1.6.3.       进程最近打印内容观察ztecall/ztemsg
+   调试函数ztecall 进程号可以查看指定进程的处理的最近若干个消息及处理消息时打印的内容。以主控进程为例可以看出处理1201消息耗时16个Tick(TickRate为60Hz,每个tick为16.6毫秒所以耗时约为267毫秒对于MPX86TickRate约为700MHZ即每个tick为1.5纳秒左右)。
+
+-> ztecall0x4010001
+
+Tick Rate = 60 Hz
+
+SCSMCProc
+
+   Name                             MsgId(MsgPtr)   Time          TickUse  Stk
+
+   UniProcEntry                      1201(0x7f8fb2d) 0:00:01:000   16      27
+
+-  SCSMCProc: OMP Start.
+
+-  SCSMCProc: The board is startingMasterPowerOn!
+
+   UniProcEntry                      3003(0x419e764) 0:00:01:266   0       27
+
+   UniProcEntry                      3003(0x419e9a4)0:00:01:266   0        27
+
+   UniProcEntry                      1021(0x40ddddc)0:00:01:500   0        27
+
+   UniProcEntry                      1021(0x40de0dc)0:00:01:500   0        27
+
+   UniProcEntry                      3003(0x41a73a4)0:00:02:266   0        27
+
+   UniProcEntry                      3003(0x41ae664)0:00:02:300   0        27
+
+   UniProcEntry                      3003(0x7f8fb2d)0:00:02:300   0        27
+
+-  SCSMCProc: The Board finished Poweron Ok!
+
+-  SCSMCProc: ******ProcessPowerOnFinished0xbd5!
+
+   UniProcEntry                      1021(0x40f06dc) 0:02:55:600   0       27
+
+   UniProcEntry                      1021(0x40f10dc)0:02:55:600   0        27
+
+   UniProcEntry                      1021(0x40f12dc)0:02:55:600   0        27
+
+   从上面还可以看出消息号后的括号内时消息指针该消息指针只是示意性的短时有效。有以个例外是OSS拷贝了进程最后一次打印时处理的消息如上图所示的指针0x7f8fb2d。
+
+ztemsg 消息指针可以显示消息的详细内容。如下所示可以看出该消息是SCS_VMM_MGT给主控的上电成功消息。
+
+-> ztemsg 0x7f8fb2d
+
+MsgId 3003   Length 0   
+
+Sender(Module-SubSys-Unit-Sunit-Pno-Route)   1-255-65535-255-0x4060001-3
+
+Receiver(Module-SubSys-Unit-Sunit-Pno-Route)1-255-65535-255-0x4010001-0
+
+->PrnProcName 0x406
+
+SCS_VMM_MGT
+
+1.6.4.       进程最近打印的1K内容和打印时间zteprint
+   用zteprint 进程号 命令可以看到该进程最近打印的1K内容和打印时间等。如下所示
+
+同时显示了进程拷贝发生打印的消息指针。
+
+-> zteprint0x4010001
+
+SCSMCProc                         ptr_of_msgsave0x7f8fb2d
+
+0:00:01:266    SCSMCProc: OMP Start.
+
+0:00:01:266    SCSMCProc: The board is startingMasterPowerOn!
+
+0:00:02:300    SCSMCProc: The Board finished Poweron Ok!
+
+0:00:02:300    SCSMCProc: ******ProcessPowerOnFinished0xbd5!
+
+注打印的内容中最好只在每行的最后加回车即可否则显示比较难看。

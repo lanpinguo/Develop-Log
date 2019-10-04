@@ -1,0 +1,18 @@
+
+ Traceback (most recent call last):
+   File "<pyshell#0>", line 1, in <module>
+     from kivy.garden.graph import MeshLinePlot
+   File "<frozen importlib._bootstrap>", line 983, in _find_and_load
+   File "<frozen importlib._bootstrap>", line 967, in _find_and_load_unlocked
+   File "<frozen importlib._bootstrap>", line 668, in _load_unlocked
+   File "<frozen importlib._bootstrap>", line 640, in _load_backward_compatible
+ KeyError: 'kivy.garden.graph'
+I have installed Kivy using there installation guide for windows https://kivy.org/doc/stable/installation/installation-windows.html
+
+You need to install kivy-garden module first:
+
+pip install kivy-garden
+Then install graph package from garden module:
+
+garden install graph
+See https://kivy.org/doc/stable/api-kivy.garden.html

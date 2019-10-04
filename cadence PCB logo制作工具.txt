@@ -1,0 +1,12 @@
+在Allegro 中导入公司的LOGO 及中文字符
+
+2， 下载上面链接的小软件：转化小软件：https://download.csdn.net/download/jiangchao3392/11143670
+
+工具名rata 
+安装路径：
+D:\Program Files (x86)\RATA\rata.exe
+打开,  选择左下角的 1-Select BMP file，导入bmp 文件。注意：bmp 文件为单色，可以用画图软件另存为
+单色文件。 
+
+
+https://blog.csdn.net/jiangchao3392/article/details/89518506

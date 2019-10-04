@@ -1,0 +1,101 @@
+使用Beaglebone Black的I2C （二）——使用C语言和i2c-dev驱动
+
+在本博客的《使用Beaglebone Black的I2C（一）》中，介绍了BBB上无需编程对i2c总线进行读写操作的方法，本文将介绍如何在c语言程序中使用i2c-dev驱动来操作i2c设备。
+
+
+以下将还以前文中使用过的L3G4200D三轴陀螺仪为例。
+
+BBB自带了i2c-dev驱动，它使用ioctl方法对i2c设备进行配置，然后利用read()、write()函数就可以操作i2c设备了。
+
+要操作某个i2c设备，首先要确定它的地址。按照我在前文中的说法，通常i2cdetect显示的器件地址是由“7位”二进制数换算成的，而器件的读写地址则需要将这7位左移，然后在末尾添加一个1或0。但是对于i2c-dev驱动来说，我们不必费此周折，只要告诉他i2cdetect显示的那个地址就可以了，驱动会自动根据你的读操作或写操作来相应地在末尾添加1或者0。
+
+
+
+先把完整程序摆出来：
+#include <stdio.h>
+#include <stdlib.h>   //exit()
+#include <fcntl.h>    //define O_RDWR
+#include <linux/i2c-dev.h>
+#include <sys/ioctl.h>
+ 
+void main()
+{
+        int file,i;
+        int addr = 0b01101001; //i2c device address of gyro
+        char *filename = "/dev/i2c-1";
+        char wbuf[] = {0x20, 0x0f}; //first byte is address to write. others are bytes to be written
+        char read_start_buf[1]; 
+        char rbuf[1000] = {0};
+ 
+        if((file = open(filename, O_RDWR)) < 0)
+        {
+                perror("Failed to open i2c device.\n");
+                exit(1);
+        }
+ 
+        if(ioctl(file, I2C_SLAVE, addr) < 0)
+        {
+                printf("Failed to access bus.\n");
+                exit(1);
+        }
+ 
+        write(file, wbuf, 2); //write 0x0f to register 0x20 to enable gyro. 
+ 
+        for(i=0;i<5;i++)
+        {
+                read_start_buf[0] = 0x29; 
+                write(file, read_start_buf, 1); //reposition file pointer to register 0x29
+                read(file, rbuf, 1); //read register 0x29 and save to rbuf
+                printf("%x", rbuf[0]);
+ 
+                read_start_buf[0] = 0x28;
+                write(file, read_start_buf, 1); //reposition file pointer to register 0x28
+                read(file, rbuf, 1); //read register 0x28 and save to rbuf
+                printf("%x\n", rbuf[0]);
+                sleep(1);
+        }
+ 
+        close(file);
+}
+
+上面的程序首先打开/dev/i2c-1这个设备，然后用ioctl配置成slave模式。然后通过将第0x20这个寄存器写成0x0f来使能陀螺仪。然后在for循环中依次读取0x29和0x28两个寄存器的值并输出，这两个寄存器一起组成了X轴的角速度值。
+程序输出如下：
+
+root@beaglebone:~/ioctl_test# ./i2c
+03c
+04a
+035
+05f
+03c
+root@beaglebone:~/ioctl_test# ./i2c
+1f7f
+f2c3
+f567
+3979
+3aca
+
+运行了两次，第一次陀螺仪静止（但输出仍有一点小波动），第二次陀螺仪在晃动。可以看到输出值的不同。
+
+
+需要注意的一点，读i2c设备时如何定位读取的位置？
+
+使用lseek()的话会返回-1，这个是不可行的。答案就是程序中，用write()写一个字节。write函数参数中的buf数组里的第一项代表了write的位置，从第二项开始是写入的内容，因此只写一个字节就是把指针移动过去了但是不写入任何内容。
+
+
+
+用这个方法就无需其他驱动也可以操作任意i2c外设了。
+
+
+
+另外有个疑问。按理说执行 read(file, rbuf, 10); 的话，可以读出当前指针位置开始的10个字节的内容。我在其他设备上也验证了这点。但是在L3G4200D陀螺仪上，一次读取10个的话，读出的就全是一样的数值，都是第一个数值。所以只能一位一位地读取。难道是陀螺仪芯片有意设置成这样？（这个现象跟我在《使用Beaglebone Black的I2C（一）》中的问题相符，即执行 i2cdump -y 1 0x69 c 会导致输出全部是一样的，都是第一个字节的内容。把c参数去掉才可以。）
+
+
+
+参考资料：
+
+elinux.org/Interfacing_with_I2C_Devices
+
+www.kernel.org/doc/Documentation/i2c/dev-interface
+--------------------- 
+版权声明：本文为CSDN博主「魏来之路」的原创文章，遵循CC 4.0 by-sa版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/wyt2013/article/details/20740659

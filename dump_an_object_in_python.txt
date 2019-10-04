@@ -1,0 +1,23 @@
+print all the current properties and values of an object
+
+You want vars() mixed with pprint():
+
+from pprint import pprint
+pprint(vars(your_object))
+
+or
+
+You can use the "dir()" function to do this.
+
+>>> import sys
+>>> dir(sys)
+['__displayhook__', '__doc__', '__excepthook__', '__name__', '__stderr__', '__stdin__', '__stdo
+t__', '_current_frames', '_getframe', 'api_version', 'argv', 'builtin_module_names', 'byteorder
+, 'call_tracing', 'callstats', 'copyright', 'displayhook', 'dllhandle', 'exc_clear', 'exc_info'
+ 'exc_type', 'excepthook', 'exec_prefix', 'executable', 'exit', 'getcheckinterval', 'getdefault
+ncoding', 'getfilesystemencoding', 'getrecursionlimit', 'getrefcount', 'getwindowsversion', 'he
+version', 'maxint', 'maxunicode', 'meta_path', 'modules', 'path', 'path_hooks', 'path_importer_
+ache', 'platform', 'prefix', 'ps1', 'ps2', 'setcheckinterval', 'setprofile', 'setrecursionlimit
+, 'settrace', 'stderr', 'stdin', 'stdout', 'subversion', 'version', 'version_info', 'warnoption
+', 'winver']
+>>>
