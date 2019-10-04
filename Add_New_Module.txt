@@ -1,0 +1,46 @@
+
+1，把模块文件放到 /lib/module/`uname -r`/kernel/ 目录下；
+2，运行 depmod
+3，再 modprobe 就好了。
+
+Linux加载模块时：disagrees about version of symbol struct_module
+如果你insmod、modprobe自己编译的内核模块时出现：Invalid module format，那很有可能是以下原因引起的： 
+所用内核源码版本号与目前使用的内核不同； 
+
+编译目标不同，比如编译的是i686，装好的是i386； 
+使用编译器版本不同； 
+目前使用的内核不是自己编译出来的。
+
+前3种比较好办，只要用发行版提供的源码、内核配置（/boot/config*）和编译器就可以了。但如果只是为了增加一个模块就要重新编译整个内核和所有模块，总是让人觉得有点麻烦，而且也丧失了发行版提供的自动升级功能。其实只要前3种没有问题了，最后一种造成的问题也只是build version有区别，实际还是能用的。这情况下可以使用modprobe的force功能，以避开版本号检查。 
+
+引用:
+
+-f --force 
+Try to strip any versioning information from the module, which might otherwise stop it from loading: this is the same as using both --force-vermagic and --force-modversion. Naturally, these checks are there for your protection, so using this option is dangerous. 
+This applies to any modules inserted: both the module (or alias) on the command line, and any modules it depends on. 
+
+--force-vermagic 
+Every module contains a small string containing important information, such as the kernel and compiler versions. If a module fails to load and the kernel complains that the "version magic" doesn’t match, you can use this option to remove it. Naturally, this check is there for your protection, so this using option is dangerous. 
+This applies to any modules inserted: both the module (or alias) on the command line, and any modules it depends on. 
+
+--force-modversion 
+When modules are compiled with CONFIG_MODVERSIONS set, a section is created detailing the versions of every interface used by (or supplied by) the module. If a module fails to load and the kernel complains that the module disagrees about a version of some interface, you can use "--force-modversion" to remove the version information altogether. Naturally, this check is there for your protection, so using this option is dangerous. 
+This applies any modules inserted: both the module (or alias) on the command line, and any modules it depends on.
+
+
+如果dmesg中提示的是： 
+
+代码:
+
+version magic '2.6.12 686 gcc-3.3' should be '2.6.12-10-686 686 gcc-3.4'
+
+
+那就要考虑前三条的问题，或者用--force-vermagic来解决，不过这样风险比较大。 
+如果dmesg提示的是： 
+
+代码:
+
+disagrees about version of symbol struct_module
+
+
+那就是最后一条的问题，可以用--force-modversion，风险比较小。

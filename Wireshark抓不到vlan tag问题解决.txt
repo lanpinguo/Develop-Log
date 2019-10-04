@@ -1,0 +1,25 @@
+大部分网卡默认配置为自动识别数据包中的vlan tag信息，并将其去除再送给上层应用，因此按照默认配置，wireshark无法抓取到数据包中的vlan tag信息。只要修改相关配置即可。
+
+
+
+1、设置网卡属性
+
+右击需要配置的网卡，属性---配置---高级---Packet Priority & VLAN，将其禁用
+
+
+2、修改注册表，位置为
+
+HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Class\{4D36E972-E325-11CE-BFC1-08002BE10318}\00xx
+
+00xx表示需配置的网卡，可在网卡属性中查看，属性---配置---常规
+
+
+搜索MonitorModeEnabled，并将其值改为1
+
+
+3、重启电脑即可；
+--------------------- 
+作者：stone8761 
+来源：CSDN 
+原文：https://blog.csdn.net/stone8761/article/details/76154787 
+版权声明：本文为博主原创文章，转载请附上博文链接！

@@ -1,0 +1,252 @@
+BeagleBone Blue
+转至元数据结尾
+由 Robert Nelson创建, 最后修改于四月 16, 2019转至元数据起始
+This is a page about TI's Cortex-A8 based; BeagleBone Blue.
+
+Availability
+Basic Requirements
+ARM Cross Compiler: GCC
+Bootloader: U-Boot
+Linux Kernel
+TI BSP
+Root File System
+Debian 9
+Ubuntu 18.04 LTS
+Setup microSD card
+Install Kernel and Root File System
+Copy Root File System
+Set uname_r in /boot/uEnv.txt
+Copy Kernel Image
+Copy Kernel Device Tree Binaries
+Copy Kernel Modules
+File Systems Table (/etc/fstab)
+Remove microSD/SD card
+Comments
+Availability
+Boards:
+BeagleBone Blue at Digi-Key
+
+Basic Requirements
+Running a recent release of Debian, Fedora or Ubuntu; without OS Virtualization Software.
+ARM Cross Compiler – Linaro: https://www.linaro.org
+Linaro Toolchain Binaries: https://www.linaro.org/downloads/
+Bootloader
+Das U-Boot – the Universal Boot Loader: http://www.denx.de/wiki/U-Boot
+Source: https://github.com/u-boot/u-boot/
+Linux Kernel
+Linus's Mainline tree: https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git
+ARM based rootfs
+Debian: https://www.debian.org
+Ubuntu: https://www.ubuntu.com
+ARM Cross Compiler: GCC
+This is a pre-built (64bit) version of Linaro GCC that runs on generic linux, sorry (32bit) x86 users, it's time to upgrade...
+Download/Extract:
+
+~/
+wget -c https://releases.linaro.org/components/toolchain/binaries/6.5-2018.12/arm-linux-gnueabihf/gcc-linaro-6.5.0-2018.12-x86_64_arm-linux-gnueabihf.tar.xz
+tar xf gcc-linaro-6.5.0-2018.12-x86_64_arm-linux-gnueabihf.tar.xz
+export CC=`pwd`/gcc-linaro-6.5.0-2018.12-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-
+Test Cross Compiler:
+
+~/
+${CC}gcc --version
+arm-linux-gnueabihf-gcc (Linaro GCC 6.5-2018.12) 6.5.0
+Copyright (C) 2017 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Bootloader: U-Boot
+Das U-Boot – the Universal Boot Loader: http://www.denx.de/wiki/U-Boot
+eewiki.net patch archive: https://github.com/eewiki/u-boot-patches
+Download:
+
+~/
+git clone https://github.com/u-boot/u-boot
+cd u-boot/
+git checkout v2019.04 -b tmp
+Patches:
+
+~/u-boot
+wget -c https://github.com/eewiki/u-boot-patches/raw/master/v2019.04/0001-am335x_evm-uEnv.txt-bootz-n-fixes.patch
+wget -c https://github.com/eewiki/u-boot-patches/raw/master/v2019.04/0002-U-Boot-BeagleBone-Cape-Manager.patch
+  
+patch -p1 < 0001-am335x_evm-uEnv.txt-bootz-n-fixes.patch
+patch -p1 < 0002-U-Boot-BeagleBone-Cape-Manager.patch
+Configure and Build:
+
+~/u-boot
+make ARCH=arm CROSS_COMPILE=${CC} distclean
+make ARCH=arm CROSS_COMPILE=${CC} am335x_evm_defconfig
+make ARCH=arm CROSS_COMPILE=${CC}
+Linux Kernel
+This script will build the kernel, modules, device tree binaries and copy them to the deploy directory.
+
+TI BSP
+Download:
+
+~/
+git clone https://github.com/RobertCNelson/ti-linux-kernel-dev.git
+cd ti-linux-kernel-dev/
+For TI v4.14.x:
+
+~/ti-linux-kernel-dev/
+git checkout origin/ti-linux-4.14.y -b tmp
+For TI v4.14.x: Real-Time
+
+~/ti-linux-kernel-dev/
+git checkout origin/ti-linux-rt-4.14.y -b tmp
+For TI v4.19.x:
+
+~/ti-linux-kernel-dev/
+git checkout origin/ti-linux-4.19.y -b tmp
+For TI v4.19.x: Real-Time
+
+~/ti-linux-kernel-dev/
+git checkout origin/ti-linux-rt-4.19.y -b tmp
+Build:
+
+~/ti-linux-kernel-dev/
+./build_kernel.sh
+Root File System
+Debian 9
+
+
+debian
+
+temppwd
+
+root
+
+root
+
+Download:
+
+~/
+wget -c https://rcn-ee.com/rootfs/eewiki/minfs/debian-9.8-minimal-armhf-2019-02-16.tar.xz
+Verify:
+
+~/
+sha256sum debian-9.8-minimal-armhf-2019-02-16.tar.xz
+40643313dbfc4bc9487455cb6e839cc110e226ac2e9046a2f59f05e563802943  debian-9.8-minimal-armhf-2019-02-16.tar.xz
+Extract:
+
+~/
+tar xf debian-9.8-minimal-armhf-2019-02-16.tar.xz
+Ubuntu 18.04 LTS
+
+
+ubuntu
+
+temppwd
+
+Download:
+
+~/
+wget -c https://rcn-ee.com/rootfs/eewiki/minfs/ubuntu-18.04.2-minimal-armhf-2019-02-16.tar.xz
+Verify:
+
+~/
+sha256sum ubuntu-18.04.2-minimal-armhf-2019-02-16.tar.xz
+299f278ff446f0e427cb1a6650d1fa5d42d6744fff627c804f0afc918129b6b6  ubuntu-18.04.2-minimal-armhf-2019-02-16.tar.xz
+Extract:
+
+~/
+tar xf ubuntu-18.04.2-minimal-armhf-2019-02-16.tar.xz
+Setup microSD card
+We need to access the External Drive to be utilized by the target device. Run lsblk to help figure out what linux device has been reserved for your External Drive.
+
+Example: for DISK=/dev/sdX
+lsblk
+NAME   MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+sda      8:0    0 465.8G  0 disk
+├─sda1   8:1    0   512M  0 part /boot/efi
+└─sda2   8:2    0 465.3G  0 part /                <- Development Machine Root Partition
+sdb      8:16   1   962M  0 disk                  <- microSD/USB Storage Device
+└─sdb1   8:17   1   961M  0 part                  <- microSD/USB Storage Partition
+Thus you would use:
+export DISK=/dev/sdb
+Example: for DISK=/dev/mmcblkX
+lsblk
+NAME      MAJ:MIN   RM   SIZE RO TYPE MOUNTPOINT
+sda         8:0      0 465.8G  0 disk
+├─sda1      8:1      0   512M  0 part /boot/efi
+└─sda2      8:2      0 465.3G  0 part /                <- Development Machine Root Partition
+mmcblk0     179:0    0   962M  0 disk                  <- microSD/USB Storage Device
+└─mmcblk0p1 179:1    0   961M  0 part                  <- microSD/USB Storage Partition
+Thus you would use:
+export DISK=/dev/mmcblk0
+Erase partition table/labels on microSD card:
+
+sudo dd if=/dev/zero of=${DISK} bs=1M count=10
+Install Bootloader:
+
+~/
+sudo dd if=./u-boot/MLO of=${DISK} count=1 seek=1 bs=128k
+sudo dd if=./u-boot/u-boot.img of=${DISK} count=2 seek=1 bs=384k
+Create Partition Layout:
+With util-linux v2.26, sfdisk was rewritten and is now based on libfdisk.
+
+sudo sfdisk --version
+sfdisk from util-linux 2.27.1
+sfdisk >= 2.26.x
+sudo sfdisk ${DISK} <<-__EOF__
+4M,,L,*
+__EOF__
+sfdisk <= 2.25.x
+sudo sfdisk --unit M ${DISK} <<-__EOF__
+4,,L,*
+__EOF__
+Format Partition:
+
+for: DISK=/dev/mmcblkX
+sudo mkfs.ext4 -L rootfs ${DISK}p1
+  
+for: DISK=/dev/sdX
+sudo mkfs.ext4 -L rootfs ${DISK}1
+Mount Partition:
+On most systems these partitions may will be auto-mounted...
+
+sudo mkdir -p /media/rootfs/
+  
+for: DISK=/dev/mmcblkX
+sudo mount ${DISK}p1 /media/rootfs/
+  
+for: DISK=/dev/sdX
+sudo mount ${DISK}1 /media/rootfs/
+Install Kernel and Root File System
+To help new users, since the kernel version can change on a daily basis. The kernel building scripts listed on this page will now give you a hint of what kernel version was built.
+
+-----------------------------
+Script Complete
+eewiki.net: [user@localhost:~$ export kernel_version=4.X.Y-Z]
+-----------------------------
+Copy and paste that "export kernel_version=4.X.Y-Z" exactly as shown in your own build/desktop environment and hit enter to create an environment variable to be used later.
+
+export kernel_version=4.X.Y-Z
+Copy Root File System
+~/
+sudo tar xfvp ./*-*-*-armhf-*/armhf-rootfs-*.tar -C /media/rootfs/
+sync
+sudo chown root:root /media/rootfs/
+sudo chmod 755 /media/rootfs/
+Set uname_r in /boot/uEnv.txt
+~/
+sudo sh -c "echo 'uname_r=${kernel_version}' >> /media/rootfs/boot/uEnv.txt"
+Copy Kernel Image
+Kernel Image:
+
+~/
+sudo cp -v ./ti-linux-kernel-dev/deploy/${kernel_version}.zImage /media/rootfs/boot/vmlinuz-${kernel_version}
+Copy Kernel Device Tree Binaries
+~/
+sudo mkdir -p /media/rootfs/boot/dtbs/${kernel_version}/
+sudo tar xfv ./ti-linux-kernel-dev/deploy/${kernel_version}-dtbs.tar.gz -C /media/rootfs/boot/dtbs/${kernel_version}/
+Copy Kernel Modules
+~/
+sudo tar xfv ./ti-linux-kernel-dev/deploy/${kernel_version}-modules.tar.gz -C /media/rootfs/
+File Systems Table (/etc/fstab)
+sudo sh -c "echo '/dev/mmcblk0p1  /  auto  errors=remount-ro  0  1' >> /media/rootfs/etc/fstab"
+Remove microSD/SD card
+sync
+sudo umount /media/rootfs
+Comments
+Any questions or comments please go to our TechForum: TechForum

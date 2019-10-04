@@ -1,0 +1,373 @@
+VxWorks网络设备的加载及协议栈初始化
+
+一．MUX中间层
+    为了能够兼容更多的网络设备和网络协议，VxWorks操作系统专门在网络设备驱动程序和网络协议层之间增加了MUX接口层。网络设备驱动程序不关心用户通过何种网络协议访问设备，只需要将数据传递给MUX层，或者从MUX层获取需要发送的数据；同样，协议层中的协议也不需要关心用户使用何种网络设备，将数据发送给MUX层或者从MUX层读取数据即可。
+
+    MUX层位于数据链路层和网络协议层之间，它提供协议和设备的衔接，管理着网络协议接口和底层设备驱动之间的通信。
+
+
+    MUX层的加入有效隔离了网络设备驱动程序和协议层协议， MUX层的统一标准接口屏蔽了底层网络设备的差异性和上层网络组件的特殊性，降低了网络设备的增加和网络组件的扩展的复杂度。
+
+二．END & NPT
+    MUX层支持两种网络设备驱动程序：END（Enhanced Network Driver）和NPT（Network Protocol Toolkit）。
+
+    这两种网络设备驱动程序的大体结构相似，与MUX接口也几乎相同，MUX装载两者的方式也相同。不同的是，END模型基于帧（frame）传递数据，NPT模型基于包（packet）传递数据。在这里，帧和包的区别在于，帧包含了网络传输的全部数据，也就是数据包和MAC地址等链路层数据；而包仅仅包括数据包，不包括链路层信息。
+
+    NPT驱动程序模型可以看作是对END模型的一个扩展。END模型是VxWorks推荐的实现方式。
+
+三．END网络设备相关数据结构
+1.struct END_OBJ
+    网络设备驱动程序的接口数据结构是END_OBJ，如下所示。
+
+/* endObject - the basic end object that everyone derives from */
+
+typedef struct end_object
+
+{
+
+    NODEnode;
+
+    /*...*/
+
+    DEV_OBJdevObject;              /*Root of the device heirarchy*/
+
+    STATUS (*receiveRtn)();         /*MUX routine to call on reception*/
+
+ 
+
+    structproto_entry* pSnarf;     /*First snarf protocol*/
+
+    structproto_entry* pTyped;     /*First typed protocol*/
+
+    structproto_entry* pPromisc;   /*First promiscuous protocol*/
+
+    structproto_entry* pStop;      /*End of protocols*/
+
+    UINT32nProtoSlots;             /*Number of slots in protocol table*/
+
+ 
+
+    intendStyle;               /*END, NPT, MULTI, ...*/
+
+    BOOLattached;                  /*Indicates unit is attached*/
+
+ 
+
+    SEM_IDtxSem;               /*Transmitter semaphore.*/
+
+    longflags;                     /*various flags.*/
+
+    structnet_funcs* pFuncTable;   /*Function talbe.*/
+
+    M2_INTERFACETBLmib2Tbl;    /*MIB II counters.*/
+
+    LISTmultiList;                 /*Head of the multicast address list*/
+
+    intnMulti;                     /*Number of elements in the list*/
+
+    structprotocol_binding* outputFilter; /*Optional output filter*/
+
+    NET_POOL_IDpNetPool;           /*Memorycookie used by MUX buffering*/
+
+    M2_ID*pMib2Tbl;            /*RFC 2233 MIB objects*/
+
+    structend_object* dummyBinding; /*dummy protocolbinding*/
+
+}END_OBJ;
+
+    结构中的NODE节点用于链化所有的网络设备；DEV_OBJ数据机构用于描述设备，包括名称、描述、设备索引以及指向设备数据结构的指针等信息；结构net_protocol/proto_entry用于挂接网络协议；结构net_funcs则包含了网络设备驱动程序向MUX层提供的回调函数接口。
+
+2.struct NET_FUNCS
+/*NET_FUNCS - driver functiontable*/
+
+typedef struct net_funcs
+
+{
+
+    STATUS (*start)(END_OBJ*);/*Driver's start func*/
+
+    STATUS (*stop)(END_OBJ*); /*Driver's stop func*/
+
+    STATUS (*unload)(END_OBJ*);/*Driver's unload func*/
+
+    STATUS (*ioctl)(END_OBJ*,int, caddr_t); /*Driver's ioctl func*/
+
+    STATUS (*send)(END_OBJ*,M_BLK_ID); /*Driver's send func*/
+
+    STATUS (*mCastAddrAdd)(END_OBJ*,char*); /*Driver's mcast add func*/
+
+    STATUS (*mCastAddrDel)(END_OBJ*,char*); /*Driver's mcast delete func*/
+
+    STATUS (*mCastAddrGet)(END_OBJ*,MULTI_TABLE*); /*Driver's mcast get func*/
+
+    STATUS (*pollSend)(END_OBJ*,M_BLK_ID); /*Driver's polling send func*/
+
+    STATUS (*pollRecv)(END_OBJ*,M_BLK_ID); /*Driver's polling recv func*/
+
+    M_BLK_ID(*fromAddress)(M_BLK_ID,M_BLK_ID, M_BLK_ID, BOOL); /*Driver's addrformation func*/
+
+    STATUS (*packetDataGet)(M_BLK_ID,LL_HDR_INFO*); /*Driver's packet data get func*/
+
+    STATUS (*addrGet)(M_BLK_ID,M_BLK_ID, M_BLK_ID, M_BLK_ID, M_BLK_ID); /*Driver'spacket addr get func*/
+
+    int (*endBind)(void*,void*, void*, long type); /*information exchangebetween network service and network driver*/
+
+}NET_FUNCS;
+
+3.struct END_TBL_ENTRY
+    END_TBL_ENTRY为设备程序入口表。
+
+/*This is the structure that is usedby the BSP to build up a table
+
+ * of END devices to be started at boot time.
+
+ */
+
+typedef struct end_tbl_entry
+
+{
+
+    int unit;                          /*This device's unit #*/
+
+    END_OBJ*(*endLoadFunc)(char*,void*); /*Theload function*/
+
+    char*endLoadString;               /*The load string*/
+
+    BOOLendLoan;                      /*Do we loan buffers?*/
+
+    void*pBSP;                            /*BSP private*/
+
+    BOOLprocessed;                        /*Has this been processed?*/
+
+}END_TBL_ENTRY;
+
+    全局数组END_TBL_ENTRY endDevTbl[];记录了所有网络设备END_OBJ的endLoadFunc，以便在系统网络设备初始化时，逐一创建初始化END_OBJ。
+
+四．END网络设备驱动的初始化
+    END网络设备初始化函数调用路径如下：usrNetworkInit()->usrNetEndLibInit()，在usrNetEndLibInit()中调用muxDevLoad()/muxDevStart()加载并初始化MUX/END接口。
+#ifdef INCLUDE_END
+STATUS usrNetEndLibInit()
+
+{
+
+    intcount;
+
+    END_TBL_ENTRY*pDevTbl;
+
+    void*pCookie = NULL;
+
+ 
+
+    /*Add in mux ENDS*/
+
+    for(count=0,pDevTbl=endDevTbl; pDevTbl->endLoadFunc!=END_TBL_END;pDevTbl++,count++)
+
+    {
+
+       /*make sure that WDB has not already installed thedevice*/
+
+       if(!pDevTbl->processed)
+
+       {
+
+           pCookie= muxDevLoad(pDevTbl->unit,
+
+              pDevTbl->endLoadFunc,
+
+              pDevTbl->endLoadString,
+
+              pDevTbl->endLoan,pDevTbl->pBSP);
+
+ 
+
+           /*...*/
+
+           muxDevStart(pCookie);
+
+           /*...*/
+
+       }
+
+       /*...*/
+
+    }
+
+    /*...*/
+
+}
+
+#endif
+
+1.加载网络设备：muxDevLoad()->endLoad()
+    muxDevLoad()函数将网络设备驱动程序挂接到MUX层中。这个函数返回一个标识设备的 cookie，以后所有其他涉及到该设备的调用都会用到这个cookie。
+
+/*muxDevLoad - load a driver intothe MUX*/
+
+void* muxDevLoad(int unit,/*unit number of device*/
+
+    END_OBJ*(*endLoad)(char*, void*), /*load function of thedriver*/
+
+    char*pInitString, /*init string for this driver*/
+
+    BOOLloaning, /*we loan buffers*/
+
+    void*pBSP /*for BSP group*/
+
+    )
+
+{
+
+    /*Loading a device is a two pass algorithm.*/
+
+    endLoad(devName,NULL); /*pass 1*/
+
+ 
+
+    endLoad(initString,pBSP); /*pass 2*/
+
+
+    pNew->receiveRtn = muxReceive; /*END_OBJ::receiveRtn*/
+}
+
+    endLoad()中将调用netPoolInit()完成内存池的创建，完成rx/tx操作相关的数据结构（DMA descriptor ring and associated mbuf/sk_buff）的创建，以及mac/phy、mdio/gpio等相关初始化工作。最终返回描述驱动的数据结构END_OBJ。其中调用endObjInit()，传递net_funcs*END_OBJ::pFuncTable。
+
+STATUS endObjInit(
+
+    END_OBJ*pEndObj, /*object to be initialized*/
+
+    DEV_OBJ*pDevice, /*ptr to device struct*/
+
+    char*pBaseName, /*device base name, for example,"ln"*/
+
+    int unit,/*unit number*/
+
+    NET_FUNCS*pFuncTable,/*END device functions*/
+
+    char*pDescription
+
+    );
+
+    关于END_OBJ::receiveRtn
+    一般在RX ISR（Interrupt Service Routine）中调用宏END_RCV_RTN_CALL(END_OBJ*,M_BLK_ID)，即END_OBJ::receiveRtn->muxReceive()将接收到的数据包（M_BLK_ID）通过MUX层上交给TCP/IP协议栈处理（pass the packet to the TCP/IP stack through the MUX layer）。
+2.启动网络设备：muxDevStart()->endStart()
+    一旦网络设备被成功加载，就可以使用muxDevStart()激活它。
+
+/*start a device by calling its start routine*/
+
+STATUS muxDevStart(
+
+    void*pDevCookie /*device identifier from muxDevLoad()routine*/
+
+)
+
+{
+
+    /*...*/
+
+    END_OBJ*pEnd = PDEVCOOKIE_TO_ENDOBJ(pDevCookie);
+
+    pEnd->pFuncTable->start(pEnd);/*net_funcs::start()*/
+
+    /*...*/
+
+}
+
+    endStart()会激活驱动程序并且会依照所使用的BSP和处理器结构为驱动程序注册一个正确的中断服务程序（connects the driver ISR and enablesinterrupts）。
+
+    一般调用SYS_INT_CONNECT()宏-intConnect()函数挂接中断；调用SYS_INT_ENABLE()宏-intEnable()函数使能中断。
+
+五．绑定网络协议
+    usrNetworkInit()在调用usrNetEndLibInit()后，将进一步调用usrNetIpAttachCommon(pDevName,uNum,"IPv4",ipAttach);将以太网设备附加到IP协议栈。ipAttach()调用muxBind()把网络协议栈通过MUX层绑定到一个网络设备驱动程序。一旦这一步完成，网络协议就准备在相应的设备上进行数据的收发了。
+
+/* ipAttach - a generic attach routine for the TCP/IP network stack */
+
+int ipAttach
+
+    (
+
+    intunit,                   /* Unit number  */
+
+    char*pDevice     /*Device name (i.e. ln, ei etc.). */
+
+)
+
+{
+
+    /*...*/
+
+    /* END device */
+
+       pDrvCtrl->pIpCookie = muxBind (pDevice, unit, (FUNCPTR)ipReceiveRtn,(FUNCPTR) ipShutdownRtn, (FUNCPTR)ipTxRestart, (VOIDFUNCPTR) ipError,ETHERTYPE_IP, "IP 4.4 TCP/IP", (void *) pDrvCtrl);
+
+    /*...*/
+
+}
+六．TCP/IP协议栈的初始化
+/* initialize various protocols */
+
+LOCAL STATUS usrNetProtoInit (void)
+
+{
+
+    ipLibInit(&ipCfgParams);       /* has to included by default */
+
+    rawIpLibInit();                    /* has to included by default */
+
+    rawLibInit();
+
+ 
+
+#ifdef INCLUDE_UDP
+
+    udpLibInit(&udpCfgParams);         /* udp protocol initialization */
+
+#endif
+
+ 
+
+#ifdef INCLUDE_TCP
+
+    tcpLibInit(&tcpCfgParams);         /* tcp protocol initialization */
+
+#endif
+
+ 
+
+#ifdef INCLUDE_ICMP
+
+    icmpLibInit(&icmpCfgParams);       /* icmp protocol initialization */
+
+#endif
+
+ 
+
+#ifdef INCLUDE_IGMP
+
+    igmpLibInit();                     /* igmp protocol initialization */
+
+#endif
+
+ 
+
+    return(OK);
+
+}
+
+    usrNetProtoInit()被bootLoad()调用，关于bootLoad()及之前的流程参考后续对VxWorks引导及启动过程的分析。
+
+七．RX Flow & TX Flow
+    RX Flow：rx ISR-> muxReceive()-> ipReceiveRtn()-> ip_input()->...-> tcp_input()-> recv()，用户通过socket的recv()接口从STREAM套接字上收取从以太网驱动上到TCP/IP协议栈的数据包。
+    TX Flow：send()->...->tcp_output()->...->ip_output()->ipOutput()->...->ipTxRestart()->ipTxStartup()->muxSend()->END_OBJ::pFuncTable->send()。用户通过socket的send()接口在STREAM套接字上发送数据包，经过TCP/IP协议栈下传，最终通过MUX层传递给设备驱动的发送函数将数据包发送出去。
+
+
+参考：
+    《VxWorksBSP for x86 AMD》
+
+    《VxWorks网络协议栈初始化流程》
+    《VxWorks网络程序员指南》
+
+    《vxworks下设备驱动程序及bsp开发指南》
+
+    《VxWorks内核、设备驱动与BSP开发详解》
+
+    《linux-Tcp IP协议栈源码阅读笔记》

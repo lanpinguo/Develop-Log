@@ -1,0 +1,3 @@
+
+What's the CONFIG_OF in linux?
+Open Firmware. This was invented long time ago when Apple was producing laptops based on PowerPC CPUs. Openfirmware provides a good description of the devices connected to the platform. In Linux kernel the part that works with device data is called Device Tree (DT). More details in the Usage model.

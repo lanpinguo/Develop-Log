@@ -1,0 +1,12 @@
+1\ create ssh connection 
+ssh debian@192.168.7.2 
+default password: 
+temppwd
+
+for wifi ap:
+ssh debian@192.168.8.1 
+default password: 
+temppwd
+
+2\ wifi
+If your Beagle includes WiFi, an access point called "BeagleBone-XXXX" where "XXXX" varies between boards. The access point password defaults to "BeagleBone". Your Beagle should be running a DHCP server that will provide your computer with an IP address in the 192.168.8.x range and reserve 192.168.8.1 for itself.

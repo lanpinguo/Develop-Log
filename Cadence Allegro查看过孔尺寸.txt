@@ -1,0 +1,4 @@
+
+1.Tools—>Padstack—>Modify Design Padstack.选择你要看的VIA单击右边的Edit按钮即可看到详细信息。
+2.Display—>Element选择右边Find中的VIA然后单击你要看的VIA会看到它的基本尺寸信息。
+3.可以直接从库里边看找到你要看的VIA档案（*.PAD文件）看到的效果跟1是一样的。

@@ -1,0 +1,32 @@
+添加IPV6地址
+ip -6 addr add <ipv6address>/<prefixlength> dev <interface>
+ip -6 addr add 2001:0db8:0:f101::1/64 dev eth0
+
+ifconfig <interface> inet6 add <ipv6address>/<prefixlength>
+ifconfig eth0 inet6 add 2001:0db8:0:f101::1/64
+
+添加默认路由
+ip -6 route add <ipv6network>/<prefixlength> via <ipv6address>
+ip -6 route add default via 2001:0db8:0:f101::1
+
+route -A inet6 add <ipv6network>/<prefixlength> gw
+route -A inet6 add default gw 2001:0db8:0:f101::1
+
+查看路由
+ip -6 route show
+route -A 'inet6'
+route -6
+
+windows查看路由表
+route print
+
+查看邻居缓存
+ip -6 neighbor show
+
+windows查看邻居缓存
+netsh interface ipv6 show neighbors
+--------------------- 
+作者：普朗克常量 
+来源：CSDN 
+原文：https://blog.csdn.net/u013401853/article/details/55103161 
+版权声明：本文为博主原创文章，转载请附上博文链接！
