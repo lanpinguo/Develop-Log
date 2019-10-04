@@ -1,0 +1,77 @@
+py2exe使用方法
+
+一、简介
+
+py2exe是一个将python脚本转换成windows上的可独立执行的可执行程序(*.exe)的工具，这样，你就可以不用装python而在windows系统上运行这个可执行程序。
+
+py2exe已经被用于创建wxPython,Tkinter,Pmw,PyGTK,pygame,win32com client和server,和其它的独立程序。py2exe是发布在开源许可证下的。
+
+二、安装py2exe
+
+从http://prdownloads.sourceforge.net/py2exe下载并运行与你所安装的Python对应的py2exe版本的installer，这将安装py2exe和相应的例子；这些例子被安装在lib\site-packages\py2exe\samples目录下。
+
+三、py2exe的用法
+
+如果你有一个名为helloworld.py的python脚本，你想把它转换为运行在windows上的可执行程序，并运行在没有安装python的windows系统上，那么首先你应写一个用于发布程序的设置脚本例如mysetup.py，在其中的setup函数前插入语句import py2exe 。
+mysetup.py示例如下:
+# mysetup.py
+from distutils.core import setup
+import py2exe
+
+setup(console=["helloworld.py"])
+然后按下面的方法运行mysetup.py:
+python mysetup.py py2exe
+上面的命令执行后将产生一个名为dist的子目录，其中包含了helloworld.exe,python24.dll,library.zip这些文件。
+如果你的helloworld.py脚本中用了已编译的C扩展模块，那么这些模块也会被拷贝在个子目录中，同样，所有的dll文件在运行时都是需要的，除了系统的dll文件。
+dist子目录中的文件包含了你的程序所必须的东西，你应将这个子目录中的所有内容一起发布。
+
+默认情况下，py2exe在目录dist下创建以下这些必须的文件：
+1、一个或多个exe文件。
+2、python##.dll。 
+3、几个.pyd文件，它们是已编译的扩展名，它们是exe文件所需要的；加上其它的.dll文件，这些.dll是.pyd所需要的。
+4、一个library.zip文件，它包含了已编译的纯的python模块如.pyc或.pyo
+上面的mysetup.py创建了一个控制台的helloword.exe程序，如果你要创建一个图形用户界的程序，那么你只需要将mysetup.py中的console=["helloworld.py"]替换为windows=["myscript.py"]既可。
+
+py2exe一次能够创建多个exe文件，你需要将这些脚本文件的列表传递给console或windows的关键字参数。如果你有几个相关联的脚本，那么这是很有用的。
+运行下面个命令，将显示py2exe命令的所有命令行标记。
+python mysetup.py py2exe --help
+
+四、指定额外的文件
+一些应用程序在运行时需要额外的文件，诸如配置文件、字体、位图。
+如果在安装脚本中用data_files可选项指定了那些额外的文件，那么py2exe能将这些文件拷贝到dist子目录中。data_files应包含一个元组(target-dir, files)列表，其中的files是这些额外的文件的列表。
+示例如下：
+# mysetup.py
+from distutils.core import setup
+import glob
+import py2exe
+
+setup(console=["helloworld.py"],
+      data_files=[("bitmaps",
+                   ["bm/large.gif", "bm/small.gif"]),
+                  ("fonts",
+                   glob.glob("fonts\\*.fnt"))],
+)
+说明：data_files选项将创建一个子目录dist\bitmaps，其中包含两个.gif文件；一个子目录dist\fonts，其中包含了所有的.fnt文件。
+
+五、Windows NT services
+
+你可以通过传递一个service关键字参数给setup函数来建造Windows NT services
+,这个service参数的值必须是一个Python模块名(包含一service类)的列表。
+示例如下：
+# mysetup.py
+from distutils.core import setup
+import py2exe
+
+setup(service=["MyService"])
+所建造的可执行的service是可以通过在其后跟一定的命令行参数标记来自行安装和卸载的。你可以通过在这个可执行的service(exe)后跟一-help参数来得到更多的帮助。
+六、COM servers
+
+你可以通过传递一个com_server 关键字参数给setup函数来建造Windows NT services
+,这个service参数的值必须是一个Python模块名(包含一个或多个COM server 类)的列表。
+示例如下：
+# mysetup.py
+from distutils.core import setup
+import py2exe
+
+setup(com_server=["win32com.server.interp"])
+默认情况下，DLL和EXE servers被建造，你不需要它们的话你可以简单的删除它们。

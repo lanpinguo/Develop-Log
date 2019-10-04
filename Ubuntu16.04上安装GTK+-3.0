@@ -1,0 +1,22 @@
+之前写过一篇在CentOS上源代码安装最新版GTK+3.0的文章，之后一直想尝试在Ubuntu上通过命令的方式安装，这
+
+样可以省去很多时间，专心做开发。
+Ubuntu上安装GTK+3.0的命令只有4条，而且安装速度很快，构建GTK+3.0的开发环境很方便。
+1、安装gcc/g++/gdb/make等基本编程工具:sudo apt-get install build-essential
+2、安装GTK+3.0：sudo apt-get install libgtk-3-dev
+3、安装pkg-config：sudo apt-get install pkg-config
+4、安装帮助文件，方便查看帮助：sudo apt-get install devhelp (可以把dehelp固定在工具栏上)
+
+确认一下pkg-config版本 pkg-config –version
+确认一下GTK+版本 pkg-config –modversion gtk+-3.0
+
+经确认GTK+是3.18.9版本
+
+GTK+头文件位置：/usr/include/gtk-3.0
+库文件位置： /usr/lib/X86_64-linux-gnu
+
+CentOS源代码安装GTK+3.0连接：
+http://blog.csdn.net/singleyellow/article/details/54860915
+————————————————
+版权声明：本文为CSDN博主「拜乔布斯」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/singleyellow/article/details/74628428

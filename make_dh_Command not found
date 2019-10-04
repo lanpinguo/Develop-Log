@@ -1,0 +1,9 @@
+make: dh: Command not found
+
+8
+
+The guy in IRC was almost there, but not quite. The package that you need is called dh-make no devscripts. A simple 
+
+sudo apt-get install dh-make
+
+ should fix the issue.

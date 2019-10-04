@@ -1,0 +1,1 @@
+orangepi@Orangepi:/work$ gcc -Wall -o blink blink.c -lwiringPi -lcrypt -lpthread -lm -lrt

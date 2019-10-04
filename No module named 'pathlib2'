@@ -1,0 +1,11 @@
+ No module named 'pathlib2'
+ 
+ Have you tried installing pathlib2 with pip or pip3? Please try
+
+pip install pathlib2
+if you're using Python3. However, If pip is not found, then try installing it with
+if you're using Python2, and
+
+pip3 install pathlib2
+
+apt-get install python-pip python3-pip
