@@ -1,0 +1,134 @@
+https://discourse.panda3d.org/t/integrating-a-wxpython-gui-into-a-panda-app/2150/2
+
+Panda3D
+integrating a wxPython GUI into a Panda app
+General Discussion
+Log In
+integrating a wxPython GUI into a Panda app
+General Discussion
+ 
+Osirus
+Feb '07
+Hi, in my quest to make add a wxPython GUI to my panda project, I have hit a stumbling block. According to the manual I have to 鈥榳rite鈥?my own wxPython main loop as a task in python as obviously both cannot hold a non returning main loop. I have managed to get panda鈥檚 screen working and responding to events, but the wxPython window does not work at all. It does not even load properly at all. Here is my code:
+
+in init:
+
+class = EntryEditor(DirectObject.DirectObject):
+               (init code)
+               #Create the visible frame
+		self.app = wx.App(0)
+		self.frame = wx.Frame(None, -1, 'Edit Page Entry',pos = (865,0))
+                 (The rest of the wxPython code ...)
+                 taskMgr.add(self.wx,"wx")
+and later on as a task:
+
+def wx(self,task):
+		while self.app.Pending():
+			self.app.Dispatch()
+		return Task.cont 
+And right at the end
+
+if __name__ == '__main__':
+	test = EntryEditor()
+	run()
+But this just creates a small little window (without widgets) where my wxPython app should be whilst the panda side of things works fine. Here is a pic of the two windows (the wxApp is the small greyish window on the right that should be a number of windows (It is made such that the app is a frame that creates many smaller frames) It is also supposed to have controls/widgets. before i started integrating the GUI into the panda application on the left, the GUI was fully functional.
+
+
+
+
+
+created
+Feb '07
+last reply
+Feb '07
+3
+replies
+7.6k
+views
+2
+users
+
+
+drwr
+Feb '07
+It appears that something has changed in recent versions of wxPython, so that:
+
+while self.app.Pending():
+         self.app.Dispatch() 
+no longer functions. It is not clear from looking at their documentation whether this is an unintended bug, or whether the intended interface has changed to something different.
+
+It鈥檚 probably worth asking over at the wxPython forums for guidance.
+
+If you鈥檙e not able to find out how to run wxPython without having it take over the main loop, you may have to reverse it, so that wxPython is the main loop and Panda is the client. You鈥檒l probably have to use wxPython timers to get a callback frequently enough to keep your 3-D performance up; but in my past experience, I had difficulty getting frequent callbacks out of wxPython, even with timers. Maybe it鈥檚 gotten better recently.
+
+You might also have luck by putting the app.MainLoop() call inside a thread, but this is dangerous because (a) you will have two different threads (Panda and wxPython) sending window commands in parallel, which is a recipe for a crash on Linux, and (b) every callback from wxPython will be made in a thread, so your application will have to be carefully written to prevent data corruption.
+
+Good luck!
+
+David
+
+
+
+
+Osirus
+Feb '07
+To let anyone else who might want to do this in the future I have solved the problem, On both OS鈥檚 i have used the latest stable wxPython ( 2.8 ):
+
+On windows the above code actually works whilst on linux it does not.
+
+On linux we have to create our own eventloop and set this as the active main loop for the duration of the program we are running. Afterwards we have to set the active event loop back to the default one.
+
+ALOT simpler in coding terms:
+
+class App(DirectObject.DirectObject):
+def __init__(self):
+               #Create a new event loop (to overide default wxEventLoop)
+		self.evtloop = wx.EventLoop()
+        	self.old = wx.EventLoop.GetActive()
+        	wx.EventLoop.SetActive(self.evtloop)
+                taskMgr.add(self.wx,"Custom wx Event Loop")
+
+def wx(self,task):
+                while self.evtloop.Pending():
+                        self.evtloop.Dispatch()
+		time.sleep(0.1)
+		self.app.ProcessIdle()
+                return Task.cont
+
+def close(self):
+        	wx.EventLoop.SetActive(self.old)
+def 
+As you can see panda still holds the main loop and we have simply re-written the wxPython mainloop.
+
+
+
+
+drwr
+Feb '07
+Great news!
+
+David
+
+
+
+ Reply
+Suggested Topics
+Topic	Replies	Views	Activity
+Good Resources for Learning Panda3D
+General Discussion
+5	194	Jan 6
+Gaffer support please
+General Discussion
+2	76	Apr 24
+Loading MPEG ADTS file crashes Panda3D
+General Discussion
+0	22	13d
+Limit the cone bullet constraint - Reference table
+General Discussion
+0	31	Aug 27
+Could an official double precision fp version of Panda3D be provided?
+General Discussion
+11	137	May 16
+Want to read more? Browse other topics in 
+General Discussion
+ or view latest topics.
