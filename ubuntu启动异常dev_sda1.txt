@@ -1,0 +1,10 @@
+ubuntu启动异常/dev/sda1 contains a file system with errors, check forced
+2018.09.21 09:46:47
+字数 10
+阅读 642
+出现启动异常提示
+
+/dev/sda1 contains a file system with errors, check forced 
+修复
+
+fsck -f /dev/sda1

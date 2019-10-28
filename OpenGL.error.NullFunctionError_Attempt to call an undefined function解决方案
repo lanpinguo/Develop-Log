@@ -1,0 +1,34 @@
+“OpenGL.error.NullFunctionError: Attempt to call an undefined function”解决方案
+
+在windows_64下利用命令：pip install pyopengl 安装python的openGL环境。结果运行示例代码出现以下错误：
+OpenGL.error.NullFunctionError: Attempt to call an undefined function glutInitDisplayMode, check for bool(glutInitDisplayMode) before calling
+
+原因分析
+主要是你的windows是64位的，但是使用命令pip install pyopengl 安装后，执行示例默认使用的是pyopengl_32位的，所以出现了以上错误！
+
+解决方案
+在Windows_64上安装64位的pyopengl 即可，pyopengl_64位下载链接：PyOpenGL‑3.1.1‑win_amd64.whl
+下载与自己Python版本合适的，执行命令：pip install XXX.whl 即可正常使用pyopengl环境。
+
+测试环境代码
+from OpenGL.GL import *
+from OpenGL.GLU import *
+from OpenGL.GLUT import *
+
+def drawFunc():
+    glClear(GL_COLOR_BUFFER_BIT)
+    #glRotatef(1, 0, 1, 0)
+    glutWireTeapot(0.5)
+    glFlush()
+
+glutInit()
+glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA)
+glutInitWindowSize(400, 400)
+#参数为b类型而不是string
+glutCreateWindow(b"First")
+glutDisplayFunc(drawFunc)
+#glutIdleFunc(drawFunc)
+glutMainLoop() 
+————————————————
+版权声明：本文为CSDN博主「feilong_csdn」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/feilong_csdn/article/details/61421002
