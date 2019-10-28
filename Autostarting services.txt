@@ -17,6 +17,22 @@ To add a new service, just create a file in /lib/systemd/system/myservice.servic
     [Install]
     WantedBy=multi-user.target
 
+example 2:
+
+	[Unit]
+	Description=roller_coaster
+
+	[Service]
+	User=root
+	PIDFile=/var/run/rc_server.pid
+	ExecStartPre=/usr/bin/rm rc_status.log
+	ExecStart=/home/debian/rc_server -l rc_status.log
+	ExecStop=/usr/bin/kill -9 $MAINPID
+	Restart=always    
+	RestartSec=10
+	[Install]
+	WantedBy=multi-user.target
+
 And then make a symlink to this file in /etc/systemd/system/multi-user.target.wants/.
 root@beaglebone:/etc/systemd/system/multi-user.target.wants# ln /lib/systemd/system/roller_coaster.service roller_coaster.service 
 The service will start automatically on startup. You can also start and stop it manually, and query the status:
@@ -24,4 +40,18 @@ The service will start automatically on startup. You can also start and stop it 
     systemctl status myservice.service
     systemctl start myservice.service
     systemctl stop myservice.service
+
+delete a service:
+
+302
+
+My recipe for service obliteration (be careful with the rm statements!)
+
+systemctl stop [servicename]
+systemctl disable [servicename]
+rm /etc/systemd/system/[servicename]
+rm /etc/systemd/system/[servicename] symlinks that might be related
+systemctl daemon-reload
+systemctl reset-failed
+It is possible that the systemd service 'wraps' the old style scripts in /etc/init.d, so you may want to clean that up too, but that is not where systemd services live.
 
