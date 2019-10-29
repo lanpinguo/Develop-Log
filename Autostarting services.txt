@@ -27,7 +27,7 @@ example 2:
 	PIDFile=/var/run/rc_server.pid
 	ExecStartPre=/usr/bin/rm rc_status.log
 	ExecStart=/home/debian/rc_server -l rc_status.log
-	ExecStop=/usr/bin/kill -9 $MAINPID
+	ExecStop=/bin/kill -15 $MAINPID
 	Restart=always    
 	RestartSec=10
 	[Install]
