@@ -1,0 +1,54 @@
+Linux+python3.6配置OpenGL
+
+一、准备
+
+系统：Ubuntu 18.04 LTS 64位
+环境：python 3.6
+二、安装pip3
+
+$ sudo apt-get install python3-pip
+1
+三、安装OpenGL
+
+$ pip3 install PyOpenGL PyOpenGL_accelerate
+$ sudo apt-get install python3-opengl
+1
+2
+四、测试
+
+# 画直线或矩形
+from OpenGL.GL import *
+from OpenGL.GLU import *
+from OpenGL.GLUT import *
+
+
+def Line():
+    glClear(GL_COLOR_BUFFER_BIT)
+    glBegin(GL_LINES)
+    glVertex2f(0.5, 0.5)
+    glVertex2f(-0.5, -0.5)
+    glEnd()
+    glFlush()
+
+
+def Rectangle():
+    glClear(GL_COLOR_BUFFER_BIT)
+    glRectf(-0.5, -0.5, 0.5, 0.5)
+    glFlush()
+
+
+# 使用glut初始化OpenGL
+glutInit()
+# GLUT_RGBA采用RGB
+glutInitDisplayMode(GLUT_RGBA)
+# 窗口位置及大小-生成
+glutInitWindowPosition(0, 0)
+glutInitWindowSize(300, 300)
+glutCreateWindow(b"project of openGL")
+# 调用函数绘制图像
+glutDisplayFunc(Line)
+# 主循环
+glutMainLoop()
+————————————————
+版权声明：本文为CSDN博主「laomd」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/laomd/article/details/80158214
