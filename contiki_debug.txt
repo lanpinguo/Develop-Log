@@ -1,0 +1,43 @@
+contiki 
+
+
+1\
+NETSTACK_MAC
+const struct mac_driver csma_driver = {
+  "CSMA",
+  init,
+  send_packet,
+  input_packet,
+  on,
+  off,
+  channel_check_interval,
+};
+
+2\
+NETSTACK_LLSEC
+const struct llsec_driver nullsec_driver = {
+  "nullsec",
+  init,
+  send,
+  input
+};
+
+3\
+NETSTACK_NETWORK
+const struct network_driver sicslowpan_driver = {
+  "sicslowpan",
+  sicslowpan_init,
+  input
+};
+
+4\
+IP stack
+tcpip_input();
+
+
+
+
+
+
+
+
