@@ -34,6 +34,12 @@ const struct network_driver sicslowpan_driver = {
 IP stack
 tcpip_input();
 
+tcpip.c Line 812
+PROCESS(tcpip_process, "TCP/IP stack");
+PROCESS_THREAD(tcpip_process, ev, data)
+
+tcpip.c Line 191 
+packet_input(void)
 
 
 
