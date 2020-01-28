@@ -1,0 +1,12 @@
+
+1.在之前的AES加密中，python2或者3.4采用的是pyCyrpto这个模块，但是昨天废了好大劲去安装它都是失败，而经过大量查阅发现此库已经停止维护了，在安装过程中尽管用pip install pycryto 去下载，对应的tar.gz可以下载，但是在自动安装时会报错，说是没有微软2014的工具环境。
+
+2.后经继续查阅，发现pyCyrpto库的后续分支，有一个叫pyCryptodome的库，是前代的延伸版，下面给出一个全面的地址，如果有pip安装不了的库可以通过此网站进行对应的下载。
+————————————————
+版权声明：本文为CSDN博主「s740556472」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/s740556472/article/details/78778522
+
+pip install pycryptodomex
+
+不要使用下面的方面（无效）
+pip install pycryptodomex

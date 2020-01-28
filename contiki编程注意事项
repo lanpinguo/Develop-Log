@@ -1,0 +1,5 @@
+A protothread is driven by repeated calls to the function in which the protothread is running. Each time the function is called, the protothread will run until it blocks or exits. Thus the scheduling of protothreads is done by the application that uses protothreads.(contiki-2.6/doc/pt-doc.txt)
+这和其他系统的任务切换概念是不一样的，像uCOS，Linux都是保存堆栈，保存寄存器信息，保存一个完整的任务运行状态下一次继续重复上一次的运行。而Contiki的这种Protothread更像是函数的调用，不过和一般的函数调用不一样的是，它下一次调用时进入函数运行的起点不是都一样，而是又上一次退出时(pt)->lc的值来决定。而且这时寄存器的值都不是上一次退出函数时的值，而是对于本次运行都是无用的，这也就是为什么Contiki在protothread中不建议使用局部变量的原因，因为只要退出本次protothread，下次重新运行时，即使是知道了上一次的退出时的位置，局部变量的值依然是未知的，因为没有保存。同时由于protothread使用switch语句实现，如果使用不当可能破坏protothread的跳转，这是为什么在protothread中不建议使用switch的原因。
+————————————————
+版权声明：本文为CSDN博主「tietao」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/tietao/article/details/8459964
