@@ -1,0 +1,27 @@
+c++编译时打印宏定义
+#pragma message("this is message")
+
+#pragma message只能打印字符串，如果想打印任何宏定义可使用：
+
+ 
+
+#define PRINT_MACRO_HELPER(x) #x
+#define PRINT_MACRO(x) #x"="PRINT_MACRO_HELPER(x)
+#pragma message(PRINT_MACRO(var))
+
+ 
+
+ 
+
+如：#define __cplusplus 199911L
+
+#pragma message(PRINT_MACRO(__cplusplus))
+
+ 
+
+ 
+
+Android.mk输出信息
+
+$(warning "LOCAL_PATH is$(LOCAL_PATH)")
+$(warning "TARGET_ARCH is$(TARGET_ARCH)")

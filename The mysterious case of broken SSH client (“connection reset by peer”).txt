@@ -1,0 +1,101 @@
+Solution found for me via the following URL: http://www.held.org.il/blog/2011/05/the-myterious-case-of-broken-ssh-client-connection-reset-by-peer/
+
+It even does a pretty good job of explaining what is going on.
+
+Ultimately, I added the following to /etc/ssh/ssh_config:
+
+Host *
+SendEnv LANG LC_*
+HashKnownHosts yes
+GSSAPIAuthentication yes
+GSSAPIDelegateCredentials no
+Ciphers aes128-ctr,aes192-ctr,aes256-ctr,arcfour256,arcfour128,aes128-cbc,3des-cbc
+HostKeyAlgorithms ssh-rsa,ssh-dss
+MACs hmac-md5,hmac-sha1,hmac-ripemd160
+Neither Ciphers, or HostKeyAlgorithms worked on their own, pretty sure MACs put me over the top to get this to work, but I can't be sure, put many hours into getting this solved. I hope this can at least help somebody else.
+
+Edit: This (sometimes) fixes the problem, but probably not in the way you want. --jcwenger
+
+These settings appear to (as a side effect) change the way the ssh client emits packets, and happen to cause it to emit smaller packets. This isn't fixing the problem; it just, sometimes, makes it so that the real problem (MTU fragmentation interacting with stupid firewall rule implementations) isn't triggered.
+
+The correct solution is to set an MTU that works end to end.
+
+Having to manually set MTU to a smaller number to ensure no fragmentation occurs isn't any cleaner (we as users shouldn't have to manually take steps to counter problems caused by our network teams)... but it's at least directly dealing with the actual cause in a reliable and provable way, rather than screwing up SSH's cipher settings in a way that, as a side effect, when the stars align, happens to cause it to not make big packets.
+
+Also, SSH isn't the only thing that makes big packets. Setting MTU keeps the same thing from happening to other protocols too.
+
+国内网站查到的方法：
+3.2 修改/etc/ssh/ssh_config
+The solution was found here: SSH works in putty but not terminal
+
+in Ubuntu 13.10/12.10, login and gain sudo access.
+
+Edit /etc/ssh/ssh_config, uncomment the following lines
+
+Ciphers aes128-ctr,aes192-ctr,aes256-ctr,arcfour256,arcfour128,aes128-cbc,3des-cbc
+GSSAPIAuthentication yes
+GSSAPIDelegateCredentials no
+MACs hmac-md5,hmac-sha1,umac-64@openssh.com,hmac-ripemd160
+Add the following line
+
+HostKeyAlgorithms ssh-rsa,ssh-dss
+You should end up with your /etc/ssh/ssh_config file looking like this
+
+Host *
+Ciphers aes128-ctr,aes192-ctr,aes256-ctr,arcfour256,arcfour128,aes128-cbc,3des-cbc
+MACs hmac-md5,hmac-sha1,umac-64@openssh.com,hmac-ripemd160
+SendEnv LANG LC_*
+HashKnownHosts yes
+GSSAPIAuthentication yes
+GSSAPIDelegateCredentials no
+HostKeyAlgorithms ssh-rsa,ssh-dss
+Now run ssh -T -v git@github.com and it will ask you to add the server to your known hosts file. Hit yes, and then it should welcome you to the server.
+
+3.3 修改内核
+
+SSH xxx@ip 就没有反应了，也没有报错
+可以PING通对方，TELNET对方的22端口也是通到
+局域网里到WINDOWS使用PUTTY是可以链接到远程主机到
+真是奇怪呀
+
+uncoffee@suncoffee:~$ ssh -v IP
+OpenSSH_5.5p1 Debian-4ubuntu4, OpenSSL 0.9.8o 01 Jun 2010
+debug1: Reading configuration data /etc/ssh/ssh_config
+debug1: Applying options for *
+debug1: Connecting to IP [IP] port 22.
+debug1: Connection established.
+debug1: identity file /home/suncoffee/.ssh/id_rsa type -1
+debug1: identity file /home/suncoffee/.ssh/id_rsa-cert type -1
+debug1: identity file /home/suncoffee/.ssh/id_dsa type -1
+debug1: identity file /home/suncoffee/.ssh/id_dsa-cert type -1
+debug1: Remote protocol version 1.99, remote software version OpenSSH_3.9p1
+debug1: match: OpenSSH_3.9p1 pat OpenSSH_3.*
+debug1: Enabling compatibility mode for protocol 2.0
+debug1: Local version string SSH-2.0-OpenSSH_5.5p1 Debian-4ubuntu4
+debug1: SSH2_MSG_KEXINIT sent
+
+到这里就停了，没有反应了
+
+解决办法：修改内核参数
+net.ipv4.tcp_rmem = 4096 87380 207520
+
+4 如何修改内核
+查看当前系统参数sysctl -a
+手动修改（当前有效，重启后无效）joy@joy:~$ cat /proc/sys/net/ipv4/icmp_echo_ignore_all0joy@joy:~$ echo "1" >  /proc/sys/net/ipv4/icmp_echo_ignore_all
+命令修改（当前有效，重启后无效）sysctl -w net.ipv4.icmp_echo_ignore_all=1   （参数名与=文件路径去掉/proc/sys/，且"/ "改成"."）
+配置文件中修改（当前无效，重启永久生效）vim /etc/sysctl.conf添加net.ipv4.icmp_echo_ignore_all=1
+让其修改后立刻生效 sysctl -p
+参数迁移1、当初当前主机所有配置sysctl -a > mysys.conf
+2、拷贝到其他主机并执行sysctl -p -f mysys.conf
+3、如果使用2套参数文件后性能大不相同，可对比2个参数文件
+
+
+————————————————
+版权声明：本文为CSDN博主「翟海飞」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/zhaihaifei/article/details/78675817
+
+————————————————
+版权声明：本文为CSDN博主「翟海飞」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/zhaihaifei/article/details/78675817
+
+

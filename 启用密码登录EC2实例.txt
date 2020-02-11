@@ -1,0 +1,36 @@
+在使用 SSH 登录到 EC2 实例时，如何启用密码登录而不是使用密钥对？
+上次更新时间：2019 年 9 月 17 日
+
+我希望使用密码而非密钥对文件 (.pem) 通过 SSH 登录到 Amazon Elastic Compute Cloud (Amazon EC2) 实例。该怎么办？ 
+
+简短描述
+​要启用密码身份验证，请创建一个密码，更新 /etc/ssh/sshd_config 文件，然后重新启动 SSH 服务。以下过程在 Amazon Linux、RHEL、SUSE 和 Ubuntu 上进行了测试。
+
+注意：使用基于密码的登录而非密钥对身份验证具有安全隐患。​因此，不建议使用基于密码的登录。另外，最佳实践是最大限度地减少与您的实例关联的安全组规则的源 IP 地址以防止 SSH 攻击。
+解决方法
+1.    从 SSH 客户端，登录到您的 EC2 实例。
+
+使用以下用户名之一：
+
+对于 Amazon Linux，用户名为 ec2-user。
+对于 RHEL 5，用户名为 root 或 ec2-user。
+对于 Ubuntu，用户名为 ubuntu。
+对于 SUSE Linux，用户名为 root 或 ec2-user。
+如果 ec2-user 或 root 无法使用，请与您的 AMI 提供商核实。
+
+2.    为用户设置密码。以下示例使用 ec2-user 作为用户：
+$ sudo passwd ec2-user
+Changing password for user ec2-user.
+New password:
+Retype new password:
+例如，成功的响应类似于以下示例：
+passwd: all authentication tokens updated successfully.
+3.    更新 /etc/ssh/sshd_config 文件中的 PasswordAuthentication 参数：
+PasswordAuthentication yes
+4.    重新启动 SSH 服务。
+
+对于 Amazon Linux、RHEL 5 和 SUSE Linux，请使用以下命令：
+sudo service sshd restart
+对于 Ubuntu，请使用以下命令：
+sudo service ssh restart
+5.    退出 SSH 客户端，然后登录以测试密码身份验证。

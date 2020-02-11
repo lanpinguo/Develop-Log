@@ -19,19 +19,19 @@ To add a new service, just create a file in /lib/systemd/system/myservice.servic
 
 example 2:
 
-	[Unit]
-	Description=roller_coaster
+[Unit]
+Description=roller_coaster
 
-	[Service]
-	User=root
-	PIDFile=/var/run/rc_server.pid
-	ExecStartPre=/usr/bin/rm rc_status.log
-	ExecStart=/home/debian/rc_server -l rc_status.log
-	ExecStop=/bin/kill -15 $MAINPID
-	Restart=always    
-	RestartSec=10
-	[Install]
-	WantedBy=multi-user.target
+[Service]
+User=root
+PIDFile=/var/run/rc_server.pid
+ExecStartPre=/usr/bin/rm rc_status.log
+ExecStart=/home/debian/rc_server -l rc_status.log
+ExecStop=/bin/kill -15 $MAINPID
+Restart=always    
+RestartSec=10
+[Install]
+WantedBy=multi-user.target
 
 And then make a symlink to this file in /etc/systemd/system/multi-user.target.wants/.
 root@beaglebone:/etc/systemd/system/multi-user.target.wants# ln /lib/systemd/system/roller_coaster.service roller_coaster.service 

@@ -4,29 +4,29 @@
 
 2、在系统中使用vi命令编辑hostapd配置文件/etc/hostapd/hostapd.conf（该在安装hostapd软件组件包时自动创建完成），内容如下：
 
-    ctrl_interface=/var/run/hostapd  
-    ctrl_interface_group=wheel  
-    # Some usable default settings...  
-    macaddr_acl=0  
-    auth_algs=1  
-    ignore_broadcast_ssid=0  
-    # Uncomment these for base WPA & WPA2 support with a pre-shared key  
-    wpa=2  
-    wpa_key_mgmt=WPA-PSK  
-    wpa_pairwise=TKIP  
-    rsn_pairwise=CCMP  
-    # DO NOT FORGET TO SET A WPA PASSPHRASE!!  
-    wpa_passphrase=****** 
-    # Most modern wireless drivers in the kernel need driver=nl80211   
-    #ieee80211n=1  
-    # Customize these for your local configuration...  
-    interface=wlan0  
-    hw_mode=g  
-    channel=7  
-    ssid=HOSTAP 
-    logger_stdout=-1 
-    logger_stdout_level=2 
-    max_num_sta=5 
+ctrl_interface=/var/run/hostapd  
+ctrl_interface_group=wheel  
+# Some usable default settings...  
+macaddr_acl=0  
+auth_algs=1  
+ignore_broadcast_ssid=0  
+# Uncomment these for base WPA & WPA2 support with a pre-shared key  
+wpa=2  
+wpa_key_mgmt=WPA-PSK  
+wpa_pairwise=TKIP  
+rsn_pairwise=CCMP  
+# DO NOT FORGET TO SET A WPA PASSPHRASE!!  
+wpa_passphrase=****** 
+# Most modern wireless drivers in the kernel need driver=nl80211   
+#ieee80211n=1  
+# Customize these for your local configuration...  
+interface=wlan0  
+hw_mode=g  
+channel=7  
+ssid=HOSTAP 
+logger_stdout=-1 
+logger_stdout_level=2 
+max_num_sta=5 
 
 在该配置文件中SSID其实指的就是无线AP的访问名，用户可以随意定义自己喜欢的名字。而wpa_passphrase等号后的字符其实就是无线AP的连接密码，用户同样需要根据自己的需求进行修改。
 
@@ -67,3 +67,84 @@ dhcp-option=6,8.8.8.8为客户端配置dns，用户应该自己修改为外网�
 
 sudo  hostapd /etc/hostapd/hostapd.conf >/home/share/hostapd/hostapd.log 
 
+另一个例子：
+
+1、使能无线：
+rfkill unblock all
+
+2、重新加载wifi网卡驱动，配置为AP模式：
+root@Orangepi:/lib/modules/3.10.102+/kernel/drivers/net/wireless/bcmdhd#insmod bcmdhd.ko op_mode=2 
+
+3、输入如下命令开始修改
+
+sudo vi  /etc/network/interfaces
+修改成像下面的样子
+allow-hotplug wlan0
+iface wlan0 inet static
+address 192.168.42.1
+netmask 255.255.255.0
+#iface wlan0 inet manual
+#wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
+#iface default inet dhcp
+
+重启网络服务：
+sudo service networking restart
+
+注意：DHCP服务端只能监听静态端口
+
+安装DHCP服务端并修改配置文件
+sudo apt-get install isc-dhcp-server
+sudo vi /etc/dhcp/dhcpd.conf
+去掉authoritative一行前面的#号和下面两行前面的#号
+option domain-name "example.org";
+option domain-name-servers ns1.example.org, ns2.example.org;
+接着在最后一行后面加入下面代码
+subnet 192.168.42.0 netmask 255.255.255.0 
+{
+ range 192.168.42.10 192.168.42.50;
+ option broadcast-address 192.168.42.255;
+ option routers 192.168.42.1;
+ default-lease-time 600;
+ max-lease-time 7200;
+ option domain-name "local";
+ option domain-name-servers 8.8.8.8, 8.8.4.4;
+}
+然后按ESC键输入:wq保存修改
+
+接着修改下面配置文件
+
+sudo vi /etc/default/isc-dhcp-server
+接口修改为如下wlan0
+INTERFACES="wlan0"
+安装AP热点程序和修改配置文件
+sudo apt-get install hostapd
+sudo vi /etc/hostapd/hostapd.conf
+创建无线热点的SSID和密码
+interface=wlan0
+driver=nl80211
+ #driver=rtl871xdrv
+ssid=RPI-WIFI
+hw_mode=g
+channel=6
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+wpa=2
+wpa_passphrase=raspberrypi
+wpa_key_mgmt=WPA-PSK
+wpa_pairwise=TKIP
+rsn_pairwise=CCMP
+上面创建的无线热点名称为RPI-WIFI，无线密码为raspberrypi
+
+
+
+
+修改守护程序的配置文件
+
+sudo vi /etc/default/hostapd
+找到DAEMON_CONF一行，修改如下
+DAEMON_CONF="/etc/hostapd/hostapd.conf"
+重启然后就应该可以用手机发现树莓派的热点RPI-WIFI了
+————————————————
+版权声明：本文为CSDN博主「某月Moyu」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/wangwangwangxing/article/details/82347477

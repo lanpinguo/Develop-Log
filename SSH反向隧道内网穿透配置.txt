@@ -71,7 +71,7 @@ sudo apt-get install autossh
 2.执行AutoSSH命令
 
 autossh -M 5555 -NR 80:127.0.0.1:7777 root@114.114.114.114
-
+autossh -M 5555 -NR 80:127.0.0.1:80 ubuntu@3.112.255.227
 -M：在5555端口上监听连接的变化，只要断开就重连 
 少了-f 参数，因为AutoSSH本来就在后台运行
 --------------------- 

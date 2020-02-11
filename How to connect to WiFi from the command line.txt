@@ -1,0 +1,81 @@
+
+1\
+
+I think you want to keep using managed interface (by NetworkManager). nmcli is a command‐line tool for controlling NetworkManager.
+
+To see list of saved connections, use (<SavedWiFiConn>)
+
+nmcli c
+To see list of available WiFi hotspots (<WiFiSSID>)
+
+nmcli d wifi list
+or:
+
+sudo iwlist <WifiInterface> scanning
+To see list of interfaces (<WifiInterface>)
+
+ifconfig -a
+Just change <WifiInterface>, <WiFiSSID>, <WiFiPassword> in the following commands to reflect your setup. If WiFi info already saved, easier way using <SavedWiFiConn> name of connection as it was saved in NetworkManager.
+
+Ubuntu 16.04
+##disconnect
+nmcli d disconnect <WifiInterface>
+
+##connect
+nmcli d connect <WifiInterface>
+Another way:
+
+##disconnect
+nmcli c down <SavedWiFiConn>
+
+##connect
+nmcli c up <SavedWiFiConn>
+Ubuntu 15.10 & previous
+##disconnect
+nmcli d disconnect iface <WifiInterface>
+
+##connect
+nmcli d wifi connect <WiFiSSID> password <WiFiPassword> iface <WifiInterface>
+Another way:
+
+##disconnect:
+nmcli c down id <SavedWiFiConn>
+
+##connect:
+nmcli c up id <SavedWiFiConn>
+If your password isn't automatically recognized type this:
+
+nmcli -a c up <SavedWiFiConn>
+
+2\
+If your wi-fi access point is saved, it will auto-connect. Turn wireless on or off with a simpler command:
+
+nmcli nm wifi on
+nmcli nm wifi off
+on newer version:
+
+nmcli radio wifi on
+nmcli radio wifi off
+
+
+3
+
+If you want to connect to a network called PrettyFlyForAWiFi-5G
+
+nmcli -a d wifi connect PrettyFlyForAWiFi-5G
+
+-a (or --ask) means it will ask you for the password. The connection will be saved and should connect automatically if you restart your computer.
+
+You could append password <your password> to the end (the literal word password followed by the actual password)
+
+nmcli d wifi connect PrettyFlyForAWiFi-5G password 12345678
+but maybe run unset HISTFILE beforehand, so that your WiFi password isn't saved to your ~/.bash_history file.
+
+To see all the WiFi networks around you (--rescan yes is optional, the list of networks might be up to 30 seconds old without it)
+
+nmcli d wifi list --rescan yes
+which will output something like
+
+IN-USE  SSID                         MODE   CHAN  RATE        SIGNAL  BARS  SECURITY
+        PrettyFlyForAWiFi-5G         Infra  44    405 Mbit/s  59      ▂▄▆_  WPA2
+        PrettyFlyForAWiFi            Infra  6     195 Mbit/s  41      ▂▄__  WPA1 WPA2

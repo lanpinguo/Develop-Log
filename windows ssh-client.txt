@@ -1,0 +1,5 @@
+
+windows ssh相关目录：
+C:\Users\lenovo\.ssh
+ssh客户端相关app:
+C:\Windows\System32\OpenSSH

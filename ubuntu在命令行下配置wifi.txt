@@ -1,0 +1,250 @@
+
+
+前言
+ubuntu作为server时，或者运行在片上设备时，往往只能通过ssh连接，而没有图形界面的支持。如何在这种情况下配置无线网卡并成功连接wifi，是个足够头疼的问题。经过一天的折腾，参考了许多技术博客后，算是在自己的tx1板子上完成了这项配置wifi的工作，在此记录，希望为随后入坑的人提供些许帮助。
+需要说明的是，以下方法为参考了所列技术博客后的实践结果，且由于运行环境的各种区别，本人不能保证下列方案能够解决所有人的问题。但是，解决思路应该是大同小异的。如果该方案在你的机子上未能成功，请不要轻言放弃~再baidu/bing/google/stackoverflow/askubuntu一番，说不定属于你的答案就在某个角落！
+
+步骤
+1
+使用”iwconfig”命令查看无线网卡的信息。所运行命令为：
+
+ubuntu:~$ iwconfig
+1
+在我的机子上的输出如下：
+
+rmnetctl  no wireless extensions.
+
+wlan0     IEEE 802.11abgn  ESSID:off/any
+          Mode:Managed  Access Point: Not-Associated   Tx-Power=31 dBm
+          Retry  long limit:7   RTS thr:off   Fragment thr:off
+          Power Management:on
+
+dummy0    no wireless extensions.
+
+enx00044b6697cd  no wireless extensions.
+
+ip6tnl0   no wireless extensions.
+
+sit0      no wireless extensions.
+
+lo        no wireless extensions.
+
+tunl0     no wireless extensions.
+
+需要说明的是，需要在你的无线网卡存在，且无线网卡驱动安装后，才会检测到类似上面的wlan0的网卡项。如果没有网卡项，请先确认您的机子上存在无线网卡，且驱动正确安装。
+
+2
+启动无线网卡项，或者确认其是启动的：
+
+ubuntu:~$ sudo ip link set wlan0 up
+1
+该命令行在我的机子上没有输出。
+
+3
+扫描所检测到的无线网络：
+
+ubuntu:~$ sudo iw dev wlan0 scan | less
+或者：
+iwlist wlan0 scan
+
+我的机子上的输出如下：
+
+BSS f0:b4:29:61:92:ef(on wlan0)
+        TSF: 9516218618 usec (0d, 02:38:36)
+        freq: 2447
+        beacon interval: 100 TUs
+        capability: ESS Privacy ShortSlotTime APSD (0x0c11)
+        signal: -58.00 dBm
+        last seen: 10 ms ago
+        Information elements from Probe Response frame:
+        SSID: Xiaomi_517
+        Supported rates: 1.0* 2.0* 5.5* 11.0* 9.0 18.0 36.0 54.0
+        DS Parameter set: channel 8
+        ERP: Barker_Preamble_Mode
+        Extended supported rates: 6.0 12.0 24.0 48.0
+        HT capabilities:
+                Capabilities: 0x6c
+                        HT20
+                        SM Power Save disabled
+                        RX HT20 SGI
+                        RX HT40 SGI
+                        No RX STBC
+                        Max AMSDU length: 3839 bytes
+                        No DSSS/CCK HT40
+                Maximum RX AMPDU length 65535 bytes (exponent: 0x003)
+                Minimum RX AMPDU time spacing: 4 usec (0x05)
+                HT RX MCS rate indexes supported: 0-15
+                HT TX MCS rate indexes are undefined
+        HT operation:
+                 * primary channel: 8
+                 * secondary channel offset: no secondary
+                 * STA channel width: 20 MHz
+                 * RIFS: 0
+                 * HT protection: no
+                 * non-GF present: 0
+                 * OBSS non-GF present: 0
+                 * dual beacon: 0
+                 * dual CTS protection: 0
+                 * STBC beacon: 0
+                 * L-SIG TXOP Prot: 0
+                 * PCO active: 0
+                 * PCO phase: 0
+        WPA:     * Version: 1
+                 * Group cipher: TKIP
+                 * Pairwise ciphers: TKIP CCMP
+                 * Authentication suites: PSK
+        RSN:     * Version: 1
+                 * Group cipher: TKIP
+                 * Pairwise ciphers: TKIP CCMP
+                 * Authentication suites: PSK
+                 * Capabilities: 1-PTKSA-RC 1-GTKSA-RC (0x0000)
+        WMM:     * Parameter version 1
+                 * u-APSD
+                 * BE: CW 15-1023, AIFSN 3
+                 * BK: CW 15-1023, AIFSN 7
+                 * VI: CW 7-15, AIFSN 2, TXOP 3008 usec
+                 * VO: CW 3-7, AIFSN 2, TXOP 1504 usec
+        BSS Load:
+                 * station count: 0
+                 * channel utilisation: 19/255
+                 * available admission capacity: 31250 [*32us]
+        Country: CN     Environment: Indoor/Outdoor
+                Channels [1 - 13] @ 16 dBm
+        WPS:     * Version: 1.0
+                 * Wi-Fi Protected Setup State: 2 (Configured)
+                 * Response Type: 3 (AP)
+                 * UUID: 28802880-2880-1880-a880-f0b4296192ef
+                 * Manufacturer: xiaomi
+                 * Model: R1CM
+                 * Model Number: 0002
+                 * Serial Number: 12345678
+                 * Primary Device Type: 6-0050f204-1
+                 * Device name: XiaoMiRouter
+                 * Config methods: Label, Display, Keypad
+                 * RF Bands: 0x1
+                 * Unknown TLV (0x1049, 6 bytes): 00 37 2a 00 01 20
+BSS b0:c5:54:81:0d:aa(on wlan0)
+        TSF: 9516218240 usec (0d, 02:38:36)
+        freq: 2412
+        beacon interval: 100 TUs
+        capability: ESS Privacy ShortPreamble ShortSlotTime (0x0431)
+        signal: -65.00 dBm
+        last seen: 10 ms ago
+        Information elements from Probe Response frame:
+        SSID: CSR
+        Supported rates: 1.0* 2.0* 5.5* 11.0* 6.0 9.0 12.0 18.0
+        DS Parameter set: channel 1
+        ERP: <no flags>
+        Extended supported rates: 24.0 36.0 48.0 54.0
+        HT capabilities:
+                Capabilities: 0x186e
+                        HT20/HT40
+                        SM Power Save disabled
+                        RX HT20 SGI
+                        RX HT40 SGI
+                        No RX STBC
+                        Max AMSDU length: 7935 bytes
+                        DSSS/CCK HT40
+                Maximum RX AMPDU length 32767 bytes (exponent: 0x002)
+                Minimum RX AMPDU time spacing: 16 usec (0x07)
+                HT RX MCS rate indexes supported: 0-15
+                HT TX MCS rate indexes are undefined
+        HT operation:
+                 * primary channel: 1
+                 * secondary channel offset: above
+                 * STA channel width: any
+                 * RIFS: 0
+                 * HT protection: nonmember
+                 * non-GF present: 0
+                 * OBSS non-GF present: 1
+                 * dual beacon: 0
+                 * dual CTS protection: 0
+                 * STBC beacon: 0
+                 * L-SIG TXOP Prot: 0
+                 * PCO active: 0
+                 * PCO phase: 0
+        WPA:     * Version: 1
+                 * Group cipher: TKIP
+                 * Pairwise ciphers: TKIP CCMP
+                 * Authentication suites: PSK
+        RSN:     * Version: 1
+                 * Group cipher: TKIP
+                 * Pairwise ciphers: TKIP CCMP
+                 * Authentication suites: PSK
+                 * Capabilities: 1-PTKSA-RC 1-GTKSA-RC (0x0000)
+        WMM:     * Parameter version 1
+                 * u-APSD
+                 * BE: CW 15-1023, AIFSN 3
+                 * BK: CW 15-1023, AIFSN 7
+                 * VI: CW 7-15, AIFSN 2, TXOP 3008 usec
+                 * VO: CW 3-7, AIFSN 2, TXOP 1504 usec
+        WPS:     * Version: 1.0
+                 * Wi-Fi Protected Setup State: 2 (Configured)
+                 * Response Type: 3 (AP)
+                 * UUID: 63041253-1019-2006-1228-b0c554810daa
+                 * Manufacturer: D-Link Systems
+                 * Model: DIR-619L
+                 * Model Number: DIR-619L
+                 * Serial Number: 20070413-0001
+                 * Primary Device Type: 6-0050f204-1
+                 * Device name: DIR-619L
+                 * Config methods: Display, PBC
+                 * Unknown TLV (0x1049, 6 bytes): 00 37 2a 00 01 20
+
+上述的输出中描述了两个不同的wifi源，我们所需要关注的项主要有两个，一个是SSID，这个项即为该wifi的名称，如Xiaomi_517；第二个项为WPA，WPA是一种网络加密协议，WPA的版本分为1和2，从上面我们可以看到，WPA的版本号为1。本方案对于WPA版本2的wifi很可能无效！
+
+4
+连接网络。此时需要分成多种情况：
+1. 如果所连接的网络是开放的、没有加密的，则可以轻松地直接连接：
+
+ubuntu:~$ sudo iw dev wlan0 connect [网络 SSID]
+1
+如果网络是用较低级的协议，WEP加密的，则也比较容易：
+ubuntu:~$ sudo iw dev wlan0 connect [网络 SSID] key 0:[WEP 密钥]
+1
+如果网络使用的是WPA或者WPA2协议，则需要使用一个叫做wpasupplicant的工具，通过如下命令可以自动安装：
+ubuntu:~$ sudo apt install wpasupplicant
+1
+如果安装不成功，请自行查找其他资料。。。如果安装成功，则通过如下命令创建文件并修改：
+
+ubuntu:~$ sudo vim /etc/wpasupplicant/wpa_supplicant.conf
+1
+此处默认读者会使用vim编辑器（如果不会vim还想在纯命令行中生存。。。还是学一学vim吧同学:)）。然后，将该文件更改为下列内容（如果已有内容，则将原有文件重命名作为备份，然后打开一个新的文件，写入下列内容）：
+
+ctrl_interface=/var/run/wpa_supplicant
+
+ap_scan=1
+
+network={
+        ssid="your SSID name"
+        psk="your WiFi password"
+        priority=1
+}
+
+
+然后在后台启动该命令：
+
+ubuntu:~$ sudo wpa_supplicant -i wlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf &
+1
+在该命令中，最后的&符号意思为将该命令挂到后台运行。
+在我的机子上，尝试连接WiFi“Xiaomi_517”，输出如下：
+
+1
+如果你的输出中不是CONNECTED而是其他的各种或者是CHANGE或者是REJECT或者是其他的什么，请自行搜索其他解决方案。。。因为这些情况我都遇到过，而我是通过将wpa_supplicant.conf文件写成上述的样子，才解决成功的。对于你的情况，我无法在这篇文档中回答。有一个可能的原因是network-manager与wpa_supplicant冲突，所以可以尝试通过“sudo apt remove network-manager”卸载之。但进行操作前请万分注意，因为该方法将使可视化桌面中的网络管理控件失效，甚至会导致连有线网络都不能用了。。。
+
+5
+使用dhclient或者dhcpcd命令为本机获取ip地址：
+
+ubuntu:~$ sudo dhclient wlan0
+1
+在我的机子上没有dhcpcd命令，只有dhclient命令。
+
+6
+检查是否成功连接无线网络。检查方法主要是两个，一个是通过iwconfig命令，查看wlan0是否已经连接上相应SSID的wifi；一个是通过ping指令，尝试联网。
+
+参考技术博客
+http://www.jb51.net/LINUXjishu/234506.html
+http://www.360doc.com/content/13/0520/11/6279070_286724263.shtml
+————————————————
+版权声明：本文为CSDN博主「HolyLow」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/holylow/article/details/71680713

@@ -1,0 +1,5 @@
+python之NameError: name 'raw_input' is not defined
+
+NameError: name 'raw_input' is not defined
+
+python 3.0以后把raw_input变成了input

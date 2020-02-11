@@ -1,0 +1,96 @@
+python引入同一目录下的py文件
+
+
+
+
+
+
+
+python3下需要明确指定引用模块名
+
+例如：
+import coap.coapTokenizer        as t
+或者：
+from coap import coapTokenizer        as t
+
+
+
+
+
+
+注意：python2和python3的包内import语法有区别，下面介绍一下python3的包内import语法
+
+python3
+例如在admin.py文件中要引入dealcode.py文件：
+
+1、在目录下有__init__.py文件
+
+2、在admin.py文件中加一行：from . import dealcode
+
+（如果要引入同一目录下的dealcode.py文件中的一个类Hello，在admin.py文件中加一行：from .dealcode import Hello）
+
+ 
+
+可以直接在__init__.py中import，在该目录下的文件都可以使用__init__.py文件中import的东西
+
+ 
+
+如果还是不行的话，注意一下当前目录是否已经被加入PYTHONPATH环境变量中了，
+
+如果是命令行，系统会默认当前目录已经在环境变量中
+
+如果是pycharm，则不会默认当前目录已经在环境变量中，需要配置一下：参考这篇博客
+
+如果python 从一个文件夹里导入py文件,需要在这个文件夹里写一个__init__.py的文件，初始化一些数据或者直接是空文件。 
+这样就可以解决ImportError：No module named **了
+
+还有一种情况是：使用了from XX import XX 这个时候要注意要import 的文件在要在上一级的文件夹里
+
+比如
+
+
+调用的话可以在main里这样调用
+
+from B import b
+
+原文:原文
+
+在 python 中，每一个 py 文件都称为模块，每一个具有  __init__.py 文件的目录称为包。
+
+python 的搜索路径是一个列表，导入模块时，python 会自动搜索这个列表中的路径，如果路径中存在要导入的模块文件，则导入成功。即只要模块或者包所在的目录在 sys.path 中，就可以使用 import 模块或者 import 包来使用。
+
+搜索路径，即sys.path，由一下几部分构成
+
+程序的主目录
+PYTHONPATH目录
+标准链接库目录（/usr/local/lib/python2.7）
+任何的 .pth 文件的内容
+所以可以修改 bashrc 中 的 PYTHONPATH 变量，或者在 sys.path 添加路径（代码中暂时添加），将模块放到标准连接库目录下，在 sys.path 的某一个路径下增加 .pth 文件（内容为模块所在的目录）。
+
+第二种方法如下：
+ 
+
+目录如下的文件系统：
+--test
+  --a.py
+  --bbb
+    --b.py
+    --__init__.py
+结果如下：
+
+
+
+可以看到将模块 a.py 和包 bbb 所在的 test 目录加到 sys.path 中就可以找到他们了
+
+python2
+python2 和python3在不同文件夹引入相应的py文件的区别是前面不需要加.例如
+
+python2用法 引入misc文件夹中的utils.py
+sys.path.append('/storage/st2/image_caption/neuraltalk2pytorch/')
+import misc.utils as utils
+ 
+python3用法 引入misc文件夹中的utils.py
+sys.path.append('/storage/st2/image_caption/neuraltalk2pytorch/')
+import .misc.utils as utils
+原文:同一文件夹
+
