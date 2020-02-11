@@ -1,0 +1,4 @@
+You can not install pdflatex by simply performing command apt-get install pdflatex. It is because the program named pdflatex is actually a file as a part of another package. To install pdflatex in Ubuntu 12.04, 14.04, 16.04, 16.10, and 17.04, perform this command:
+
+
+sudo apt-get install texlive-latex-base

@@ -1,0 +1,142 @@
+Linux 系统中，可以使用 useradd 命令新建用户，此命令的基本格式如下：
+[root@localhost ~]#useradd [选项] 用户名
+
+该命令常用的选项及各自的含义，如表 1 所示。
+
+表 1 useradd命令常用选项
+选项	含义
+-u UID	手工指定用户的 UID，注意 UID 的范围（不要小于 500）。
+-d 主目录	手工指定用户的主目录。主目录必须写绝对路径，而且如果需要手工指定主目录，则一定要注意权限；
+-c 用户说明	手工指定/etc/passwd文件中各用户信息中第 5 个字段的描述性内容，可随意配置；
+-g 组名	手工指定用户的初始组。一般以和用户名相同的组作为用户的初始组，在创建用户时会默认建立初始组。一旦手动指定，则系统将不会在创建此默认的初始组目录。
+-G 组名	指定用户的附加组。我们把用户加入其他组，一般都使用附加组；
+-s shell	手工指定用户的登录 Shell，默认是 /bin/bash；
+-e 曰期	指定用户的失效曰期，格式为 "YYYY-MM-DD"。也就是 /etc/shadow 文件的第八个字段；
+-o	允许创建的用户的 UID 相同。例如，执行 "useradd -u 0 -o usertest" 命令建立用户 usertest，它的 UID 和 root 用户的 UID 相同，都是 0；
+-m	建立用户时强制建立用户的家目录。在建立系统用户时，该选项是默认的；
+-r	创建系统用户，也就是 UID 在 1~499 之间，供系统程序使用的用户。由于系统用户主要用于运行系统所需服务的权限配置，因此系统用户的创建默认不会创建主目录。
+其实，系统已经帮我们规定了非常多的默认值，在没有特殊要求下，无需使用任何选项即可成功创建用户。例如：
+[root@localhost ~]# useradd lamp
+
+此行命令就表示创建 lamp 普通用户。
+
+不要小看这条简单的命令，它会完成以下几项操作：
+在 /etc/passwd 文件中创建一行与 lamp 用户相关的数据：
+[root@localhost ~]# grep "lamp" /etc/passwd
+lamp:x:500:500::/home/lamp:/bin/bash
+
+可以看到，用户的 UID 是从 500 开始计算的。同时默认指定了用户的家目录为 /home/lamp/，用户的登录 Shell 为 /bin/bash。
+在 /etc/shadow 文件中新增了一行与 lamp 用户密码相关的数据：
+[root@localhost ~]# grep "lamp" /etc/shadow
+lamp:!!:15710:0:99999:7:::
+
+当然，这个用户还没有设置密码，所以密码字段是 "!!"，代表这个用户没有合理密码，不能正常登录。同时会按照默认值设定时间字段，例如密码有效期有 99999 天，距离密码过期 7 天系统会提示用户“密码即将过期”等。
+在 /etc/group 文件中创建一行与用户名一模一样的群组：
+[root@localhost ~]# grep "lamp" /etc/group
+lamp:x:500:
+
+该群组会作为新建用户的初始组。
+在 /etc/gshadow 文件中新增一行与新增群组相关的密码信息：
+[root@localhost ~]# grep "lamp" /etc/gshadow
+lamp:!::
+
+当然，我们没有设定组密码，所以这里没有密码，也没有组管理员。
+默认创建用户的主目录和邮箱：
+[root@localhost ~]#ll -d /home/lamp/
+drwx------ 3 lamp lamp 4096 1月6 00:19 /home/lamp/
+[root@localhost ~]#ll /var/spod/mail/lamp
+-rw-rw---- 1 lamp mail 0 1月6 00:19 /var/spool/mail/lamp
+
+注意这两个文件的权限，都要让 lamp 用户拥有相应的权限。
+将 /etc/skel 目录中的配置文件复制到新用户的主目录中（至于为什么，学完本节内容就会明白）。
+
+可以看到，useradd 命令创建用户的过程，其实就是修改了与用户相关的几个文件或目录，前面章节已经对这些文件做了详细介绍。
+
+除了默认创建用户，我们还可以利用 useradd 命令的各种选项亲自定制要创建的用户，例如：
+[root@localhost ~]# groupadd lamp1
+#先手工添加lamp1用户组，因为我一会儿要把lamp1用户的初始迎指定过来，如果不事先建立，则会报告用户组不存在
+[root@localhost ~]# useradd -u 550 -g lamp1 -G root -d /home/lamp1 -c "test user" -s /bin/bash lamp1
+#在建立用户lamp1的同时，指定了UID（550）、初始组（lamp1）、附加组（root）、家目录（/home/lamp1/）、用户说明（test user）和用户登录Shell（/bin/bash）
+[root@localhost ~]# grep "lamp1" /etc/passwd /etc/shadow /etc/group
+#同时查看三个文件
+/etc/passwd:lamp1:x:550:502:test user:/home/lamp1:/bin/bash
+#用户的UID、初始组、用户说明、家目录和登录Shell都和命令手工指定的一致
+/etc/shadow:lamp1:!!:15710:0:99999:7:::
+#lamp1用户还没有设定密码
+/etc/group:root:x:0:lamp1
+#lamp1用户加入了root组，root组是lamp1用户的附加组
+/etc/group:lampl:x:502:
+#GID为502的组是lamp1组
+[root@localhost ~]#ll -d /home/lamp1/
+drwx------ 3 lamp1 lamp1 4096 1月6 01:13 /home/lamp1/
+#家目录也建立了，不需要手工建立
+
+通过以上 2 种方式，都可以成功创建用户。通常情况下，根本不需要手工指定任何内容，因为使用默认值就可以满足我们的要求。那你有没有想过，useradd 命令的这些默认值保存哪里，能否手工修改呢？
+
+答案是肯定的。useradd 命令在添加用户时参考的默认值文件主要有两个，分别是 /etc/default/useradd 和 /etc/login.defs。前面我们已经详细介绍了 /etc/login.defs，这里不再过多赘述，本节带大家详细了解 /etc/default/useradd 文件。
+/etc/default/useradd 文件
+首先，使用 Vim 命令查看 /etc/default/useradd 文件中包含哪些内容：
+[root@localhost ~]#vim /etc/default/useradd
+# useradd defaults file
+GR0UP=100
+HOME=/home
+INACTIVE=-1
+EXPIRE=
+SHELL=/bin/bash
+SKEL=/etc/skel
+CREATE_MAIL_SPOOL=yes
+
+另外，也可以直接通过命令进行查看，结果是一样的：
+[root@localhost ~]# useradd -D
+GROUP=100
+HOME=/home
+INACTIVE=-1
+EXPIRE=
+SHELL=/bin/bash
+SKEL=/etc/skel
+CREATE_MAIL_SPOOL=yes
+
+-D 选项指的就是查看新建用户的默认值。
+
+表 2 对此文件中的各项做了详细的解释。
+
+表 2 /etc/default/useradd 文件内容
+参数	含义
+GR0UP=100	这个选项用于建立用户的默认组，也就是说，在添加每个用户时，用户的初始组就是 GID 为 100 的这个用户组。但 CentOS 并不是这样的，而是在添加用户时会自动建立和用户名相同的组作为此用户的初始组。也就是说这个选项并不会生效。
+
+Linux 中默认用户组有两种机制：一种是私有用户组机制，系统会创建一个和用户名相同的用户组作为用户的初始组；另一种是公共用户组机制，系统用 GID 是 100 的用户组作为所有新建用户的初始组。目前我们采用的是私有用户组机制。
+HOME=/home	指的是用户主目录的默认位置，所有新建用户的主目录默认都在 /home/下，刚刚新建的 lamp1 用户的主目录就为 /home/lamp1/。
+INACTIVE=-1	指的是密码过期后的宽限天数，也就是 /etc/shadow 文件的第七个字段。这里默认值是 -1，代表所有新建立的用户密码永远不会失效。
+EXPIRE=	表示密码失效时间，也就是 /etc/shadow 文件的第八个字段。默认值是空，代表所有新建用户没有失效时间，永久有效。
+SHELL=/bin/bash	表示所有新建立的用户默认 Shell 都是 /bin/bash。
+SKEL=/etc/skel	在创建一个新用户后，你会发现，该用户主目录并不是空目录，而是有 .bash_profile、.bashrc 等文件，这些文件都是从 /etc/skel 目录中自动复制过来的。因此，更改 /etc/skel 目录下的内容就可以改变新建用户默认主目录中的配置文件信息。
+CREATE_MAIL_SPOOL=yes	指的是给新建用户建立邮箱，默认是创建。也就是说，对于所有的新建用户，系统都会新建一个邮箱，放在 /var/spool/mail/ 目录下，和用户名相同。例如，lamp1 的邮箱位于 /var/spool/mail/lamp1。
+注意，此文件中各选项值的修改方式有 2 种，一种是通过 Vim 文本编辑器手动修改，另一种就是使用文章开头介绍的 useradd 命令，不过所用的命令格式发生了改变：
+useradd -D [选项] 参数
+
+用此命令修改 /etc/default/useradd 文件，可使用的选项如表 3 所示。
+
+useradd -D 命令可用选项
+选项+参数	含义
+-b HOME	设置所创建的主目录所在的默认目录，只需用目录名替换 HOME 即可，例如 useradd -D -b /gargae。
+-e EXPIRE	设置密码失效时间，EXPIRE 参数应使用 YYYY-MM-DD 格式，例如 useradd -D -e 2019-10-17。
+-f INACTIVE	设置密码过期的宽限天数，例如 useradd -D -f 7。
+-g GROUP	设置新用户所在的初始组，例如 useradd -D -g bear。
+-s SHELL	设置新用户的默认 shell，SHELL 必须是完整路径，例如 useradd -D -s /usr/bin/csh。
+例如，要修改新用户的默认 Shell 为 /bin/csh，可以使用如下方式：
+[root@localhost ~]# useradd -D -s /bin/csh
+[root@localhost ~]# useradd -D
+GROUP=100
+HOME=/home
+INACTIVE=-1
+EXPIRE=
+SHELL=/bin/csh
+SKEL=/etc/skel
+CREATE_MAIL_SPOOL=yes
+
+通过 /etc/default/useradd 文件，大家仅能修改有关新用户的部分默认值，有一些内容并没有在这个文件中，例如修改用户默认的 UID、GID，以及对用户密码的默认设置，对这些默认值的修改就需要在 /etc/login.defs 文件中进行。
+有关 /etc/login.defs 文件，可阅读《Linux /etc/login.defs》一节。
+
+其实，useradd 命令创建用户的过程是这样的，系统首先读取 /etc/login.defs 和 /etc/default/useradd，根据这两个配置文件中定义的规则添加用户，也就是向 /etc/passwd、/etc/group、/etc/shadow、/etc/gshadow 文件中添加用户数据，接着系统会自动在 /etc/default/useradd 文件设定的目录下建立用户主目录，最后复制 /etc/skel 目录中的所有文件到此主目录中，由此，一个新的用户就创建完成了。
+
+当然，如果你能彻底掌握 useradd 命令创建用户的整个过程，完全可以手动创建用户。

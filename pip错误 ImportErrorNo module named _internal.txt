@@ -1,0 +1,18 @@
+pip错误 ImportError: No module named _internal
+
+
+Traceback (most recent call last):
+File "/home/ubuntu/.local/bin/pip", line 7, in <module>
+ 
+from pip._internal import main
+ 
+ImportError: No module named _internal
+ 
+
+强制重新安装pip3
+wget https://bootstrap.pypa.io/get-pip.py  --no-check-certificate
+ 
+sudo python3 get-pip.py --force-reinstall
+————————————————
+版权声明：本文为CSDN博主「大皮靴」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/youlaqian/article/details/81410700

@@ -1,0 +1,5 @@
+
+在cmd下生成密钥：
+PS C:\Users\lanpi> ssh-keygen
+使用git-bash cmd终端的ssh-copy-id命令拷贝至目标主机：
+lanpi@DESKTOP-S5SQSMC MINGW64 /c/Users/lanpi/.ssh $ ssh-copy-id -i id_rsa.pub -f lanpinguo@192.168.118.129

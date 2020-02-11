@@ -1,0 +1,132 @@
+从 Win10 1809 和 Windows Server 2019 开始 Windows 开始支持 OpenSSH Server。本文介绍一下其基本的概念和配置方法，本文演示用的环境为 Win10 1809(ssh 客户端)和 Windows Server 2019(ssh 服务器)。
+
+安装 OpenSSH Server
+OpenSSH 客户端程序默认已经被系统安装好了，打开 Settings->Apps->Manage optional features 面板就可以看到：
+
+
+
+而 OpenSSH Server 默认没有安装，需要用户手动安装。点击上图中的 "Add a feature" 按钮，然后选择 OpenSSH Server，并点击 "Install" 按钮：
+
+
+
+开启服务
+安装完成后打开服务管理器，把 OpenSSH Authentication Agent 服务和 OpenSSH SSH Server 服务都设置为自启动，并启动这两个服务：
+
+
+
+监听端口
+启动服务后可以通过 netstat 命令查看 SSH Server 服务是不是已经开始监听默认的 22 号端口了：
+
+
+
+防火墙规则
+在安装 OpenSSH Server 的时候会在防火墙的入站规则中添加一条记录让防火墙放行对 22 号端口的访问：
+
+
+
+服务器端的配置文件目录
+服务器端的配置文件在 C:\ProgramData\ssh 目录中，注意 C:\ProgramData 是一个隐藏目录：
+
+
+
+安装目录
+Windows 系统中 OpenSSH 的安装目录为 C:\Windows\System32\OpenSSH，不管是客户端程序还是服务器端程序都这这个目录中：
+
+
+
+OpenSSH 服务器端程序的默认配置文件 sshd_config_default 也在这个目录中。这个目录会被添加到 PATH 环境变量中：
+
+
+
+这样就可以在 PowerShell 中直接执行相关的命令而无需写出完整的路径。
+
+Win10 自带的 OpenSSH 客户端
+因为 SSH 客户端所在的目录被添加到了 PATH 环境变量中，在 PowerShell 中可以直接执行 OpenSSH 客户端的命令，比如 ssh：
+
+
+
+连接远程 Linux 主机
+使用 ssh 命令连接一下 Linux 主机，笔者的 Linux 主机为 Ubuntu16.04，可以连接，但是欢迎信息显示了两次：
+
+
+
+查看 ssh 命令的版本为 7.7.2.1：
+
+
+
+在另外一台机器上用个老一点的版本(7.6.0.0)试了试：
+
+
+
+没有发现重复输出欢迎信息的问题，判断可能是新版本引入的 bug。
+
+连接远程 Windows 主机
+当 Windows 系统中安装好 OpenSSH Server 并开始监听端口后就可以通过远程的客户端来连接了。连接远程 Windows 主机与连接远程 Linux 主机相同，下面是通过密码登录的方式(nick 是 Windows 系统中的一个本地用户)：
+
+
+
+连接成功后默认的 shell 是 Windows Command shell (cmd.exe) 程序：
+
+
+
+在 Windows 系统中，PowerShell 已逐渐成为主流，我们可以把默认的 shell 设置为 PowerShell。其实就是在运行 OpenSSH Server 的 Windows 系统的注册表中添加一个配置项，注册表路径为 HKEY_LOCAL_MACHINE\SOFTWARE\OpenSSH，项的名称为 DefaultShell，项的值为 C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe。我们可以以管理员身份启动 PowerShell，然后执行下面的命令完成注册表项的添加：
+
+> New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -PropertyType String -Force
+
+
+现在重新连接远程服务器，默认的 shell 已经变成了 PowerShell：
+
+
+
+通过秘钥认证方式登录
+前面我们介绍的 ssh 命令都是通过密码认证连接服务器的，下面介绍通过秘钥认证的方式登录服务器。
+
+ssh-keygen 命令
+ssh-keygen 命令用来生成公钥认证使用的秘钥对，创建的秘钥一般都和 ssh 客户端的配置一起保存在用户家目录下的 .ssh 目录中(与 Linux 系统中类似)：
+
+
+
+执行 ssh-keygen 命令：
+
+> ssh-keygen
+
+
+默认情况下一路回车就可以了，使用默认的文件名称和存放目录：
+
+
+
+遗憾的是 Windows 下目前还没有提供 ssh-copy-id 命令，需要手动把用户的公钥添加到远程主机系统中的用户的  authorized_keys 文件中。具体在运行 OpenSSH Server 的主机上的操作步骤如下：
+在用户家目录下创建 .ssh 目录
+打开 PowerShell，进入用户的家目录，用 mkdir 命令创建 .ssh 目录：
+
+> cd ~
+> mkdir .ssh
+
+
+创建 authorized_keys 文件并加入公钥
+在 PowerShell 中执行 notepad .ssh\authorized_keys 命令创建文本文件，把客户端的公钥复制到这个文件中并保存。
+把文本文件的名称修改为 authorized_keys：
+
+
+
+修改 ssh 服务的配置文件
+以管理员权限打开 PowerShell，执行命令 notepad C:\ProgramData\ssh\sshd_config。
+注释掉配置文件中的最后两行然后保存：
+
+#Match Group administrators
+#       AuthorizedKeysFile __PROGRAMDATA__/ssh/administrators_authorized_keys
+最后在服务管理器器中重启 OpenSSH SSH Server 服务，然后客户端就可以通过公钥认证的方式登录到远程服务器了。
+
+注意：
+一定不要用 Repair-AuthorizedKeyPermission 命令修复 .ssh\authorized_keys 文件的权限。
+也不要以下面的方式创建 .ssh\authorized_keys 文件：
+
+echo "publickey" > .ssh\authorized_keys
+echo $null > .ssh\authorized_keys
+总结
+OpenSSH 的支持让系统管理员有了一个方便的工具来管理 Windows 系统，相信 OpenSSH + PowerShell 的组合将成为管理 Windows 系统的黄金搭档。本文只是介绍了一些入门的概念，但给人的感觉是 Windows 上的 OpenSSH 工具尚需打磨(问题挺多的，按照文档配置个公钥认证就把人搞吐了)。
+
+参考：
+PowerShell/Win32-OpenSSH
+OpenSSH in Windows
+解决公钥认证问题
